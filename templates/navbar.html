@@ -1,0 +1,30 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="container-fluid">
+        <!-- Logo/Brand -->
+        <a class="navbar-brand" href="#">Home</a>
+        
+        <!-- Botão Toggler para Offcanvas -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Offcanvas Menu -->
+        <div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="offcanvasNavbar">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title">Menu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="navbar-nav">
+                   
+                        <a class="nav-link" href="{% url 'cal:calendar' %}">Calendário</a>
+                        <a class="nav-link" href="{% url 'cal:event_new' %}">Cadastrar Plantão</a>
+                        
+                    
+                        <a class="nav-link" href="#">Login</a>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+  </nav>

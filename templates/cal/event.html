@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}
-Fazer Escala
-{% endblock %}
+
+{% block page_title %}Fazer Escala{% endblock %}
+
+{% block content_title %}Fazer Escala{% endblock %}
 
 {% block content %}
-<div class="clearfix">
-  <!-- <a class="btn btn-info left" href="{% url 'cal:calendar' %}"> Calendar </a> -->
+<div class="clearfix mb-3">
+  <a class="btn btn-info left" href="{% url 'cal:calendar' %}"> Voltar para Calendário </a>
 </div>
 
 {% if form.errors %}
@@ -19,16 +20,77 @@ Fazer Escala
     {% endfor %}
     {% for error in form.non_field_errors %}
         <div class="alert alert-danger">
-            {{ field.label }} <strong>{{ error|escape }}</strong>
+            <strong>{{ error|escape }}</strong>
         </div>
     {% endfor %}
 {% endif %}
 
-<form method="post">
+<form method="post" class="mt-4">
   {% csrf_token %}
-  <table class="form form-table">
-    {{ form }}
-    <tr><td colspan="2"><button type="submit" class="btn btn-info right"> Submit </button></td></tr>
-  </table>
+  <div class="form-group row">
+    {% for field in form %}
+    <div class="col-md-6 mb-3">
+      <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}
+      <small class="form-text text-muted">{{ field.help_text }}</small>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div class="form-group row">
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Salvar Escala</button>
+    </div>
+  </div>
 </form>
+
+<style>
+  /* Estilos responsivos para o formulário */
+  @media (max-width: 768px) {
+    .form-group.row {
+      display: block;
+    }
+    
+    .col-md-6 {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    
+    .left {
+      width: 100%;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    form {
+      padding: 15px;
+    }
+  }
+  
+  /* Melhorias para campos de formulário */
+  select, input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .btn {
+    padding: 8px 20px;
+  }
+</style>
+
+<script>
+  // Script para melhorar a experiência mobile
+  $(document).ready(function() {
+    // Ajustar datepicker para mobile
+    if ($(window).width() <= 768) {
+      $('input[type="date"]').attr('type', 'text')
+        .datepicker({
+          dateFormat: 'yy-mm-dd'
+        });
+    }
+  });
+</script>
 {% endblock %}

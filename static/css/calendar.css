@@ -1,0 +1,121 @@
+/* Estilos específicos para o calendário */
+.calendar-container {
+    margin-top: 20px;
+    margin-bottom: 60px; /* Espaço para o footer */
+}
+
+.calendar-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.calendar {
+    width: 100%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+.calendar th {
+    background-color: #f8f9fa;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.calendar td {
+    height: 100px;
+    vertical-align: top;
+    padding: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.calendar .day {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.calendar .event {
+    font-size: 0.8em;
+    background-color: #e9ecef;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.calendar .today {
+    background-color: #fff3cd;
+}
+
+.calendar .other-month {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+    .calendar td {
+        height: 60px;
+        font-size: 0.8rem;
+    }
+    
+    .calendar .event {
+        font-size: 0.7em;
+    }
+    
+    .calendar-navigation .btn {
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Estilos para o calendário */
+table.calendar {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.calendar th {
+    background-color: #f8f9fa;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.calendar td {
+    height: 100px;
+    vertical-align: top;
+    padding: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.calendar td ul {
+    list-style: none;
+    padding-left: 5px;
+    margin-top: 5px;
+}
+
+.calendar td li {
+    font-size: 0.8em;
+    background-color: #e9ecef;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+}
+
+.calendar .date {
+    font-weight: bold;
+}
+
+.calendar .today {
+    background-color: #fff3cd;
+}

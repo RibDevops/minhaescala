@@ -1,16 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}
-Calendar
-{% endblock %}
+{% block title %}Calendário{% endblock %}
 
 {% block content %}
-<div class="clearfix">
-	<a class="btn btn-info left" href="{% url 'cal:calendar' %}?{{ prev_month }}"> Previous Month </a>
-	<a class="btn btn-info right" href="{% url 'cal:calendar' %}?{{ next_month }}"> Next Month </a>
-	
-</div>
+<div class="calendar-container">
+    <div class="calendar-navigation">
+        <a class="btn btn-primary" href="{% url 'cal:calendar' %}?{{ prev_month }}">
+            <i class="bi bi-chevron-left"></i> Mês Anterior
+        </a>
+        <h2 class="calendar-title">{{ month_name|title }} {{ year }}</h2>
+        <a class="btn btn-primary" href="{% url 'cal:calendar' %}?{{ next_month }}">
+            Próximo Mês <i class="bi bi-chevron-right"></i>
+        </a>
+    </div>
 
-{{ calendar }}
+    <div class="table-responsive">
+        {{ calendar }}
+    </div>
+</div>
 {% endblock %}

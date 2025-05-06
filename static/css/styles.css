@@ -1,82 +1,56 @@
-/* Common styles */
+/* Estilos gerais para melhorar a responsividade */
 body {
-  font-family: "ptsans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.left {
-  float: left;
+.container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
-.right {
-  float: right;
+.alert-messages {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1050;
+  width: 90%;
+  max-width: 400px;
 }
 
-.btn {
-  outline: none;
-  color: black;
-  background-color: transparent;
-  box-shadow: 0 0 0 0;
-  margin-right: 3px;
+/* Ajustes para telas pequenas */
+@media (max-width: 768px) {
+  .alert-messages {
+      width: 100%;
+      max-width: none;
+      top: 60px;
+      right: 0;
+      padding: 0 15px;
+  }
+  
+  .title {
+      font-size: 1.5rem;
+      margin-top: 20px !important;
+  }
+  
+  .page-content {
+      padding-top: 60px !important;
+  }
 }
 
-.clearfix {
-  margin: 15px;
+/* Melhorias para o calendário (se estiver usando fullcalendar) */
+.fc-toolbar {
+  flex-direction: column;
 }
 
-.form {
-  margin: auto;
+.fc-toolbar.fc-header-toolbar {
+  margin-bottom: 0.5em;
 }
 
-.form input, .form select, .form textarea {
-  border-radius: 5px;
-  border: 1px solid #17a2b8;
-  outline: none;
-  background: none;
-  padding: 5px;
-  width: 100%;
-}
-
-/* App styles */
-.title {
-  text-align: center;
-  margin: 10px;
-}
-
-.calendar {
-  width: 98%;
-  margin: auto;
-  font-size: 13px;
-}
-
-.calendar tr, .calendar td {
-  border: 1px solid black;
-}
-
-.calendar th {
-  padding: 10px;
-  text-align: center;
-  font-size: 18px;
-}
-
-.calendar td {
-  width: 200px;
-  height: 150px;
-  padding: 20px 0px 0px 5px;
-}
-
-.month {
-  font-size: 25px;
-}
-
-.date {
-  font-size: 16px;
-}
-
-ul {
-  height: 100%;
-  padding: 0px 5px 0px 20px;
-}
-
-a {
-  color: #17a2b8;
+@media (min-width: 768px) {
+  .fc-toolbar {
+      flex-direction: row;
+  }
 }

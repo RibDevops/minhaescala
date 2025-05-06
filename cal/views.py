@@ -5,6 +5,7 @@ from django.views import generic
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 import calendar
+from django.utils import timezone
 
 from .models import *
 from .utils import Calendar
@@ -21,11 +22,22 @@ class CalendarView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         d = get_date(self.request.GET.get('month', None))
+        
+        # Obter todos os eventos do mês
+        events = Event.objects.filter(
+            start_time__year=d.year,
+            start_time__month=d.month
+        )
+        
+        # Criar calendário com eventos
         cal = Calendar(d.year, d.month)
-        html_cal = cal.formatmonth(withyear=True)
+        html_cal = cal.formatmonth(withyear=True, events=events)
+        
         context['calendar'] = mark_safe(html_cal)
         context['prev_month'] = prev_month(d)
         context['next_month'] = next_month(d)
+        context['month_name'] = d.strftime("%B")  # Nome completo do mês
+        context['year'] = d.year
         return context
 
 def get_date(req_month):
