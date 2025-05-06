@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+  
+
+   <!-- Required meta tags -->
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   <!-- Bootstrap CSS -->
+   <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+    <link href="{% static 'css/simple-sidebar.css' %}" rel="stylesheet">
+    <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+    <link rel="shortcut icon" href="{% static 'img/meuplantao.png' %}" type="image/png">
+   <link rel="stylesheet" href="{% static 'css/all.css' %}" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg"
+     crossorigin="anonymous">
+   <link rel="stylesheet" type="text/css" href="{% static 'cal/css/styles.css' %}">
+</head>
+<body>
+   
+    <div id="wrapper">
+      
+      <!-- Sidebar -->
+      <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+          <li class="sidebar-brand"><a href="#">Home</a></li>
+          <li><a href="{% url 'cal:calendar' %}">Calendário</a>
+          <li><a href="{% url 'cal:event_new' %}">Fazer escala</a></li>
+          <!-- <li><a href="#">Overview</a></li>
+          <li><a href="#">Events</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Contact</a></li> -->
+        </ul>
+      </div>
+          
+      <!-- Page content -->
+      <!-- <div id="page-content-wrapper">
+        <div class="content-header">
+          <h1>
+            <a id="menu-toggle" href="#" class="btn btn-default"><i class="icon-reorder"></i></a>
+            Teste
+          </h1>
+        </div> -->
+        <!-- Keep all page content within the page-content inset div! -->
+        <div class="page-content inset">
+          <div class="row">
+            <div class="col-md-12">
+              <!-- Conteúdo Principal -->
+                    <main class="container-fluid mt-3">
+                      {% if messages %}
+                <div class="alert-messages">
+                  {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}" role="alert">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <h1 class="title">{% block title %}{% endblock %}</h1>
+              {% block content %}{% endblock %}
+            </div>
+            
+          </div>
+        </div>
+      </div>
+      
+    </div>
+	
+    <!-- JavaScript -->
+    <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+  <script src="{% static 'js/bootstrap.js' %}"></script>
+
+
+
+   <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="{% static 'js/jquery-3.2.1.slim.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+    <!-- Custom JavaScript for the Menu Toggle -->
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("active");
+    });
+    </script>
+  </body>
+</html>
