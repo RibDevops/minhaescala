@@ -11,6 +11,8 @@ from .models import *
 from .utils import Calendar
 from .forms import EventForm
 
+from django.shortcuts import redirect
+
 
 def index(request):
     return HttpResponse('hello')
@@ -71,3 +73,15 @@ def event(request, event_id=None):
         form.save()
         return HttpResponseRedirect(reverse('cal:calendar'))
     return render(request, 'cal/event.html', {'form': form})
+
+def listar_eventos(request):
+    eventos = Event.objects.all().order_by('start_time')
+    return render(request, 'cal/lista_eventos.html', {'eventos': eventos})
+
+
+
+
+def excluir_evento(request, event_id):
+    evento = get_object_or_404(Event, pk=event_id)
+    evento.delete()
+    return redirect('cal:listar_eventos')

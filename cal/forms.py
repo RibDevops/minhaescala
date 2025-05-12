@@ -29,6 +29,7 @@ class EventForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
+        self.fields['title'].widget.attrs['placeholder'] = 'ex: SN - José'
         # Remove os input_formats com hora, pois agora só queremos a data
         self.fields['start_time'].input_formats = ('%Y-%m-%d',)  # Formato ISO para data
         self.fields['end_time'].input_formats = ('%Y-%m-%d',)   # Formato ISO para data

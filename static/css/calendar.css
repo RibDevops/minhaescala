@@ -53,7 +53,7 @@ table.calendar {
 .calendar .event,
 .calendar td li {
     font-size: 0.8em;
-    background-color: #e9ecef;
+    background-color: #5fe2a1;
     padding: 2px 5px;
     border-radius: 3px;
     margin-bottom: 2px;
@@ -61,6 +61,24 @@ table.calendar {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Dia atual destacado */
+.calendar td.today {
+    background-color: #ffe599; /* amarelo claro */
+    /* border: 2px solid #ffa500; */
+}
+
+/* Evento normal */
+.calendar .event {
+    background-color: #5fe2a1; /* verde claro */
+    color: #000;
+}
+
+/* Evento importante (exemplo adicional, caso queira customizar) */
+.calendar .event.important {
+    background-color: #ff9999; /* vermelho claro */
+    color: #fff;
 }
 
 .calendar td ul {
@@ -71,7 +89,7 @@ table.calendar {
 
 /* Estados especiais */
 .calendar .today {
-    background-color: #fff3cd;
+    background-color: #e7e1cb;
 }
 
 .calendar .other-month {
@@ -102,4 +120,6 @@ table.calendar {
         font-size: 1.2rem;
     }
 }
+
+
 

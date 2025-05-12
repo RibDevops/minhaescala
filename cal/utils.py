@@ -2,7 +2,7 @@ from asyncio import Event
 import calendar
 from datetime import datetime
 import locale
-
+from datetime import date
 
 locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
 
@@ -13,6 +13,17 @@ class Calendar(calendar.HTMLCalendar):
         self.month = month
         super(Calendar, self).__init__()
 
+    # def formatday(self, day, events):
+    #     events_per_day = events.filter(start_time__day=day)
+    #     d = ''
+    #     for event in events_per_day:
+    #         d += f'<li>{event.get_html_url}</li>'
+        
+    #     if day != 0:
+    #         return f'<td><span class="date">{day}</span><ul>{d}</ul></td>'
+    #     return '<td></td>'
+   
+
     def formatday(self, day, events):
         events_per_day = events.filter(start_time__day=day)
         d = ''
@@ -20,8 +31,11 @@ class Calendar(calendar.HTMLCalendar):
             d += f'<li>{event.get_html_url}</li>'
         
         if day != 0:
-            return f'<td><span class="date">{day}</span><ul>{d}</ul></td>'
+            css_class = 'today' if date(self.year, self.month, day) == datetime.today().date() else ''
+            return f'<td class="{css_class}"><span class="date">{day}</span><ul>{d}</ul></td>'
         return '<td></td>'
+
+
 
     def formatweek(self, theweek, events):
         week = ''
