@@ -71,7 +71,9 @@ def event(request, event_id=None):
     form = EventForm(request.POST or None, instance=instance)
     if request.POST and form.is_valid():
         form.save()
-        return HttpResponseRedirect(reverse('cal:calendar'))
+        # return HttpResponseRedirect(reverse('cal:event'))
+        return HttpResponseRedirect(reverse('cal:event_new'))
+
     return render(request, 'cal/event.html', {'form': form})
 
 def listar_eventos(request):
