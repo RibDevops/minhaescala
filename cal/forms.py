@@ -23,7 +23,7 @@ class EventForm(ModelForm):
         model = Event
         widgets = {
             'start_time': DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),  # Somente data
-            'end_time': DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),    # Somente data
+            # 'end_time': DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),    # Somente data
         }
         fields = '__all__'
 
@@ -32,4 +32,4 @@ class EventForm(ModelForm):
         self.fields['title'].widget.attrs['placeholder'] = 'ex: SN - José'
         # Remove os input_formats com hora, pois agora só queremos a data
         self.fields['start_time'].input_formats = ('%Y-%m-%d',)  # Formato ISO para data
-        self.fields['end_time'].input_formats = ('%Y-%m-%d',)   # Formato ISO para data
+        # self.fields['end_time'].input_formats = ('%Y-%m-%d',)   # Formato ISO para data

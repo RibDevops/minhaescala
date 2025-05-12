@@ -12,12 +12,12 @@ class Event(models.Model):
         null=True,           # Permite valores nulos
         blank=True           # Permite campo em branco no formulário
     )
-    end_time = models.DateField(
-        verbose_name="Data de início",
-        # auto_now_add=False,  # Define como data atual apenas na criação
-        null=True,           # Permite valores nulos
-        blank=True           # Permite campo em branco no formulário
-    )
+    # end_time = models.DateField(
+    #     verbose_name="Data de início",
+    #     # auto_now_add=False,  # Define como data atual apenas na criação
+    #     null=True,           # Permite valores nulos
+    #     blank=True           # Permite campo em branco no formulário
+    # )
 
     # start_time = models.DateField()  # Armazena apenas data
     # end_time = models.DateField()    # Armazena apenas data

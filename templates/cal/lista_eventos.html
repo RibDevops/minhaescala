@@ -20,7 +20,7 @@
                 <tr>
                     <td>{{ evento.title }}</td>
                     <td>{{ evento.start_time|date:"d/m/Y" }}</td>
-                    <td>{{ evento.end_time|date:"d/m/Y" }}</td>
+                    <!-- <td>{{ evento.end_time|date:"d/m/Y" }}</td> -->
                     <td>
                         <a class="btn btn-warning" href="{% url 'cal:event_edit' evento.id %}" >Editar</a> |
                         <a class="btn btn-danger"href="{% url 'cal:excluir_evento' evento.id %}" 
