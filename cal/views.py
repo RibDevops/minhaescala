@@ -83,13 +83,19 @@ def event(request, event_id=None):
     return render(request, 'cal/event.html', {'form': form})
 
 def listar_eventos(request):
-    eventos = Event.objects.all().order_by('start_time')
+    eventos = Event.objects.filter(enfermeiro__user=request.user).order_by('-start_time')
     return render(request, 'cal/lista_eventos.html', {'eventos': eventos})
 
 
 
 
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+
+@require_POST
 def excluir_evento(request, event_id):
-    evento = get_object_or_404(Event, pk=event_id)
+    evento = get_object_or_404(Event, pk=event_id, enfermeiro__user=request.user)
     evento.delete()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'ok'})
     return redirect('cal:listar_eventos')
