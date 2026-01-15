@@ -15,7 +15,7 @@ class Setor(models.Model):
 
 class TipoPlantao(models.Model):
     TIPO_CHOICES = [('Normal', 'Normal'), ('TPD', 'TPD')]
-    PERIODO_CHOICES = [('SM', 'Manhã'), ('ST', 'Tarde'), ('SN', 'Noite')]
+    PERIODO_CHOICES = [('SM', 'Manhã'), ('ST', 'Tarde'), ('SN', 'Noite'), ('SD', 'Dia')]
     HORAS_CHOICES = [(6, '6h'), (12, '12h')]
     
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
