@@ -143,3 +143,7 @@ STATIC_URL = '/static/'
 # LOGIN_URL = '/login/'  # Deve corresponder ao nome da sua URL de login
 # LOGIN_REDIRECT_URL = 'home'  # Página para redirecionar após login bem-sucedido
 # LOGOUT_REDIRECT_URL = 'home'  # Página para redirecionar após logout
+
+# Replit configuration - allow CSRF and frames for preview
+CSRF_TRUSTED_ORIGINS = ['https://*.replit.dev', 'https://*.replit.app', 'https://*.repl.co']
+X_FRAME_OPTIONS = 'ALLOWALL'
