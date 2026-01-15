@@ -17,7 +17,9 @@ from django.shortcuts import redirect
 def index(request):
     return HttpResponse('hello')
 
-class CalendarView(generic.ListView):
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+class CalendarView(LoginRequiredMixin, generic.ListView):
     model = Event
     template_name = 'cal/calendar.html'
 
@@ -25,8 +27,9 @@ class CalendarView(generic.ListView):
         context = super().get_context_data(**kwargs)
         d = get_date(self.request.GET.get('month', None))
         
-        # Obter todos os eventos do mês
+        # Obter eventos apenas do enfermeiro logado
         events = Event.objects.filter(
+            enfermeiro__user=self.request.user,
             start_time__year=d.year,
             start_time__month=d.month
         )
@@ -70,9 +73,12 @@ def event(request, event_id=None):
 
     form = EventForm(request.POST or None, instance=instance)
     if request.POST and form.is_valid():
-        form.save()
-        # return HttpResponseRedirect(reverse('cal:event'))
-        return HttpResponseRedirect(reverse('cal:event_new'))
+        event_obj = form.save(commit=False)
+        # Associa automaticamente ao enfermeiro logado
+        if hasattr(request.user, 'perfil'):
+            event_obj.enfermeiro = request.user.perfil
+        event_obj.save()
+        return HttpResponseRedirect(reverse('cal:calendar'))
 
     return render(request, 'cal/event.html', {'form': form})
 

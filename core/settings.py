@@ -147,3 +147,7 @@ STATIC_URL = '/static/'
 # Replit configuration - allow CSRF and frames for preview
 CSRF_TRUSTED_ORIGINS = ['https://*.replit.dev', 'https://*.replit.app', 'https://*.repl.co']
 X_FRAME_OPTIONS = 'ALLOWALL'
+
+LOGIN_URL = 'admin:login'
+LOGIN_REDIRECT_URL = 'cal:calendar'
+LOGOUT_REDIRECT_URL = 'admin:login'
