@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from .models import Solicitacao, Plantao
-from .forms import SolicitacaoForm
+from ..models import Solicitacao, Plantao
+from ..forms import SolicitacaoForm
 
 class SolicitacaoCreateView(LoginRequiredMixin, CreateView):
     model = Solicitacao

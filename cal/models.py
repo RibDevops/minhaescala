@@ -86,6 +86,6 @@ class Solicitacao(models.Model):
     data_fim = models.DateField(blank=True, null=True)
     motivo = models.TextField()
     status = models.CharField(max_length=20, choices=[('PENDENTE', 'Pendente'), ('APROVADO', 'Aprovado'), ('REJEITADO', 'Rejeitado')], default='PENDENTE')
-    data_solicitacao = models.DateTimeField(auto_now_add=True)
+    data_solicitacao = models.DateTimeField(default=timezone.now)
     plantao_origem = models.ForeignKey(Plantao, on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitacoes_origem')
     enfermeiro_destino = models.ForeignKey(Enfermeiro, on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitacoes_destino')
