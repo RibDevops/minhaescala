@@ -1,33 +1,49 @@
-from django.forms import ModelForm, DateInput
-from cal.models import Event
+from django import forms
+from .models import Plantao, Solicitacao, Enfermeiro, Hospital, Setor, TipoPlantao
+from datetime import datetime
 
-# class EventForm(ModelForm):
-#   class Meta:
-#     model = Event
-#     # datetime-local is a HTML5 input type, format to make date time show on fields
-#     widgets = {
-#       'start_time': DateInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
-#       'end_time': DateInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
-#     }
-#     fields = '__all__'
-
-#   def __init__(self, *args, **kwargs):
-#     super(EventForm, self).__init__(*args, **kwargs)
-#     # input_formats parses HTML5 datetime-local input to datetime field
-#     self.fields['start_time'].input_formats = ('%Y-%m-%dT%H:%M',)
-#     self.fields['end_time'].input_formats = ('%Y-%m-%dT%H:%M',)
-
-
-class EventForm(ModelForm):
+class PlantaoForm(forms.ModelForm):
     class Meta:
-        model = Event
-        fields = ['hospital', 'setor', 'tipo_plantao', 'title', 'start_time']
+        model = Plantao
+        fields = ['enfermeiro', 'tipo_plantao', 'data', 'hora_inicio', 'hora_fim', 'setor', 'hospital', 'observacoes']
         widgets = {
-            'start_time': DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'observacoes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
-
+    
     def __init__(self, *args, **kwargs):
-        super(EventForm, self).__init__(*args, **kwargs)
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
-        self.fields['start_time'].input_formats = ('%Y-%m-%d',)
+        
+        if user and hasattr(user, 'perfil'):
+            if user.perfil.tipo_usuario == 'ESCALANTE':
+                enf = getattr(user.perfil, 'enfermeiro', None)
+                if enf:
+                    self.fields['enfermeiro'].queryset = Enfermeiro.objects.filter(setores__in=enf.setores.all())
+                    self.fields['setor'].queryset = enf.setores.all()
+                    self.fields['hospital'].queryset = Hospital.objects.filter(id__in=enf.hospitais.all())
+
+class SolicitacaoForm(forms.ModelForm):
+    class Meta:
+        model = Solicitacao
+        fields = ['tipo', 'data_inicio', 'data_fim', 'motivo', 'plantao_origem', 'enfermeiro_destino']
+        widgets = {
+            'data_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_fim': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'motivo': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+        if user and hasattr(user, 'perfil') and hasattr(user.perfil, 'enfermeiro'):
+            self.fields['plantao_origem'].queryset = Plantao.objects.filter(
+                enfermeiro=user.perfil.enfermeiro,
+                data__gte=datetime.today()
+            )

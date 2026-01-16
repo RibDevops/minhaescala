@@ -1,0 +1,345 @@
+Estou desenvolvendo um sistema Django para gerenciar escalas de enfermeiros hospitalares. Já tenco os models prontos (código abaixo). NÃO preciso recriar models - só preciso das views, forms, templates e lógica de negócio.
+ARQUITETURA DOS MODELS (JÁ EXISTENTE):
+1. FLUXO PRINCIPAL:
+text
+
+PerfilUsuario → Enfermeiro → Escala → Plantao → ControleHoras
+
+2. SUBSTITUIÇÕES IMPORTANTES:
+
+    ❌ ANTIGO: Event com title e start_time
+
+    ✅ NOVO: Plantao com enfermeiro, data, hora_inicio, hora_fim
+
+    O "título" agora é implícito: {enfermeiro} - {data} - {tipo_plantao}
+
+3. PERFIS DE USUÁRIO:
+
+    Profissional: Só vê suas escalas
+
+    Escalante: Cria/edita escalas do seu setor
+
+    Chefe: Aprova escalas
+
+    Admin: Acesso total
+
+OBJETIVO ATUAL:
+
+Criar apenas as VIEWS, FORMS e TEMPLATES para:
+
+    Autenticação/registro (JÁ TENHO - só ajustar)
+
+    Calendário de escalas (visualização mensal)
+
+    CRUD de Plantões
+
+    Controle de horas
+
+    Solicitações (troca/folga)
+
+REGRAS PARA ECONOMIA DE TOKENS:
+
+    NÃO recriar models (já existem)
+
+    Foco em código essencial (evitar comentários longos)
+
+    Usar Django Class-Based Views quando possível
+
+    Templates simples (Bootstrap 5 básico)
+
+    Lógica por partes (vou pedir cada módulo)
+
+PRIMEIRA PARTE: VIEWS PARA CALENDÁRIO
+Código necessário:
+python
+
+# views.py - Calendário
+from datetime import datetime, timedelta
+from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
+from .models import Plantao, Enfermeiro, Escala
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+class CalendarioView(LoginRequiredMixin, TemplateView):
+    template_name = 'calendario/calendario.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Determinar mês atual ou especificado
+        month = self.request.GET.get('month')
+        if month:
+            d = datetime.strptime(month, "%Y-%m").date()
+        else:
+            d = datetime.today().date().replace(day=1)
+        
+        # Calcular primeiro e último dia do mês
+        primeiro_dia = d.replace(day=1)
+        ultimo_dia = (primeiro_dia.replace(month=primeiro_dia.month+1) - timedelta(days=1))
+        
+        # Filtrar plantões baseado no perfil
+        if self.request.user.perfil.tipo_usuario == 'PROFISSIONAL':
+            enfermeiro = self.request.user.perfil.enfermeiro
+            plantoes = Plantao.objects.filter(
+                enfermeiro=enfermeiro,
+                data__range=[primeiro_dia, ultimo_dia]
+            )
+        elif self.request.user.perfil.pode_visualizar_todos:
+            plantoes = Plantao.objects.filter(data__range=[primeiro_dia, ultimo_dia])
+        else:
+            # Escalante/Chefe vê apenas seu setor
+            setores = self.request.user.perfil.enfermeiro.setores.all()
+            plantoes = Plantao.objects.filter(
+                setor__in=setores,
+                data__range=[primeiro_dia, ultimo_dia]
+            )
+        
+        # Organizar por dia
+        calendario = {}
+        for plantao in plantoes:
+            dia = plantao.data.day
+            if dia not in calendario:
+                calendario[dia] = []
+            calendario[dia].append(plantao)
+        
+        context.update({
+            'primeiro_dia': primeiro_dia,
+            'ultimo_dia': ultimo_dia,
+            'calendario': calendario,
+            'mes_atual': d.strftime("%Y-%m"),
+            'mes_anterior': (primeiro_dia - timedelta(days=1)).strftime("%Y-%m"),
+            'mes_seguinte': (ultimo_dia + timedelta(days=1)).strftime("%Y-%m"),
+        })
+        return context
+
+html
+
+<!-- templates/calendario/calendario.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calendário de Escalas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Calendário de Escalas</h2>
+        
+        <!-- Navegação do mês -->
+        <div class="row mb-3">
+            <div class="col">
+                <a href="?month={{ mes_anterior }}" class="btn btn-secondary">← Mês Anterior</a>
+            </div>
+            <div class="col text-center">
+                <h4>{{ primeiro_dia|date:"F Y" }}</h4>
+            </div>
+            <div class="col text-end">
+                <a href="?month={{ mes_seguinte }}" class="btn btn-secondary">Próximo Mês →</a>
+            </div>
+        </div>
+        
+        <!-- Calendário -->
+        <div class="row row-cols-7 g-1">
+            <!-- Cabeçalho dos dias -->
+            {% for dia_semana in "Dom Seg Ter Qua Qui Sex Sáb"|split %}
+                <div class="col text-center fw-bold">{{ dia_semana }}</div>
+            {% endfor %}
+            
+            <!-- Dias do mês -->
+            {% for dia in dias_mes %}
+                <div class="col border min-vh-10">
+                    <div class="text-end p-1 {% if not dia.0 %}text-muted{% endif %}">
+                        {% if dia.0 %}
+                            <strong>{{ dia.0 }}</strong>
+                            {% if dia.0 in calendario %}
+                                <div class="mt-2">
+                                    {% for plantao in calendario|get_item:dia.0 %}
+                                        <div class="small p-1 mb-1 text-white rounded" 
+                                             style="background-color: {{ plantao.tipo_plantao.cor }};">
+                                            {{ plantao.enfermeiro.nome_completo|truncatechars:15 }}
+                                            <br>
+                                            <small>{{ plantao.tipo_plantao.codigo }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+
+SEGUNDA PARTE: FORMS PARA PLANTÕES
+python
+
+# forms.py
+from django import forms
+from .models import Plantao, Escala, Solicitacao
+from django.contrib.auth.models import User
+
+class PlantaoForm(forms.ModelForm):
+    class Meta:
+        model = Plantao
+        fields = ['enfermeiro', 'tipo_plantao', 'data', 'hora_inicio', 'hora_fim', 'setor', 'hospital', 'observacoes']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time'}),
+            'hora_fim': forms.TimeInput(attrs={'type': 'time'}),
+            'observacoes': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user and user.perfil.tipo_usuario != 'ADMIN':
+            # Restringir opções baseado no perfil
+            if user.perfil.tipo_usuario == 'ESCALANTE':
+                self.fields['enfermeiro'].queryset = Enfermeiro.objects.filter(
+                    setores__in=user.perfil.enfermeiro.setores.all()
+                )
+                self.fields['setor'].queryset = user.perfil.enfermeiro.setores.all()
+                self.fields['hospital'].queryset = Hospital.objects.filter(
+                    id__in=user.perfil.enfermeiro.hospitais.all()
+                )
+
+class SolicitacaoForm(forms.ModelForm):
+    class Meta:
+        model = Solicitacao
+        fields = ['tipo', 'data_inicio', 'data_fim', 'motivo', 'plantao_origem', 'enfermeiro_destino']
+        widgets = {
+            'data_inicio': forms.DateInput(attrs={'type': 'date'}),
+            'data_fim': forms.DateInput(attrs={'type': 'date'}),
+            'motivo': forms.Textarea(attrs={'rows': 4}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            # Apenas plantões futuros do próprio enfermeiro
+            self.fields['plantao_origem'].queryset = Plantao.objects.filter(
+                enfermeiro=user.perfil.enfermeiro,
+                data__gte=datetime.today()
+            )
+
+TERCEIRA PARTE: VIEWS CRUD PARA PLANTÕES
+python
+
+# views.py - CRUD
+from django.views.generic import CreateView, UpdateView, DeleteView, ListView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from .forms import PlantaoForm
+
+class PlantaoCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Plantao
+    form_class = PlantaoForm
+    template_name = 'plantao/plantao_form.html'
+    success_url = reverse_lazy('calendario')
+    
+    def test_func(self):
+        return self.request.user.perfil.pode_escalar
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def form_valid(self, form):
+        # Auto-associar à escala do mês
+        escala, created = Escala.objects.get_or_create(
+            mes_referencia=form.cleaned_data['data'].replace(day=1),
+            setor=form.cleaned_data['setor'],
+            defaults={'criado_por': self.request.user}
+        )
+        form.instance.escala = escala
+        messages.success(self.request, 'Plantão criado com sucesso!')
+        return super().form_valid(form)
+
+class PlantaoUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Plantao
+    form_class = PlantaoForm
+    template_name = 'plantao/plantao_form.html'
+    
+    def test_func(self):
+        plantao = self.get_object()
+        user = self.request.user
+        return (user.perfil.pode_escalar and 
+                plantao.setor in user.perfil.enfermeiro.setores.all())
+
+class PlantaoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Plantao
+    success_url = reverse_lazy('calendario')
+    
+    def test_func(self):
+        return self.request.user.perfil.pode_escalar
+
+class MeusPlantoesListView(LoginRequiredMixin, ListView):
+    model = Plantao
+    template_name = 'plantao/meus_plantoes.html'
+    context_object_name = 'plantoes'
+    
+    def get_queryset(self):
+        return Plantao.objects.filter(
+            enfermeiro=self.request.user.perfil.enfermeiro,
+            data__gte=datetime.today()
+        ).order_by('data')
+
+QUARTA PARTE: CONTROLE DE HORAS
+python
+
+# views.py - ControleHoras
+from django.views.generic import DetailView
+from django.db.models import Sum
+
+class ControleHorasDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = ControleHoras
+    template_name = 'controle_horas/detail.html'
+    context_object_name = 'controle'
+    
+    def test_func(self):
+        controle = self.get_object()
+        user = self.request.user
+        return (controle.enfermeiro == user.perfil.enfermeiro or 
+                user.perfil.pode_visualizar_todos)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Calcular resumo do mês
+        plantoes = Plantao.objects.filter(
+            enfermeiro=self.object.enfermeiro,
+            data__year=self.object.mes_referencia.year,
+            data__month=self.object.mes_referencia.month
+        )
+        context['plantoes'] = plantoes
+        context['total_horas'] = plantoes.aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+        return context
+
+URLS CONFIGURAÇÃO BASE:
+python
+
+# urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # Calendário
+    path('calendario/', views.CalendarioView.as_view(), name='calendario'),
+    
+    # Plantões
+    path('plantao/novo/', views.PlantaoCreateView.as_view(), name='plantao_create'),
+    path('plantao/<int:pk>/editar/', views.PlantaoUpdateView.as_view(), name='plantao_update'),
+    path('plantao/<int:pk>/excluir/', views.PlantaoDeleteView.as_view(), name='plantao_delete'),
+    path('meus-plantoes/', views.MeusPlantoesListView.as_view(), name='meus_plantoes'),
+    
+    # Controle de Horas
+    path('controle-horas/<int:pk>/', views.ControleHorasDetailView.as_view(), name='controle_horas'),
+    
+    # Página inicial
+    path('', views.CalendarioView.as_view(), name='home'),
+]

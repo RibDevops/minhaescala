@@ -4,19 +4,29 @@
 {% block title %}Calendário{% endblock %}
 
 {% block content %}
-<div class="calendar-container">
-    <div class="calendar-navigation">
-        <a class="btn btn-primary" href="{% url 'cal:calendar' %}?{{ prev_month }}">
-            <i class="bi bi-chevron-left"></i> Mês Anterior
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="?month={{ mes_anterior }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-left"></i> Anterior
         </a>
-        <!-- <h2 class="calendar-title">{{ month_name|title }} {{ year }}</h2> -->
-        <a class="btn btn-primary" href="{% url 'cal:calendar' %}?{{ next_month }}">
-            Próximo Mês <i class="bi bi-chevron-right"></i>
+        <h4 class="mb-0 text-primary">{{ primeiro_dia|date:"F Y"|capfirst }}</h4>
+        <a href="?month={{ mes_seguinte }}" class="btn btn-outline-secondary btn-sm">
+            Próximo <i class="bi bi-chevron-right"></i>
         </a>
     </div>
 
-    <div class="table-responsive">
-        {{ calendar }}
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                {{ calendar }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4 text-center">
+        <a href="{% url 'cal:event_new' %}" class="btn btn-primary px-4 rounded-pill shadow">
+            <i class="bi bi-plus-lg"></i> Novo Plantão
+        </a>
     </div>
 </div>
 {% endblock %}

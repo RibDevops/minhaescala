@@ -1,14 +1,14 @@
-from django.urls import path, re_path
+from django.urls import path
 from . import views
 
 app_name = 'cal'
 
 urlpatterns = [
-    path('index/', views.index, name='index'),
-    path('calendar/', views.CalendarView.as_view(), name='calendar'),
-    path('event/new/', views.event, name='event_new'),
-    path('eventos/', views.listar_eventos, name='listar_eventos'),
+    path('', views.CalendarioView.as_view(), name='calendar'),
+    path('calendar/', views.CalendarioView.as_view(), name='calendar_full'),
+    path('plantao/novo/', views.PlantaoCreateView.as_view(), name='event_new'),
+    path('plantao/<int:pk>/editar/', views.PlantaoUpdateView.as_view(), name='event_edit'),
+    path('plantao/<int:pk>/excluir/', views.PlantaoDeleteView.as_view(), name='plantao_delete'),
+    path('eventos/', views.MeusPlantoesListView.as_view(), name='listar_eventos'),
     path('eventos/excluir/<int:event_id>/', views.excluir_evento, name='excluir_evento'),
-
-    re_path(r'^event/edit/(?P<event_id>\d+)/$', views.event, name='event_edit'),
 ]

@@ -1,101 +1,107 @@
 from datetime import datetime, timedelta, date
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views import generic
-from django.urls import reverse
-from django.utils.safestring import mark_safe
-import calendar
-from django.utils import timezone
-
-from .models import *
-from .utils import Calendar
-from .forms import EventForm
-
-from django.shortcuts import redirect
-
-
-def index(request):
-    return HttpResponse('hello')
-
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, ListView
+from django.urls import reverse_lazy
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.safestring import mark_safe
+from .models import Plantao, Enfermeiro, Escala
+from .forms import PlantaoForm
+import calendar
 
-class CalendarView(LoginRequiredMixin, generic.ListView):
-    model = Event
+class CalendarioView(LoginRequiredMixin, TemplateView):
     template_name = 'cal/calendar.html'
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        d = get_date(self.request.GET.get('month', None))
+        month = self.request.GET.get('month')
+        if month:
+            try:
+                d = datetime.strptime(month, "%Y-%m").date()
+            except ValueError:
+                d = datetime.today().date().replace(day=1)
+        else:
+            d = datetime.today().date().replace(day=1)
         
-        # Obter eventos apenas do enfermeiro logado
-        events = Event.objects.filter(
-            enfermeiro__user=self.request.user,
-            start_time__year=d.year,
-            start_time__month=d.month
-        )
+        primeiro_dia = d.replace(day=1)
+        if primeiro_dia.month == 12:
+            ultimo_dia = primeiro_dia.replace(year=primeiro_dia.year+1, month=1, day=1) - timedelta(days=1)
+        else:
+            ultimo_dia = primeiro_dia.replace(month=primeiro_dia.month+1, day=1) - timedelta(days=1)
         
-        # Criar calendário com eventos
-        cal = Calendar(d.year, d.month)
-        html_cal = cal.formatmonth(withyear=True, events=events)
+        plantoes = Plantao.objects.filter(data__range=[primeiro_dia, ultimo_dia])
+        if hasattr(self.request.user, 'perfil'):
+            perfil = self.request.user.perfil
+            if perfil.tipo_usuario == 'PROFISSIONAL':
+                plantoes = plantoes.filter(enfermeiro=getattr(perfil, 'enfermeiro', None))
+            elif not perfil.pode_visualizar_todos:
+                enf = getattr(perfil, 'enfermeiro', None)
+                if enf:
+                    setores = enf.setores.all()
+                    plantoes = plantoes.filter(setor__in=setores)
         
-        context['calendar'] = mark_safe(html_cal)
-        context['prev_month'] = prev_month(d)
-        context['next_month'] = next_month(d)
-        context['month_name'] = d.strftime("%B")  # Nome completo do mês
-        context['year'] = d.year
+        calendario_data = {}
+        for p in plantoes:
+            dia = p.data.day
+            if dia not in calendario_data: calendario_data[dia] = []
+            calendario_data[dia].append(p)
+        
+        context.update({
+            'primeiro_dia': primeiro_dia,
+            'ultimo_dia': ultimo_dia,
+            'calendario': calendario_data,
+            'mes_atual': d.strftime("%Y-%m"),
+            'mes_anterior': (primeiro_dia - timedelta(days=1)).strftime("%Y-%m"),
+            'mes_seguinte': (ultimo_dia + timedelta(days=1)).strftime("%Y-%m"),
+        })
         return context
 
-def get_date(req_month):
-    if req_month:
-        year, month = (int(x) for x in req_month.split('-'))
-        return date(year, month, day=1)
-    return datetime.today()
+class PlantaoCreateView(LoginRequiredMixin, CreateView):
+    model = Plantao
+    form_class = PlantaoForm
+    template_name = 'cal/event.html'
+    success_url = reverse_lazy('cal:calendar')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def form_valid(self, form):
+        escala, _ = Escala.objects.get_or_create(
+            mes_referencia=form.cleaned_data['data'].replace(day=1),
+            setor=form.cleaned_data['setor'],
+            defaults={'criado_por': self.request.user}
+        )
+        form.instance.escala = escala
+        messages.success(self.request, 'Plantão criado!')
+        return super().form_valid(form)
 
-def prev_month(d):
-    first = d.replace(day=1)
-    prev_month = first - timedelta(days=1)
-    month = 'month=' + str(prev_month.year) + '-' + str(prev_month.month)
-    return month
+class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
+    model = Plantao
+    form_class = PlantaoForm
+    template_name = 'cal/event.html'
+    success_url = reverse_lazy('cal:calendar')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
-def next_month(d):
-    days_in_month = calendar.monthrange(d.year, d.month)[1]
-    last = d.replace(day=days_in_month)
-    next_month = last + timedelta(days=1)
-    month = 'month=' + str(next_month.year) + '-' + str(next_month.month)
-    return month
+class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
+    model = Plantao
+    success_url = reverse_lazy('cal:calendar')
 
-def event(request, event_id=None):
-    instance = Event()
-    if event_id:
-        instance = get_object_or_404(Event, pk=event_id)
-    else:
-        instance = Event()
+class MeusPlantoesListView(LoginRequiredMixin, ListView):
+    model = Plantao
+    template_name = 'cal/lista_eventos.html'
+    context_object_name = 'eventos'
+    def get_queryset(self):
+        if hasattr(self.request.user, 'perfil') and hasattr(self.request.user.perfil, 'enfermeiro'):
+            return Plantao.objects.filter(enfermeiro=self.request.user.perfil.enfermeiro, data__gte=date.today()).order_by('data')
+        return Plantao.objects.none()
 
-    form = EventForm(request.POST or None, instance=instance)
-    if request.POST and form.is_valid():
-        event_obj = form.save(commit=False)
-        # Associa automaticamente ao enfermeiro logado
-        if hasattr(request.user, 'perfil'):
-            event_obj.enfermeiro = request.user.perfil
-        event_obj.save()
-        return HttpResponseRedirect(reverse('cal:calendar'))
-
-    return render(request, 'cal/event.html', {'form': form})
-
-def listar_eventos(request):
-    eventos = Event.objects.filter(enfermeiro__user=request.user).order_by('-start_time')
-    return render(request, 'cal/lista_eventos.html', {'eventos': eventos})
-
-
-
-
-from django.views.decorators.http import require_POST
-from django.http import JsonResponse
-
-@require_POST
 def excluir_evento(request, event_id):
-    evento = get_object_or_404(Event, pk=event_id, enfermeiro__user=request.user)
-    evento.delete()
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'ok'})
+    p = get_object_or_404(Plantao, pk=event_id)
+    p.delete()
     return redirect('cal:listar_eventos')
