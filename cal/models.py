@@ -47,6 +47,7 @@ class PerfilUsuario(models.Model):
 class Enfermeiro(models.Model):
     perfil = models.OneToOneField(PerfilUsuario, on_delete=models.CASCADE, related_name='enfermeiro')
     nome_completo = models.CharField(max_length=255)
+    nome = models.CharField(max_length=255)
     matricula = models.CharField(max_length=50, unique=True)
     hospitais = models.ManyToManyField(Hospital, related_name='enfermeiros')
     setores = models.ManyToManyField(Setor, related_name='enfermeiros')

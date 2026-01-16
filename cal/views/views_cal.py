@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
 from ..models import Plantao, Enfermeiro, Escala
 from ..forms import PlantaoForm
+from ..utils import Calendar
 
 class CalendarioView(LoginRequiredMixin, TemplateView):
     template_name = 'cal/calendar.html'
@@ -43,16 +44,13 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
                     setores = enf.setores.all()
                     plantoes = plantoes.filter(setor__in=setores)
         
-        calendario_data = {}
-        for p in plantoes:
-            dia = p.data.day
-            if dia not in calendario_data: calendario_data[dia] = []
-            calendario_data[dia].append(p)
+        cal = Calendar(d.year, d.month, plantoes)
+        html_cal = cal.formatmonth(withyear=True)
         
         context.update({
             'primeiro_dia': primeiro_dia,
             'ultimo_dia': ultimo_dia,
-            'calendario': calendario_data,
+            'calendar': mark_safe(html_cal),
             'mes_atual': d.strftime("%Y-%m"),
             'mes_anterior': (primeiro_dia - timedelta(days=1)).strftime("%Y-%m"),
             'mes_seguinte': (ultimo_dia + timedelta(days=1)).strftime("%Y-%m"),

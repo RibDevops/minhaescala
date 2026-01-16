@@ -1,76 +1,33 @@
-from asyncio import Event
-import calendar
-from datetime import datetime, date
-import locale
+from calendar import HTMLCalendar
+from .models import Plantao
 
-try:
-    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
-except locale.Error:
-    try:
-        locale.setlocale(locale.LC_TIME, 'C.UTF-8')
-    except locale.Error:
-        pass
-
-
-class Calendar(calendar.HTMLCalendar):
-    def __init__(self, year=None, month=None):
+class Calendar(HTMLCalendar):
+    def __init__(self, year=None, month=None, plantoes=None):
         self.year = year
         self.month = month
+        self.plantoes = plantoes
         super(Calendar, self).__init__()
 
-    # def formatday(self, day, events):
-    #     events_per_day = events.filter(start_time__day=day)
-    #     d = ''
-    #     for event in events_per_day:
-    #         d += f'<li>{event.get_html_url}</li>'
-        
-    #     if day != 0:
-    #         return f'<td><span class="date">{day}</span><ul>{d}</ul></td>'
-    #     return '<td></td>'
-   
-
-    def formatday(self, day, events):
-        events_per_day = events.filter(start_time__day=day)
+    def formatday(self, day, weekday):
+        plantoes_do_dia = self.plantoes.filter(data__day=day)
         d = ''
-        for event in events_per_day:
-            d += f'<li>{event.get_html_url}</li>'
-        
+        for plantao in plantoes_do_dia:
+            # Usando o campo 'nome' que o usuário mencionou ter criado
+            nome_exibicao = plantao.enfermeiro.nome if hasattr(plantao.enfermeiro, 'nome') else plantao.enfermeiro.nome_completo
+            d += f'<li> {nome_exibicao} ({plantao.tipo_plantao.codigo}) </li>'
+
         if day != 0:
-            css_class = 'today' if date(self.year, self.month, day) == datetime.today().date() else ''
-            return f'<td class="{css_class}"><span class="date">{day}</span><ul>{d}</ul></td>'
+            return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
         return '<td></td>'
 
+    def formatweek(self, theweek):
+        s = ''.join(self.formatday(d, wd) for d, wd in theweek)
+        return f'<tr> {s} </tr>'
 
-
-    def formatweek(self, theweek, events):
-        week = ''
-        for d, weekday in theweek:
-            week += self.formatday(d, events)
-        return f'<tr>{week}</tr>'
-    
-    def formatweekheader(self):
-        dias_semana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
-        return '<tr>' + ''.join(f'<th class="header">{dia}</th>' for dia in dias_semana) + '</tr>'
-
-    def formatmonthname(self, theyear, themonth, withyear=True):
-        meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-        nome_mes = meses[themonth - 1]
-        if withyear:
-            return f'<tr><th colspan="7" class="month">{nome_mes} {theyear}</th></tr>'
-        return f'<tr><th colspan="7" class="month">{nome_mes}</th></tr>'
-    
-    def formatmonth(self, withyear=True, events=None):
-        if events is None:
-            events = Event.objects.none()
-        
-        cal = '<table class="calendar">\n'
+    def formatmonth(self, withyear=True):
+        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
         cal += f'{self.formatmonthname(self.year, self.month, withyear=withyear)}\n'
         cal += f'{self.formatweekheader()}\n'
         for week in self.monthdays2calendar(self.year, self.month):
-            cal += f'{self.formatweek(week, events)}\n'
-        cal += '</table>'
+            cal += f'{self.formatweek(week)}\n'
         return cal
-    
-    
-
