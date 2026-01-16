@@ -39,6 +39,7 @@ class PerfilUsuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
     tipo_usuario = models.CharField(max_length=20, choices=TIPO_USUARIO_CHOICES, default='PROFISSIONAL')
     pode_escalar = models.BooleanField(default=False)
+    pode_aprovar = models.BooleanField(default=False)
     pode_visualizar_todos = models.BooleanField(default=False)
     
     def __str__(self):
@@ -84,5 +85,7 @@ class Solicitacao(models.Model):
     data_inicio = models.DateField()
     data_fim = models.DateField(blank=True, null=True)
     motivo = models.TextField()
+    status = models.CharField(max_length=20, choices=[('PENDENTE', 'Pendente'), ('APROVADO', 'Aprovado'), ('REJEITADO', 'Rejeitado')], default='PENDENTE')
+    data_solicitacao = models.DateTimeField(auto_now_add=True)
     plantao_origem = models.ForeignKey(Plantao, on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitacoes_origem')
     enfermeiro_destino = models.ForeignKey(Enfermeiro, on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitacoes_destino')

@@ -1,0 +1,49 @@
+<!-- templates/solicitacoes/minhas_solicitacoes.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Minhas Solicitações</h2>
+    <a href="{% url 'solicitacao_create' %}" class="btn btn-primary mb-3">+ Nova Solicitação</a>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Período</th>
+                <th>Status</th>
+                <th>Data Solicitação</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitacao in solicitacoes %}
+            <tr>
+                <td>{{ solicitacao.get_tipo_display }}</td>
+                <td>
+                    {{ solicitacao.data_inicio|date:"d/m/Y" }}
+                    {% if solicitacao.data_fim %}
+                     - {{ solicitacao.data_fim|date:"d/m/Y" }}
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge bg-{% if solicitacao.status == 'APROVADA' %}success{% elif solicitacao.status == 'REJEITADA' %}danger{% else %}warning{% endif %}">
+                        {{ solicitacao.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ solicitacao.data_solicitacao|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if solicitacao.status == 'PENDENTE' %}
+                    <a href="#" class="btn btn-sm btn-danger">Cancelar</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">Nenhuma solicitação encontrada</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

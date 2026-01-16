@@ -1,0 +1,43 @@
+<!-- templates/solicitacoes/solicitacao_form.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Nova Solicitação</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Solicitação</label>
+                    {{ form.tipo }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Data Início</label>
+                    {{ form.data_inicio }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Data Fim (opcional)</label>
+                    {{ form.data_fim }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Plantão para Troca</label>
+                    {{ form.plantao_origem }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Trocar com</label>
+                    {{ form.enfermeiro_destino }}
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Motivo</label>
+            {{ form.motivo }}
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar Solicitação</button>
+        <a href="{% url 'minhas_solicitacoes' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
