@@ -5,7 +5,7 @@
 
 
 <div class="form-login-container">
-    <form method="POST" action="{% url 'login' %}" class="formLogin">
+    <form method="POST" action="{% url 'cal:login' %}" class="formLogin">
         {% csrf_token %}
 
         {% if messages %}
