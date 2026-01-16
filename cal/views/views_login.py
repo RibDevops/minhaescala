@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout, login as login_django
 from django.contrib import messages
 from cal.forms import UserRegisterForm
+from django.urls import reverse_lazy
 import logging
 
 logger = logging.getLogger('django')
@@ -30,6 +31,8 @@ def register_view(request):
 
 def login_view(request):
     if request.method == "GET":
+        if request.user.is_authenticated:
+            return redirect('cal:home')
         return render(request, 'registration/login.html')
     else:
         username = request.POST.get('username')
@@ -47,5 +50,12 @@ def login_view(request):
 from django.contrib.auth.views import LogoutView
 
 class CustomLogoutView(LogoutView):
+    template_name = 'registration/logged_out.html'
+    
     def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+        logout(request)
+        return render(request, self.template_name)
+    
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return render(request, self.template_name)
