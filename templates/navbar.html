@@ -20,6 +20,19 @@
                     <a class="nav-link" href="{% url 'cal:event_new' %}">Novo Plantão</a>
                     <a class="nav-link" href="{% url 'cal:listar_eventos' %}">Lista de Plantões</a>
                     <a class="nav-link" href="{% url 'cal:dashboard' %}">Dashboard</a>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarSolicitacoes" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Solicitações
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarSolicitacoes">
+                            <li><a class="dropdown-item" href="{% url 'cal:solicitacao_create' %}">Nova Solicitação</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:minhas_solicitacoes' %}">Minhas Solicitações</a></li>
+                            {% if user.perfil.pode_aprovar %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'cal:solicitacoes_pendentes' %}">Pendentes para Aprovação</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
                 </div>
                 <div class="navbar-nav">
                     {% if user.is_authenticated %}
