@@ -1,0 +1,56 @@
+/* Estilos gerais para melhorar a responsividade */
+body {
+  overflow-x: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.alert-messages {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1050;
+  width: 90%;
+  max-width: 400px;
+}
+
+/* Ajustes para telas pequenas */
+@media (max-width: 768px) {
+  .alert-messages {
+      width: 100%;
+      max-width: none;
+      top: 60px;
+      right: 0;
+      padding: 0 15px;
+  }
+  
+  .title {
+      font-size: 1.5rem;
+      margin-top: 20px !important;
+  }
+  
+  .page-content {
+      padding-top: 60px !important;
+  }
+}
+
+/* Melhorias para o calendário (se estiver usando fullcalendar) */
+.fc-toolbar {
+  flex-direction: column;
+}
+
+.fc-toolbar.fc-header-toolbar {
+  margin-bottom: 0.5em;
+}
+
+@media (min-width: 768px) {
+  .fc-toolbar {
+      flex-direction: row;
+  }
+}

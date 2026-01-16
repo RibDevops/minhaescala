@@ -1,0 +1,125 @@
+/* Estilos gerais do container e navegação */
+.calendar-container {
+    margin: 20px 0 60px; /* Unificado top, right/left, bottom */
+}
+
+.calendar-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-navigation .btn {
+    padding: 8px 16px;
+}
+
+.calendar-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: 0 10px;
+}
+
+/* Estilos da tabela do calendário */
+table.calendar {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.calendar th {
+    background-color: #f8f9fa;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.calendar td {
+    height: 100px;
+    vertical-align: top;
+    padding: 5px;
+    border: 1px solid #dee2e6;
+    position: relative;
+}
+
+/* Estilos dos dias e eventos */
+.calendar .date {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.calendar .event,
+.calendar td li {
+    font-size: 0.8em;
+    background-color: #5fe2a1;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Dia atual destacado */
+.calendar td.today {
+    background-color: #ffe599; /* amarelo claro */
+    /* border: 2px solid #ffa500; */
+}
+
+/* Evento normal */
+.calendar .event {
+    background-color: #5fe2a1; /* verde claro */
+    color: #000;
+}
+
+/* Evento importante (exemplo adicional, caso queira customizar) */
+.calendar .event.important {
+    background-color: #ff9999; /* vermelho claro */
+    color: #fff;
+}
+
+.calendar td ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 5px 0 0;
+}
+
+/* Estados especiais */
+.calendar .today {
+    background-color: #e7e1cb;
+}
+
+.calendar .other-month {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+    .calendar td {
+        height: 60px;
+        font-size: 0.8rem;
+        padding: 2px;
+    }
+    
+    .calendar .event,
+    .calendar td li {
+        font-size: 0.7em;
+        padding: 1px 3px;
+    }
+    
+    .calendar-navigation .btn {
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+    
+    .calendar-title {
+        font-size: 1.2rem;
+    }
+}
+
+
+

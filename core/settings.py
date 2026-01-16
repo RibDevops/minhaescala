@@ -123,10 +123,10 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -137,7 +137,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # MEDIA_ROOT = '/home/ribdev/core/media'
 # MEDIA_URL = '/media/'
 # STATIC_ROOT = '/home/ribdev/core/static'
-STATIC_URL = '/static/'
 
 # Configuração para redirecionamento de login
 # LOGIN_URL = '/login/'  # Deve corresponder ao nome da sua URL de login
@@ -148,6 +147,6 @@ STATIC_URL = '/static/'
 CSRF_TRUSTED_ORIGINS = ['https://*.replit.dev', 'https://*.replit.app', 'https://*.repl.co']
 X_FRAME_OPTIONS = 'ALLOWALL'
 
-LOGIN_URL = 'admin:login'
-LOGIN_REDIRECT_URL = 'cal:calendar'
-LOGOUT_REDIRECT_URL = 'admin:login'
+LOGIN_URL = 'cal:login'
+LOGIN_REDIRECT_URL = 'cal:home'
+LOGOUT_REDIRECT_URL = 'cal:login'
