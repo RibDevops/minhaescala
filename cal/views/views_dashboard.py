@@ -37,7 +37,9 @@ def dashboard(request):
     profissionais_por_turno = list(plantoes_base.values('tipo_plantao__periodo').annotate(total=Count('enfermeiro', distinct=True)))
     
     # Mapeamento de períodos para nomes amigáveis
-    periodo_map = dict(Plantao.tipo_plantao.field.related_model.PERIODO_CHOICES)
+    # Buscando o modelo TipoPlantao corretamente
+    from ..models import TipoPlantao
+    periodo_map = dict(TipoPlantao.PERIODO_CHOICES)
     for item in profissionais_por_turno:
         item['periodo_nome'] = periodo_map.get(item['tipo_plantao__periodo'], item['tipo_plantao__periodo'])
 
