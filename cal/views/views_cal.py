@@ -5,9 +5,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
-from .models import Plantao, Enfermeiro, Escala
-from .forms import PlantaoForm
-import calendar
+from ..models import Plantao, Enfermeiro, Escala
+from ..forms import PlantaoForm
 
 class CalendarioView(LoginRequiredMixin, TemplateView):
     template_name = 'cal/calendar.html'
@@ -33,7 +32,11 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         if hasattr(self.request.user, 'perfil'):
             perfil = self.request.user.perfil
             if perfil.tipo_usuario == 'PROFISSIONAL':
-                plantoes = plantoes.filter(enfermeiro=getattr(perfil, 'enfermeiro', None))
+                enf = getattr(perfil, 'enfermeiro', None)
+                if enf:
+                    plantoes = plantoes.filter(enfermeiro=enf)
+                else:
+                    plantoes = plantoes.none()
             elif not perfil.pode_visualizar_todos:
                 enf = getattr(perfil, 'enfermeiro', None)
                 if enf:

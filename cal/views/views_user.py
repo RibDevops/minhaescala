@@ -5,9 +5,9 @@ from ..forms import UsuarioForm, UsuarioUpdateForm, UsuarioPasswordResetForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
-
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
-from ..models import Transacao, Tipo, Cartao, FormaPagamento
+from ..models import Plantao, Enfermeiro
 
 @login_required
 def perfil_usuario(request):
@@ -39,7 +39,6 @@ def perfil_usuario(request):
 
 @login_required
 def editar_usuario(request, user_id):
-    # Controle de permissão: superuser edita qualquer um, usuário comum apenas a si mesmo
     if not request.user.is_staff and request.user.id != user_id:
         messages.error(request, 'Você não tem permissão para editar este perfil.')
         return redirect('cal:home')
@@ -56,32 +55,6 @@ def editar_usuario(request, user_id):
     else:
         form = UsuarioUpdateForm(instance=usuario)
     return render(request, 'usuarios/form_usuario.html', {'form': form, 'titulo': 'Editar Usuário'})
-
-
-@login_required
-@staff_member_required
-def desativar_usuario(request, pk):
-    user = get_object_or_404(User, pk=pk)
-    user.is_active = False
-    user.save()
-    messages.success(request, "Usuário desativado com sucesso.")
-    return redirect('usuarios_list')
-
-@login_required
-@staff_member_required
-def resetar_senha(request, user_id):
-    usuario = get_object_or_404(User, id=user_id)
-    if request.method == 'POST':
-        form = UsuarioPasswordResetForm(request.POST)
-        if form.is_valid():
-            usuario.set_password(form.cleaned_data['new_password'])
-            usuario.save()
-            messages.success(request, 'Senha redefinida com sucesso!')
-            return redirect('cal:listar_usuarios')
-    else:
-        form = UsuarioPasswordResetForm()
-    return render(request, 'usuarios/form_usuario.html', {'form': form, 'titulo': 'Resetar Senha'})
-
 
 @login_required
 @staff_member_required
@@ -140,10 +113,4 @@ def desativar_usuario(request, user_id):
     return redirect('cal:listar_usuarios')
 
 def home(request):
-    return render(request, 'home.html', {})
-
-def contato(request):
-    return render(request, 'contato.html')
-
-def manual_publico(request):
-    return render(request, 'manual_publico.html')
+    return redirect('cal:calendar')
