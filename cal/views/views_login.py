@@ -49,11 +49,6 @@ def login_view(request):
 
 from django.contrib.auth.views import LogoutView
 
-class CustomLogoutView(LogoutView):
-    def get(self, request, *args, **kwargs):
-        logout(request)
-        return redirect('cal:login')
-    
-    def post(self, request, *args, **kwargs):
-        logout(request)
-        return redirect('cal:login')
+def logout_view(request):
+    logout(request)
+    return redirect('cal:login')
