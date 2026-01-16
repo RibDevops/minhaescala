@@ -14,7 +14,8 @@ class Calendar(HTMLCalendar):
         for plantao in plantoes_do_dia:
             # Prioriza o campo 'nome', depois 'nome_completo'
             nome_exibicao = plantao.enfermeiro.nome or plantao.enfermeiro.nome_completo
-            d += f'<li>{nome_exibicao} ({plantao.tipo_plantao.codigo})</li>'
+            # Adicionando o código do plantão e as horas
+            d += f'<li>{nome_exibicao} ({plantao.tipo_plantao.codigo} - {plantao.tipo_plantao.horas}h)</li>'
 
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul>{d}</ul></td>"
