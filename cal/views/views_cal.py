@@ -30,19 +30,8 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
             ultimo_dia = primeiro_dia.replace(month=primeiro_dia.month+1, day=1) - timedelta(days=1)
         
         plantoes = Plantao.objects.filter(data__range=[primeiro_dia, ultimo_dia])
-        if hasattr(self.request.user, 'perfil'):
-            perfil = self.request.user.perfil
-            if perfil.tipo_usuario == 'PROFISSIONAL':
-                enf = getattr(perfil, 'enfermeiro', None)
-                if enf:
-                    plantoes = plantoes.filter(enfermeiro=enf)
-                else:
-                    plantoes = plantoes.none()
-            elif not perfil.pode_visualizar_todos:
-                enf = getattr(perfil, 'enfermeiro', None)
-                if enf:
-                    setores = enf.setores.all()
-                    plantoes = plantoes.filter(setor__in=setores)
+        # Removida a restrição de visualização para profissionais
+        # Qualquer usuário logado pode ver todos os plantões no calendário
         
         cal = Calendar(d.year, d.month, plantoes)
         html_cal = cal.formatmonth(withyear=True)

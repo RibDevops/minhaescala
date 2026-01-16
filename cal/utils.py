@@ -12,17 +12,17 @@ class Calendar(HTMLCalendar):
         plantoes_do_dia = self.plantoes.filter(data__day=day)
         d = ''
         for plantao in plantoes_do_dia:
-            # Usando o campo 'nome' que o usuário mencionou ter criado
-            nome_exibicao = plantao.enfermeiro.nome if hasattr(plantao.enfermeiro, 'nome') else plantao.enfermeiro.nome_completo
-            d += f'<li> {nome_exibicao} ({plantao.tipo_plantao.codigo}) </li>'
+            # Prioriza o campo 'nome', depois 'nome_completo'
+            nome_exibicao = plantao.enfermeiro.nome or plantao.enfermeiro.nome_completo
+            d += f'<li>{nome_exibicao} ({plantao.tipo_plantao.codigo})</li>'
 
         if day != 0:
-            return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
+            return f"<td><span class='date'>{day}</span><ul>{d}</ul></td>"
         return '<td></td>'
 
     def formatweek(self, theweek):
         s = ''.join(self.formatday(d, wd) for d, wd in theweek)
-        return f'<tr> {s} </tr>'
+        return f'<tr>{s}</tr>'
 
     def formatmonth(self, withyear=True):
         cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
