@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-person-gear"></i> {{ titulo }}</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" name="perfil_submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check-circle"></i> Salvar Alterações
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if titulo == 'Meu Perfil' %}
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Alterar Senha</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in password_form %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                <input type="{{ field.field.widget.input_type|default:'password' }}" 
+                                       name="{{ field.name }}" 
+                                       class="form-control {% if field.errors %}is-invalid{% endif %}">
+                                {% if field.help_text %}
+                                    <div class="form-text small text-muted">{{ field.help_text|safe }}</div>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" name="password_submit" class="btn btn-dark w-100">
+                            <i class="bi bi-key"></i> Atualizar Senha
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

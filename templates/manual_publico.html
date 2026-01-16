@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary"><i class="bi bi-book"></i> Manual do Sistema</h1>
+                <p class="lead text-muted">Aprenda a utilizar todas as funcionalidades da sua Carteira Digital</p>
+            </div>
+
+            <!-- Navegação Rápida -->
+            <div class="card shadow-sm border-0 mb-5 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Tópicos do Manual</h5>
+                    <div class="row g-2">
+                        <div class="col-md-4"><a href="#registrar" class="btn btn-outline-primary btn-sm w-100">Registrar Movimentação</a></div>
+                        <div class="col-md-4"><a href="#balanco-mensal" class="btn btn-outline-primary btn-sm w-100">Balanço Mensal</a></div>
+                        <div class="col-md-4"><a href="#metas" class="btn btn-outline-primary btn-sm w-100">Metas Mensais</a></div>
+                        <div class="col-md-4"><a href="#balanco-geral" class="btn btn-outline-primary btn-sm w-100">Balanço Geral</a></div>
+                        <div class="col-md-4"><a href="#categorias" class="btn btn-outline-primary btn-sm w-100">Categorias</a></div>
+                        <div class="col-md-4"><a href="#lista-geral" class="btn btn-outline-primary btn-sm w-100">Lista Geral</a></div>
+                        <div class="col-md-4"><a href="#tipos" class="btn btn-outline-primary btn-sm w-100">Tipos</a></div>
+                        <div class="col-md-4"><a href="#contato" class="btn btn-outline-primary btn-sm w-100">Contato</a></div>
+                        <div class="col-md-4"><a href="#perfil" class="btn btn-outline-primary btn-sm w-100">Perfil</a></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seções -->
+            <section id="registrar" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-plus-circle"></i> Registrar Movimentação</h2>
+                <p>O cadastro de receitas e despesas é o primeiro passo para o seu controle financeiro. Você pode informar o título, valor, data, categoria e até parcelar suas compras.</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Tela de Cadastro de Transação]
+                </div>
+            </section>
+
+            <section id="balanco-mensal" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-bar-chart-line"></i> Balanço Mensal</h2>
+                <p>Visualize um resumo detalhado do seu mês atual, anterior ou próximo. Veja gráficos de pizza que mostram onde você está gastando mais.</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Dashboards e Gráficos Mensais]
+                </div>
+            </section>
+
+            <section id="metas" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-bullseye"></i> Metas Mensais</h2>
+                <p>Defina limites de gastos por categoria para cada mês. O sistema avisará quanto do seu orçamento já foi utilizado.</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Tela de Gestão de Metas]
+                </div>
+            </section>
+
+            <section id="balanco-geral" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-pie-chart-fill"></i> Balanço Geral</h2>
+                <p>Uma visão consolidada de todo o seu histórico financeiro, agrupado por tipos de movimentação.</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Resumo Geral do Sistema]
+                </div>
+            </section>
+
+            <section id="categorias" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-grid-1x2"></i> Categorias</h2>
+                <p>Organize suas finanças criando categorias personalizadas como "Lazer", "Alimentação" ou "Educação".</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Lista de Categorias]
+                </div>
+            </section>
+
+            <section id="lista-geral" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-card-checklist"></i> Lista Geral</h2>
+                <p>Consulte todas as suas movimentações em uma única lista, com filtros por ano, mês, tipo e categoria.</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Tabela de Transações com Filtros]
+                </div>
+            </section>
+
+            <section id="tipos" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-toggles2"></i> Tipos</h2>
+                <p>Gerencie os tipos de movimentação permitidos no sistema (configuração avançada).</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Tela de Tipos de Movimentação]
+                </div>
+            </section>
+
+            <section id="contato" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-person-vcard"></i> Contato</h2>
+                <p>Precisa de ajuda ou quer dar uma sugestão? Utilize nosso canal oficial de suporte.</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Tela de Contato]
+                </div>
+            </section>
+
+            <section id="perfil" class="mb-5">
+                <h2 class="h3 text-primary border-bottom pb-2"><i class="bi bi-person-circle"></i> Perfil</h2>
+                <p>Gerencie seus dados pessoais, atualize seu e-mail ou altere sua senha de acesso com total segurança.</p>
+                <div class="bg-light p-3 border rounded mb-3 text-center text-muted">
+                    [IMAGEM: Tela de Perfil e Alteração de Senha]
+                </div>
+            </section>
+
+            <div class="text-center py-5 border-top">
+                <h4 class="mb-3">Pronto para começar?</h4>
+                <a href="{% url 'cal:register' %}" class="btn btn-primary btn-lg px-5">Criar minha conta agora</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
