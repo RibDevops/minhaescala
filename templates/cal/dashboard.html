@@ -39,6 +39,31 @@
         </div>
     </div>
 
+    <div class="row g-4 mb-4">
+        <!-- Gráfico de Profissionais por Dia -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Profissionais Escalados por Dia</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartDias" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Gráfico de Profissionais por Turno -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Por Turno</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTurnos" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <!-- Distribuição por Tipo -->
         <div class="col-lg-6">
@@ -107,4 +132,51 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Gráfico de Barras - Profissionais por Dia
+    new Chart(document.getElementById('chartDias'), {
+        type: 'bar',
+        data: {
+            labels: {{ grafico_dias_labels|safe }},
+            datasets: [{
+                label: 'Qtd Profissionais',
+                data: {{ grafico_dias_valores|safe }},
+                backgroundColor: '#3498db',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                x: { title: { display: true, text: 'Dia do Mês' } }
+            }
+        }
+    });
+
+    // Gráfico de Pizza - Profissionais por Turno
+    new Chart(document.getElementById('chartTurnos'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ grafico_turnos_labels|safe }},
+            datasets: [{
+                data: {{ grafico_turnos_valores|safe }},
+                backgroundColor: ['#f1c40f', '#e67e22', '#2c3e50', '#2ecc71']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
 {% endblock %}

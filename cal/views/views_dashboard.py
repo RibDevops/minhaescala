@@ -29,6 +29,18 @@ def dashboard(request):
     # Distribuição por Tipo de Plantão
     por_tipo = plantoes_base.values('tipo_plantao__codigo').annotate(total=Count('id')).order_by('-total')
     
+    # Dados para Gráficos
+    # 1. Profissionais por Dia
+    profissionais_por_dia = list(plantoes_base.values('data__day').annotate(total=Count('enfermeiro', distinct=True)).order_by('data__day'))
+    
+    # 2. Profissionais por Turno (Período)
+    profissionais_por_turno = list(plantoes_base.values('tipo_plantao__periodo').annotate(total=Count('enfermeiro', distinct=True)))
+    
+    # Mapeamento de períodos para nomes amigáveis
+    periodo_map = dict(Plantao.tipo_plantao.field.related_model.PERIODO_CHOICES)
+    for item in profissionais_por_turno:
+        item['periodo_nome'] = periodo_map.get(item['tipo_plantao__periodo'], item['tipo_plantao__periodo'])
+
     # Top Profissionais (se tiver permissão)
     top_profissionais = None
     if user.is_staff or (hasattr(user, 'perfil') and user.perfil.tipo_usuario != 'PROFISSIONAL'):
@@ -51,4 +63,8 @@ def dashboard(request):
         'total_horas': total_horas,
         'por_tipo': por_tipo,
         'top_profissionais': top_profissionais,
+        'grafico_dias_labels': [item['data__day'] for item in profissionais_por_dia],
+        'grafico_dias_valores': [item['total'] for item in profissionais_por_dia],
+        'grafico_turnos_labels': [item['periodo_nome'] for item in profissionais_por_turno],
+        'grafico_turnos_valores': [item['total'] for item in profissionais_por_turno],
     })
