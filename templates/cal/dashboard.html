@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Resumo da Escala</h2>
+        <form method="GET" class="d-flex align-items-center gap-2">
+            <select name="mes" class="form-select form-select-sm" onchange="this.form.submit()">
+                {% for num, nome in meses_disponiveis %}
+                <option value="{{ num }}" {% if num == mes_selecionado %}selected{% endif %}>{{ nome }}</option>
+                {% endfor %}
+            </select>
+            <select name="ano" class="form-select form-select-sm" onchange="this.form.submit()">
+                {% for a in anos_disponiveis %}
+                <option value="{{ a }}" {% if a == ano_selecionado %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <h6 class="opacity-75 mb-1">Total de Plantões</h6>
+                    <h2 class="fw-bold mb-0">{{ total_plantoes }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <h6 class="opacity-75 mb-1">Total de Horas</h6>
+                    <h2 class="fw-bold mb-0">{{ total_horas }}h</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Distribuição por Tipo -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Por Tipo de Plantão</h5>
+                </div>
+                <div class="card-body">
+                    {% if por_tipo %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Código</th>
+                                    <th class="text-center">Qtd</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in por_tipo %}
+                                <tr>
+                                    <td><span class="badge bg-info text-dark">{{ item.tipo_plantao__codigo }}</span></td>
+                                    <td class="text-center">{{ item.total }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">Nenhum dado disponível para este período.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranking de Profissionais -->
+        {% if top_profissionais %}
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Top 5 Profissionais (por Horas)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th class="text-center">Plantões</th>
+                                    <th class="text-center">Horas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prof in top_profissionais %}
+                                <tr>
+                                    <td>{{ prof.enfermeiro__nome }}</td>
+                                    <td class="text-center">{{ prof.total }}</td>
+                                    <td class="text-center"><span class="fw-bold">{{ prof.horas }}h</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
