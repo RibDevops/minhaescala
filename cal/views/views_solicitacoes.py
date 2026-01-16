@@ -32,7 +32,7 @@ class SolicitacaoCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('minhas_solicitacoes')
+        return reverse_lazy('cal:minhas_solicitacoes')
 
 class MinhasSolicitacoesListView(LoginRequiredMixin, ListView):
     model = Solicitacao
@@ -95,7 +95,7 @@ class SolicitacaoAprovarView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
             yield start_date + timedelta(n)
 
     def get_success_url(self):
-        return reverse_lazy('solicitacoes_pendentes')
+        return reverse_lazy('cal:solicitacoes_pendentes')
 
 class SolicitacoesPendentesListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Solicitacao
