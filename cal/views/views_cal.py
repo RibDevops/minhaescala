@@ -58,6 +58,9 @@ class PlantaoCreateView(LoginRequiredMixin, CreateView):
         return kwargs
     
     def form_valid(self, form):
+        # Definir horários padrão baseados no período se necessário
+        # Como o modelo agora permite nulo, e o usuário quer simplificar,
+        # vamos apenas garantir que a escala exista.
         escala, _ = Escala.objects.get_or_create(
             mes_referencia=form.cleaned_data['data'].replace(day=1),
             setor=form.cleaned_data['setor'],

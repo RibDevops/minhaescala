@@ -36,11 +36,9 @@ class UsuarioPasswordResetForm(forms.Form):
 class PlantaoForm(forms.ModelForm):
     class Meta:
         model = Plantao
-        fields = ['enfermeiro', 'tipo_plantao', 'data', 'hora_inicio', 'hora_fim', 'setor', 'hospital', 'observacoes']
+        fields = ['enfermeiro', 'tipo_plantao', 'data', 'setor', 'hospital', 'observacoes']
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'observacoes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
     
