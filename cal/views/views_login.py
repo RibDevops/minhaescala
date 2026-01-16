@@ -50,12 +50,10 @@ def login_view(request):
 from django.contrib.auth.views import LogoutView
 
 class CustomLogoutView(LogoutView):
-    template_name = 'registration/logged_out.html'
-    
     def get(self, request, *args, **kwargs):
         logout(request)
-        return render(request, self.template_name)
+        return redirect('cal:login')
     
     def post(self, request, *args, **kwargs):
         logout(request)
-        return render(request, self.template_name)
+        return redirect('cal:login')
