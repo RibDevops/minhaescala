@@ -10,7 +10,7 @@
     </div>
 
     {% if eventos %}
-        {% regroup eventos by start_time|date:"F Y" as meses_eventos %}
+        {% regroup eventos by data|date:"F Y" as meses_eventos %}
         
         {% for mes in meses_eventos %}
             <div class="card mb-4 shadow-sm">
@@ -24,6 +24,7 @@
                                 <tr>
                                     <th>Data</th>
                                     <th>Plantão</th>
+                                    <th>Profissional</th>
                                     <th>Unidade/Setor</th>
                                     <th class="text-end">Ações</th>
                                 </tr>
@@ -31,10 +32,13 @@
                             <tbody>
                                 {% for evento in mes.list %}
                                 <tr id="event-row-{{ evento.id }}">
-                                    <td class="align-middle"><strong>{{ evento.start_time|date:"d/m" }}</strong></td>
+                                    <td class="align-middle"><strong>{{ evento.data|date:"d/m" }}</strong></td>
                                     <td class="align-middle">
                                         <span class="badge bg-info text-dark">{{ evento.tipo_plantao.tipo|default:"-" }}</span><br>
-                                        <small class="text-muted">{{ evento.tipo_plantao.get_periodo_display|default:evento.title }}</small>
+                                        <small class="text-muted">{{ evento.tipo_plantao.get_periodo_display|default:evento.tipo_plantao.codigo }}</small>
+                                    </td>
+                                    <td class="align-middle">
+                                        {{ evento.enfermeiro.nome|default:evento.enfermeiro.nome_completo }}
                                     </td>
                                     <td class="align-middle">
                                         <small>{{ evento.hospital.nome_hospital|default:"-" }}</small><br>
