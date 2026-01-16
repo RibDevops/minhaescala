@@ -16,6 +16,7 @@ urlpatterns = [
     path('usuarios/excluir/<int:user_id>/', views.excluir_usuario, name='excluir_usuario'),
     path('usuarios/resetar-senha/<int:user_id>/', views.resetar_senha, name='resetar_senha'),
     path('usuarios/desativar/<int:user_id>/', views.desativar_usuario, name='desativar_usuario'),
+    path('password-reset/', views.login_view, name='password_reset'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('plantao/novo/', views.PlantaoCreateView.as_view(), name='event_new'),
     path('plantao/<int:pk>/editar/', views.PlantaoUpdateView.as_view(), name='event_edit'),
