@@ -1,97 +1,197 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block page_title %}Fazer Escala{% endblock %}
-
-{% block content_title %}Fazer Escala{% endblock %}
-
 {% block content %}
-<div class="clearfix mb-3">
-  <!-- <a class="btn btn-info left" href="{% url 'cal:calendar' %}"> Voltar para Calendário </a> -->
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0 fw-bold"><i class="bi bi-calendar-plus"></i> Registrar Escala</h4>
+        </div>
+        <div class="card-body p-4">
+            <form id="bulkPlantaoForm" method="post">
+                {% csrf_token %}
+                
+                <!-- Seleção do Profissional (Única para todos os plantões do lote) -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Profissional</label>
+                        <select name="enfermeiro" class="form-select form-select-lg" required>
+                            <option value="">Selecione o Enfermeiro</option>
+                            {% for e in enfermeiros %}
+                            <option value="{{ e.id }}">{{ e.nome|default:e.nome_completo }} ({{ e.matricula }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Selecione o profissional uma vez e adicione vários plantões abaixo.</div>
+                    </div>
+                </div>
+
+                <hr class="my-4 opacity-25">
+
+                <!-- Área dos Cards de Plantão -->
+                <div id="plantaoCards" class="row g-3">
+                    <!-- Primeiro Card (Padrão) -->
+                    <div class="col-md-6 col-xl-4 plantao-item">
+                        <div class="card h-100 border border-light shadow-sm">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-muted small">Plantão #1</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger border-0 remove-card d-none">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Data</label>
+                                    <input type="date" name="data[]" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Tipo</label>
+                                    <select name="tipo_plantao[]" class="form-select" required>
+                                        <option value="">Selecione...</option>
+                                        {% for t in tipos_plantao %}
+                                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.descricao }} ({{ t.horas }}h)</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Unidade / Setor</label>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <select name="hospital[]" class="form-select form-select-sm" required>
+                                                {% for h in hospitais %}
+                                                <option value="{{ h.id }}">{{ h.nome_hospital }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <select name="setor[]" class="form-select form-select-sm" required>
+                                                {% for s in setores %}
+                                                <option value="{{ s.id }}">{{ s.nome_setor }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label small fw-bold">Observações</label>
+                                    <textarea name="observacoes[]" class="form-control" rows="1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão Adicionar Mais -->
+                <div class="mt-4 text-center">
+                    <button type="button" id="btnAddPlantao" class="btn btn-outline-primary rounded-pill px-4">
+                        <i class="bi bi-plus-circle"></i> + Plantão
+                    </button>
+                </div>
+
+                <div class="mt-5 border-top pt-4">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'cal:calendar' %}" class="btn btn-light px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-5">Salvar Todos os Plantões</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
-{% if form.errors %}
-    {% for field in form %}
-        {% for error in field.errors %}
-            <div class="alert alert-danger">
-                {{ field.label }} <strong>{{ error|escape }}</strong>
+<template id="plantaoTemplate">
+    <div class="col-md-6 col-xl-4 plantao-item">
+        <div class="card h-100 border border-light shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-muted small">Plantão</span>
+                <button type="button" class="btn btn-sm btn-outline-danger border-0 remove-card">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
-        {% endfor %}
-    {% endfor %}
-    {% for error in form.non_field_errors %}
-        <div class="alert alert-danger">
-            <strong>{{ error|escape }}</strong>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Data</label>
+                    <input type="date" name="data[]" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Tipo</label>
+                    <select name="tipo_plantao[]" class="form-select" required>
+                        <option value="">Selecione...</option>
+                        {% for t in tipos_plantao %}
+                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.descricao }} ({{ t.horas }}h)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Unidade / Setor</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <select name="hospital[]" class="form-select form-select-sm" required>
+                                {% for h in hospitais %}
+                                <option value="{{ h.id }}">{{ h.nome_hospital }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <select name="setor[]" class="form-select form-select-sm" required>
+                                {% for s in setores %}
+                                <option value="{{ s.id }}">{{ s.nome_setor }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label small fw-bold">Observações</label>
+                    <textarea name="observacoes[]" class="form-control" rows="1"></textarea>
+                </div>
+            </div>
         </div>
-    {% endfor %}
-{% endif %}
-
-<form method="post" class="mt-4">
-  {% csrf_token %}
-  <div class="form-group row">
-    {% for field in form %}
-    <div class="col-md-6 mb-3">
-      <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-      {{ field }}
-      {% if field.help_text %}
-      <small class="form-text text-muted">{{ field.help_text }}</small>
-      {% endif %}
     </div>
-    {% endfor %}
-  </div>
-  <div class="form-group row">
-    <div class="col-12">
-      <button type="submit" class="btn btn-primary">Salvar</button>
-      <button type="submit" class="btn btn-danger">Cancelar</button>
-    </div>
-  </div>
-</form>
+</template>
 
 <style>
-  /* Estilos responsivos para o formulário */
-  @media (max-width: 768px) {
-    .form-group.row {
-      display: block;
-    }
-    
-    .col-md-6 {
-      width: 100%;
-      margin-bottom: 15px;
-    }
-    
-    .left {
-      width: 100%;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    
-    form {
-      padding: 15px;
-    }
-  }
-  
-  /* Melhorias para campos de formulário */
-  select, input, textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  .btn {
-    padding: 8px 20px;
-  }
+    .plantao-item { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-2px); transition: transform 0.2s; }
+    .form-select-lg { font-size: 1.1rem; }
+    .btn-outline-primary:hover { background-color: #f8fbff; color: #0d6efd; }
 </style>
 
 <script>
-  // Script para melhorar a experiência mobile
-  $(document).ready(function() {
-    // Ajustar datepicker para mobile
-    if ($(window).width() <= 768) {
-      $('input[type="date"]').attr('type', 'text')
-        .datepicker({
-          dateFormat: 'yy-mm-dd'
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('plantaoCards');
+    const btnAdd = document.getElementById('btnAddPlantao');
+    const template = document.getElementById('plantaoTemplate');
+
+    function updateCounters() {
+        const cards = container.querySelectorAll('.plantao-item');
+        cards.forEach((card, index) => {
+            card.querySelector('.fw-bold.text-muted.small').textContent = `Plantão #${index + 1}`;
+            const removeBtn = card.querySelector('.remove-card');
+            if (cards.length > 1) {
+                removeBtn.classList.remove('d-none');
+            } else {
+                removeBtn.classList.add('d-none');
+            }
         });
     }
-  });
+
+    btnAdd.addEventListener('click', function() {
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone);
+        updateCounters();
+    });
+
+    container.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-card')) {
+            const item = e.target.closest('.plantao-item');
+            if (container.querySelectorAll('.plantao-item').length > 1) {
+                item.remove();
+                updateCounters();
+            }
+        }
+    });
+
+    updateCounters();
+});
 </script>
 {% endblock %}

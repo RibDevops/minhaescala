@@ -46,29 +46,57 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         })
         return context
 
-class PlantaoCreateView(LoginRequiredMixin, CreateView):
-    model = Plantao
-    form_class = PlantaoForm
+class PlantaoCreateView(LoginRequiredMixin, TemplateView):
     template_name = 'cal/event.html'
-    success_url = reverse_lazy('cal:calendar')
     
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-    
-    def form_valid(self, form):
-        # Definir horários padrão baseados no período se necessário
-        # Como o modelo agora permite nulo, e o usuário quer simplificar,
-        # vamos apenas garantir que a escala exista.
-        escala, _ = Escala.objects.get_or_create(
-            mes_referencia=form.cleaned_data['data'].replace(day=1),
-            setor=form.cleaned_data['setor'],
-            defaults={'criado_por': self.request.user}
-        )
-        form.instance.escala = escala
-        messages.success(self.request, 'Plantão criado!')
-        return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['enfermeiros'] = Enfermeiro.objects.all()
+        context['tipos_plantao'] = TipoPlantao.objects.all()
+        context['hospitais'] = Hospital.objects.all()
+        context['setores'] = Setor.objects.all()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        enfermeiro_id = request.POST.get('enfermeiro')
+        datas = request.POST.getlist('data[]')
+        tipos = request.POST.getlist('tipo_plantao[]')
+        setores = request.POST.getlist('setor[]')
+        hospitais = request.POST.getlist('hospital[]')
+        obs = request.POST.getlist('observacoes[]')
+
+        if not enfermeiro_id or not datas:
+            messages.error(request, 'Dados inválidos')
+            return redirect('cal:event_new')
+
+        enfermeiro = get_object_or_404(Enfermeiro, pk=enfermeiro_id)
+        
+        for i in range(len(datas)):
+            if not datas[i] or not tipos[i]: continue
+            
+            data_dt = datetime.strptime(datas[i], '%Y-%m-%d').date()
+            tipo = get_object_or_404(TipoPlantao, pk=tipos[i])
+            setor = get_object_or_404(Setor, pk=setores[i])
+            hospital = get_object_or_404(Hospital, pk=hospitais[i])
+            
+            escala, _ = Escala.objects.get_or_create(
+                mes_referencia=data_dt.replace(day=1),
+                setor=setor,
+                defaults={'criado_por': request.user}
+            )
+            
+            Plantao.objects.create(
+                escala=escala,
+                enfermeiro=enfermeiro,
+                tipo_plantao=tipo,
+                data=data_dt,
+                setor=setor,
+                hospital=hospital,
+                observacoes=obs[i] if i < len(obs) else ''
+            )
+            
+        messages.success(request, f'Plantões registrados para {enfermeiro.nome_completo}')
+        return redirect('cal:calendar')
 
 class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
     model = Plantao
