@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
-from ..models import Plantao, Enfermeiro, Escala
+from ..models import Plantao, Enfermeiro, Escala, TipoPlantao, Hospital, Setor
 from ..forms import PlantaoForm
 from ..utils import Calendar
 
