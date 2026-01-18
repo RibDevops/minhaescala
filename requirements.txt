@@ -2,3 +2,5 @@
 django
 python-dateutil
 python-dateutil
+django
+python-dateutil
