@@ -45,6 +45,11 @@ class PerfilUsuario(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.get_tipo_usuario_display()}"
 
+class Especialidade(models.Model):
+    nome = models.CharField(max_length=100)
+    def __str__(self):
+        return self.nome
+
 class Enfermeiro(models.Model):
     perfil = models.OneToOneField(PerfilUsuario, on_delete=models.CASCADE, related_name='enfermeiro')
     nome_completo = models.CharField(max_length=255)
@@ -53,6 +58,7 @@ class Enfermeiro(models.Model):
     hospitais = models.ManyToManyField(Hospital, related_name='enfermeiros')
     setores = models.ManyToManyField(Setor, related_name='enfermeiros')
     carga_horaria_mensal = models.IntegerField(default=180)
+    especialidade = models.ForeignKey(Especialidade, on_delete=models.SET_NULL, null=True, blank=True, related_name='enfermeiros')
     
     def __str__(self):
         return self.nome_completo
