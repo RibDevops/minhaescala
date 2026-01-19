@@ -94,7 +94,7 @@ class Escala(models.Model):
 class Plantao(models.Model):
     escala = models.ForeignKey(Escala, on_delete=models.CASCADE, related_name='plantoes')
     enfermeiro = models.ForeignKey(Enfermeiro, on_delete=models.CASCADE, related_name='plantoes')
-    tipo_evento = models.ForeignKey(TipoEvento, on_delete=models.PROTECT)
+    tipo_evento = models.ForeignKey(TipoEvento, on_delete=models.PROTECT, null=True, blank=True)
     data = models.DateField()
     setor = models.ForeignKey(Setor, on_delete=models.CASCADE)
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
