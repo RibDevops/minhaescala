@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import views_solicitacoes
 
 app_name = 'cal'
 
@@ -24,10 +23,4 @@ urlpatterns = [
     path('plantao/<int:pk>/excluir/', views.PlantaoDeleteView.as_view(), name='plantao_delete'),
     path('eventos/', views.MeusPlantoesListView.as_view(), name='listar_eventos'),
     path('eventos/excluir/<int:event_id>/', views.excluir_evento, name='excluir_evento'),
-
-    # Solicitações
-    path('solicitacoes/nova/', views_solicitacoes.SolicitacaoCreateView.as_view(), name='solicitacao_create'),
-    path('solicitacoes/minhas/', views_solicitacoes.MinhasSolicitacoesListView.as_view(), name='minhas_solicitacoes'),
-    path('solicitacoes/<int:pk>/aprovar/', views_solicitacoes.SolicitacaoAprovarView.as_view(), name='aprovar_solicitacao'),
-    path('solicitacoes/pendentes/', views_solicitacoes.SolicitacoesPendentesListView.as_view(), name='solicitacoes_pendentes'),
 ]
