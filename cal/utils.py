@@ -17,12 +17,15 @@ class Calendar(HTMLCalendar):
             # Prioriza o campo 'nome', depois 'nome_completo'
             nome_exibicao = plantao.enfermeiro.nome or plantao.enfermeiro.nome_completo
             # Adicionando o código do plantão e as horas
-            d += f'<li>{nome_exibicao} ({plantao.tipo_plantao.codigo} - {plantao.tipo_plantao.horas}h)</li>'
+            d += f'<li>{nome_exibicao} ({plantao.tipo_evento.codigo} - {plantao.tipo_evento.horas}h)</li>'
             
-            # Contagem por especialidade
-            esp = plantao.enfermeiro.especialidade
-            esp_nome = esp.nome if esp else 'S/E'
-            resumo[esp_nome] = resumo.get(esp_nome, 0) + 1
+            # Contagem por especialidade (dos enfermeiros escalados no dia)
+            for esp in plantao.enfermeiro.especialidades.all():
+                esp_nome = esp.nome
+                resumo[esp_nome] = resumo.get(esp_nome, 0) + 1
+            
+            if not plantao.enfermeiro.especialidades.exists():
+                resumo['S/E'] = resumo.get('S/E', 0) + 1
 
         resumo_html = ''
         if resumo:

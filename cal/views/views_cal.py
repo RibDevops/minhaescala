@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
-from ..models import Plantao, Enfermeiro, Escala, TipoPlantao, Hospital, Setor
+from ..models import Plantao, Enfermeiro, Escala, TipoEvento, Hospital, Setor
 from ..forms import PlantaoForm
 from ..utils import Calendar
 
@@ -75,7 +75,7 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
             if not datas[i] or not tipos[i]: continue
             
             data_dt = datetime.strptime(datas[i], '%Y-%m-%d').date()
-            tipo = get_object_or_404(TipoPlantao, pk=tipos[i])
+            tipo = get_object_or_404(TipoEvento, pk=tipos[i])
             setor = get_object_or_404(Setor, pk=setores[i])
             hospital = get_object_or_404(Hospital, pk=hospitais[i])
             
@@ -88,7 +88,7 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
             Plantao.objects.create(
                 escala=escala,
                 enfermeiro=enfermeiro,
-                tipo_plantao=tipo,
+                tipo_evento=tipo,
                 data=data_dt,
                 setor=setor,
                 hospital=hospital,
