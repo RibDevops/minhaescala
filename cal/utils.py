@@ -26,8 +26,8 @@ class Calendar(HTMLCalendar):
 
         resumo_html = ''
         if resumo:
-            resumo_html = '<div class="calendar-summary"><strong>OBS:</strong>'
-            resumo_html += ' '.join([f'<span>{nome}: {qtd}</span>' for nome, qtd in resumo.items()])
+            resumo_html = '<div class="calendar-summary"><strong>QTD ESP:</strong><br/>'
+            resumo_html += ' '.join([f'<span>{nome}: {qtd}</span><br />' for nome, qtd in resumo.items()])
             resumo_html += '</div>'
 
         if day != 0:
