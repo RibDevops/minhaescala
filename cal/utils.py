@@ -16,8 +16,11 @@ class Calendar(HTMLCalendar):
         for plantao in plantoes_do_dia:
             # Prioriza o campo 'nome', depois 'nome_completo'
             nome_exibicao = plantao.enfermeiro.nome or plantao.enfermeiro.nome_completo
-            # Adicionando o código do plantão e as horas
-            d += f'<li>{nome_exibicao} ({plantao.tipo_evento.codigo} - {plantao.tipo_evento.horas}h)</li>'
+            
+            # Adicionando o código do plantão e as horas (trata o caso de tipo_evento ser None)
+            codigo = plantao.tipo_evento.codigo if plantao.tipo_evento else 'N/A'
+            horas = plantao.tipo_evento.horas if plantao.tipo_evento else 0
+            d += f'<li>{nome_exibicao} ({codigo} - {horas}h)</li>'
             
             # Contagem por especialidade (dos enfermeiros escalados no dia)
             for esp in plantao.enfermeiro.especialidades.all():
