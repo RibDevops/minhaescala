@@ -1,0 +1,12 @@
+/eventos/
+
+naõ está os registros da EventoEscala, e um momento para refinar as permissões desta pagina, acho que vamos ter que usar o campo criado_por:
+-admin pode tudo
+-escalante pode tudo na escala hierarquica, seguir a sequencia: Hospital->setor->escalante->enfermeiros
+-o escalante não pode ver o registros feitos pelo enfermeiro
+-usuario pode ver de todos os registros quem foram feitos pelo escalante, não pode alterar registros de outros
+
+    enfermeiro(matricula) pode inereir e editar os plantões registrados por ele, lembrando: Hospital->setor->enfermeiro
+    -os registros feitos por enfermeiro so podem ser vistos por ele mesmo
+    o enfermeiro nao pode fazer registro com nome de outro enfemeiro
+    vai ser necessario incluir cor na class EventoEscala, para o enfermeiro fazer diferença entre tambem usando cores, adicionar cor como campo no form.html
