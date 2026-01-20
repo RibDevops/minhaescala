@@ -19,8 +19,10 @@ class Calendar(HTMLCalendar):
             horas = plantao.tipo_evento.horas
             d += f'<li>{nome_exibicao} ({codigo} - {horas}h)</li>'
             
-            chave_resumo = plantao.tipo_evento.codigo
-            resumo[chave_resumo] = resumo.get(chave_resumo, 0) + 1
+            # Ajuste: Contar por especialidade do profissional
+            especialidade = plantao.profissional.especialidade
+            nome_esp = especialidade.nome if especialidade else 'Sem Especialidade'
+            resumo[nome_esp] = resumo.get(nome_esp, 0) + 1
 
         resumo_html = ''
         if resumo:
