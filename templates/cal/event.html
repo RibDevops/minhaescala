@@ -52,25 +52,6 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Unidade / Setor</label>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <select name="hospital[]" class="form-select form-select-sm" required>
-                                                {% for h in hospitais %}
-                                                <option value="{{ h.id }}">{{ h.nome }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <div class="col-6">
-                                            <select name="setor[]" class="form-select form-select-sm" required>
-                                                {% for s in setores %}
-                                                <option value="{{ s.id }}">{{ s.nome }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div>
                                     <label class="form-label small fw-bold">Observações</label>
                                     <textarea name="observacoes[]" class="form-control" rows="1"></textarea>
@@ -120,25 +101,6 @@
                         <option value="{{ t.id }}">{{ t.codigo }} - {{ t.nome }} ({{ t.horas }}h)</option>
                         {% endfor %}
                     </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Unidade / Setor</label>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <select name="hospital[]" class="form-select form-select-sm" required>
-                                {% for h in hospitais %}
-                                <option value="{{ h.id }}">{{ h.nome }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <select name="setor[]" class="form-select form-select-sm" required>
-                                {% for s in setores %}
-                                <option value="{{ s.id }}">{{ s.nome }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
                 </div>
                 <div>
                     <label class="form-label small fw-bold">Observações</label>

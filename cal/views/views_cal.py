@@ -49,13 +49,23 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Usando os nomes corretos dos modelos conforme models.py
         from ..models import Matricula, TipoEvento, Hospital, Setor
-        context['enfermeiros'] = Matricula.objects.all()
+        
+        user = self.request.user
+        if user.is_staff:
+            context['enfermeiros'] = Matricula.objects.all()
+        elif hasattr(user, 'perfil') and user.perfil.matriculas.exists():
+            # Pegamos o hospital e setor da primeira matrícula do perfil logado
+            primeira_matricula = user.perfil.matriculas.first()
+            context['enfermeiros'] = Matricula.objects.filter(
+                hospital=primeira_matricula.hospital,
+                setor=primeira_matricula.setor
+            )
+        else:
+            context['enfermeiros'] = Matricula.objects.none()
+            
         context['tipos_plantao'] = TipoEvento.objects.all()
-        context['hospitais'] = Hospital.objects.all()
-        context['setores'] = Setor.objects.all()
-        # Adicionando formulário para compatibilidade com templates que usam form.errors
+        # Adicionando formulário para compatibilidade
         from ..forms import PlantaoForm
         context['form'] = PlantaoForm(user=self.request.user)
         return context
@@ -64,8 +74,6 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
         enfermeiro_id = request.POST.get('enfermeiro')
         datas = request.POST.getlist('data[]')
         tipos = request.POST.getlist('tipo_plantao[]')
-        setores = request.POST.getlist('setor[]')
-        hospitais = request.POST.getlist('hospital[]')
         obs = request.POST.getlist('observacoes[]')
 
         if not enfermeiro_id or not datas:
@@ -74,20 +82,23 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
 
         enfermeiro = get_object_or_404(Matricula, pk=enfermeiro_id)
         
+        # Como agora a matrícula tem hospital e setor fixos, usamos os dela
+        if not enfermeiro.hospital or not enfermeiro.setor:
+            messages.error(request, f'O profissional {enfermeiro.nome_exibicao} não possui hospital ou setor vinculado.')
+            return redirect('cal:event_new')
+
         for i in range(len(datas)):
             if not datas[i] or not tipos[i]: continue
             
             data_dt = datetime.strptime(datas[i], '%Y-%m-%d').date()
             tipo = get_object_or_404(TipoEvento, pk=tipos[i])
-            setor = get_object_or_404(Setor, pk=setores[i])
-            hospital = get_object_or_404(Hospital, pk=hospitais[i])
             
             EventoEscala.objects.create(
                 profissional=enfermeiro,
                 tipo_evento=tipo,
                 data=data_dt,
-                setor=setor,
-                hospital=hospital,
+                setor=enfermeiro.setor,
+                hospital=enfermeiro.hospital,
                 observacoes=obs[i] if i < len(obs) else '',
                 criado_por=request.user
             )
