@@ -10,7 +10,7 @@ class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 # Hospital
 class HospitalListView(AdminRequiredMixin, ListView):
     model = Hospital
-    template_name = 'cal/crud_base_list.html'
+    template_name = 'cal/hospital_list.html'
     context_object_name = 'objetos'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -49,7 +49,7 @@ class HospitalDeleteView(AdminRequiredMixin, DeleteView):
 # Setor
 class SetorListView(AdminRequiredMixin, ListView):
     model = Setor
-    template_name = 'cal/crud_base_list.html'
+    template_name = 'cal/setor_list.html'
     context_object_name = 'objetos'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,7 +88,7 @@ class SetorDeleteView(AdminRequiredMixin, DeleteView):
 # Matricula
 class MatriculaListView(AdminRequiredMixin, ListView):
     model = Matricula
-    template_name = 'cal/crud_base_list.html'
+    template_name = 'cal/matricula_list.html'
     context_object_name = 'objetos'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
