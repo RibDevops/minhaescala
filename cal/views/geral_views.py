@@ -10,7 +10,7 @@ class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 # Hospital
 class HospitalListView(AdminRequiredMixin, ListView):
     model = Hospital
-    template_name = 'cal/hospital/list.html'
+    template_name = 'cal/crud_base_list.html'
     context_object_name = 'objetos'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -20,7 +20,7 @@ class HospitalListView(AdminRequiredMixin, ListView):
 class HospitalCreateView(AdminRequiredMixin, CreateView):
     model = Hospital
     fields = ['nome', 'sigla']
-    template_name = 'cal/hospital/form.html'
+    template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:hospital_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -30,7 +30,7 @@ class HospitalCreateView(AdminRequiredMixin, CreateView):
 class HospitalUpdateView(AdminRequiredMixin, UpdateView):
     model = Hospital
     fields = ['nome', 'sigla']
-    template_name = 'cal/hospital/form.html'
+    template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:hospital_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -39,7 +39,7 @@ class HospitalUpdateView(AdminRequiredMixin, UpdateView):
 
 class HospitalDeleteView(AdminRequiredMixin, DeleteView):
     model = Hospital
-    template_name = 'cal/hospital/confirm_delete.html'
+    template_name = 'cal/crud_base_confirm_delete.html'
     success_url = reverse_lazy('cal:hospital_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -49,7 +49,7 @@ class HospitalDeleteView(AdminRequiredMixin, DeleteView):
 # Setor
 class SetorListView(AdminRequiredMixin, ListView):
     model = Setor
-    template_name = 'cal/setor/list.html'
+    template_name = 'cal/crud_base_list.html'
     context_object_name = 'objetos'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -59,7 +59,7 @@ class SetorListView(AdminRequiredMixin, ListView):
 class SetorCreateView(AdminRequiredMixin, CreateView):
     model = Setor
     fields = ['nome', 'hospital']
-    template_name = 'cal/setor/form.html'
+    template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:setor_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -69,7 +69,7 @@ class SetorCreateView(AdminRequiredMixin, CreateView):
 class SetorUpdateView(AdminRequiredMixin, UpdateView):
     model = Setor
     fields = ['nome', 'hospital']
-    template_name = 'cal/setor/form.html'
+    template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:setor_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -78,7 +78,7 @@ class SetorUpdateView(AdminRequiredMixin, UpdateView):
 
 class SetorDeleteView(AdminRequiredMixin, DeleteView):
     model = Setor
-    template_name = 'cal/setor/confirm_delete.html'
+    template_name = 'cal/crud_base_confirm_delete.html'
     success_url = reverse_lazy('cal:setor_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,7 +88,7 @@ class SetorDeleteView(AdminRequiredMixin, DeleteView):
 # Matricula
 class MatriculaListView(AdminRequiredMixin, ListView):
     model = Matricula
-    template_name = 'cal/matricula/list.html'
+    template_name = 'cal/crud_base_list.html'
     context_object_name = 'objetos'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,7 +98,7 @@ class MatriculaListView(AdminRequiredMixin, ListView):
 class MatriculaCreateView(AdminRequiredMixin, CreateView):
     model = Matricula
     fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospitais', 'setores', 'carga_horaria_semanal', 'especialidades']
-    template_name = 'cal/matricula/form.html'
+    template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:matricula_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -108,7 +108,7 @@ class MatriculaCreateView(AdminRequiredMixin, CreateView):
 class MatriculaUpdateView(AdminRequiredMixin, UpdateView):
     model = Matricula
     fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospitais', 'setores', 'carga_horaria_semanal', 'especialidades']
-    template_name = 'cal/matricula/form.html'
+    template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:matricula_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -117,7 +117,7 @@ class MatriculaUpdateView(AdminRequiredMixin, UpdateView):
 
 class MatriculaDeleteView(AdminRequiredMixin, DeleteView):
     model = Matricula
-    template_name = 'cal/matricula/confirm_delete.html'
+    template_name = 'cal/crud_base_confirm_delete.html'
     success_url = reverse_lazy('cal:matricula_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
