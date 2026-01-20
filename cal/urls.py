@@ -59,4 +59,5 @@ urlpatterns = [
     path('periodo/novo/', periodo_views.periodo_create, name='periodo_create'),
     path('periodo/editar/<int:pk>/', periodo_views.periodo_update, name='periodo_update'),
     path('periodo/excluir/<int:pk>/', periodo_views.periodo_delete, name='periodo_delete'),
+
 ]

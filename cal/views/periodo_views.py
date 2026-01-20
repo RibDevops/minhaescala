@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from ..models import Periodo
 from ..forms import PeriodoForm
 
+
 @login_required
 def periodo_list(request):
     periodos = Periodo.objects.all().order_by('nome')

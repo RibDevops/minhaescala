@@ -2,7 +2,7 @@
 {% extends 'base.html' %} {% block title %}Períodos - Sistema de Escalas{%
 endblock %} {% block page_title %}Períodos ({{ total_count }}){% endblock %} {%
 block actions %}
-<a href="{% url 'periodo_create' %}" class="btn btn-primary">
+<a href="{% url 'cal:periodo_create' %}" class="btn btn-primary">
   <i class="bi bi-plus-circle"></i> Novo Período
 </a>
 {% endblock %} {% block content %}
@@ -29,13 +29,13 @@ block actions %}
           </td>
           <td class="table-actions text-end">
             <a
-              href="{% url 'periodo_update' periodo.pk %}"
+              href="{% url 'cal:periodo_update' periodo.pk %}"
               class="btn btn-sm btn-warning"
             >
               <i class="bi bi-pencil"></i>
             </a>
             <a
-              href="{% url 'periodo_delete' periodo.pk %}"
+              href="{% url 'cal:periodo_delete' periodo.pk %}"
               class="btn btn-sm btn-danger"
             >
               <i class="bi bi-trash"></i>
