@@ -2,7 +2,7 @@
 {% extends 'base.html' %} {% block title %}Tipos de Evento - Sistema de
 Escalas{% endblock %} {% block page_title %}Tipos de Evento ({{ total_count
 }}){% endblock %} {% block actions %}
-<a href="{% url 'tipo_evento_create' %}" class="btn btn-primary">
+<a href="{% url 'cal:tipo_evento_create' %}" class="btn btn-primary">
   <i class="bi bi-plus-circle"></i> Novo Tipo
 </a>
 {% endblock %} {% block content %}
@@ -55,13 +55,13 @@ Escalas{% endblock %} {% block page_title %}Tipos de Evento ({{ total_count
           </td>
           <td class="table-actions text-end">
             <a
-              href="{% url 'tipo_evento_update' tipo.pk %}"
+              href="{% url 'cal:tipo_evento_update' tipo.pk %}"
               class="btn btn-sm btn-warning"
             >
               <i class="bi bi-pencil"></i>
             </a>
             <a
-              href="{% url 'tipo_evento_delete' tipo.pk %}"
+              href="{% url 'cal:tipo_evento_delete' tipo.pk %}"
               class="btn btn-sm btn-danger"
             >
               <i class="bi bi-trash"></i>
@@ -83,24 +83,25 @@ Escalas{% endblock %} {% block page_title %}Tipos de Evento ({{ total_count
       <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
         <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
-            >&laquo;</a
-          >
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
         </li>
-        {% endif %} {% for num in page_obj.paginator.page_range %} {% if
-        page_obj.number == num %}
-        <li class="page-item active">
-          <span class="page-link">{{ num }}</span>
-        </li>
-        {% else %}
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active">
+              <span class="page-link">{{ num }}</span>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
         <li class="page-item">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-        {% endif %} {% endfor %} {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.next_page_number }}"
-            >&raquo;</a
-          >
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
         </li>
         {% endif %}
       </ul>

@@ -6,7 +6,6 @@ from django.core.paginator import Paginator
 from ..models import TipoEvento
 from ..forms import TipoEventoForm
 
-
 @login_required
 def tipo_evento_list(request):
     tipos = TipoEvento.objects.all().order_by('codigo')

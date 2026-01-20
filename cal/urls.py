@@ -60,4 +60,5 @@ urlpatterns = [
     path('periodo/editar/<int:pk>/', periodo_views.periodo_update, name='periodo_update'),
     path('periodo/excluir/<int:pk>/', periodo_views.periodo_delete, name='periodo_delete'),
 
+    
 ]

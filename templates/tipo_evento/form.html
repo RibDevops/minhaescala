@@ -1,7 +1,7 @@
 <!-- templates/tipo_evento/form.html -->
 {% extends 'base.html' %} {% block title %}{{ title }} - Sistema de Escalas{%
 endblock %} {% block page_title %}{{ title }}{% endblock %} {% block actions %}
-<a href="{% url 'tipo_evento_list' %}" class="btn btn-secondary">
+<a href="{% url 'cal:tipo_evento_list' %}" class="btn btn-secondary">
   <i class="bi bi-arrow-left"></i> Voltar
 </a>
 {% endblock %} {% block content %}
@@ -120,7 +120,7 @@ endblock %} {% block page_title %}{{ title }}{% endblock %} {% block actions %}
         <button type="submit" class="btn btn-primary">
           <i class="bi bi-check-circle"></i> {{ action }}
         </button>
-        <a href="{% url 'tipo_evento_list' %}" class="btn btn-secondary">
+        <a href="{% url 'cal:tipo_evento_list' %}" class="btn btn-secondary">
           <i class="bi bi-x-circle"></i> Cancelar
         </a>
       </div>
