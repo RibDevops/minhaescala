@@ -14,16 +14,11 @@ class Calendar(HTMLCalendar):
         resumo = {}
         
         for plantao in plantoes_do_dia:
-            # Prioriza o campo 'nome_exibicao'
             nome_exibicao = plantao.profissional.nome_exibicao
-            
-            # Adicionando o código do plantão e as horas
             codigo = plantao.tipo_evento.codigo
             horas = plantao.tipo_evento.horas
             d += f'<li>{nome_exibicao} ({codigo} - {horas}h)</li>'
             
-            # Contagem por tipo de evento (ou especialidade se preferir)
-            # Como a Especialidade foi removida no novo modelo, vamos usar o código do evento como resumo ou o setor
             chave_resumo = plantao.tipo_evento.codigo
             resumo[chave_resumo] = resumo.get(chave_resumo, 0) + 1
 

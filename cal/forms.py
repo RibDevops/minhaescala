@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, Hospital, Setor, TipoEvento, Periodo, PerfilUsuario
-from datetime import datetime
+from .models import EventoEscala, Matricula, Hospital, Setor, TipoEvento
 
 class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
