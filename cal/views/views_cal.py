@@ -134,17 +134,18 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         user = self.request.user
+        
+        # 1. ADMIN: Vê absolutamente tudo
+        if user.is_superuser or (hasattr(user, 'perfil') and user.perfil.tipo_usuario == 'ADMIN'):
+            return EventoEscala.objects.all().order_by('data')
+        
         if not hasattr(user, 'perfil'):
             return EventoEscala.objects.none()
             
         perfil = user.perfil
         
-        # 1. ADMIN: Vê absolutamente tudo
-        if perfil.tipo_usuario == 'ADMIN':
-            return EventoEscala.objects.all().order_by('data')
-        
         # 2. ESCALANTE: Vê o setor dele, mas não vê registros privados de enfermeiros
-        elif perfil.tipo_usuario == 'ESCALANTE':
+        if perfil.tipo_usuario == 'ESCALANTE':
             matricula = perfil.matriculas.first() 
             if not matricula:
                 return EventoEscala.objects.none()
