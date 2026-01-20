@@ -34,15 +34,15 @@
                                 <tr id="event-row-{{ evento.id }}">
                                     <td class="align-middle"><strong>{{ evento.data|date:"d/m" }}</strong></td>
                                     <td class="align-middle">
-                                        <span class="badge bg-info text-dark">{{ evento.tipo_plantao.tipo|default:"-" }}</span><br>
-                                        <small class="text-muted">{{ evento.tipo_plantao.get_periodo_display|default:evento.tipo_plantao.codigo }}</small>
+                                        <span class="badge bg-info text-dark">{{ evento.tipo_evento.nome|default:"-" }}</span><br>
+                                        <small class="text-muted">{{ evento.tipo_evento.periodo.nome|default:evento.tipo_evento.codigo }}</small>
                                     </td>
                                     <td class="align-middle">
-                                        {{ evento.enfermeiro.nome|default:evento.enfermeiro.nome_completo }}
+                                        {{ evento.profissional.nome_exibicao|default:evento.profissional.nome_completo }}
                                     </td>
                                     <td class="align-middle">
-                                        <small>{{ evento.hospital.nome_hospital|default:"-" }}</small><br>
-                                        <small class="text-muted">{{ evento.setor.nome_setor|default:"" }}</small>
+                                        <small>{{ evento.hospital.nome|default:"-" }}</small><br>
+                                        <small class="text-muted">{{ evento.setor.nome|default:"" }}</small>
                                     </td>
                                     <td class="text-end align-middle">
                                         <div class="btn-group btn-group-sm">
