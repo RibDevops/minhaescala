@@ -1,50 +1,50 @@
-<!-- escalas/templates/escalas/tipo_evento/confirm_delete.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}Excluir Tipo de Evento - Sistema de Escalas{% endblock %}
-
-{% block page_title %}Confirmar Exclusão{% endblock %}
-
-{% block content %}
+<!-- templates/tipo_evento/confirm_delete.html -->
+{% extends base.html' %} {% block title %}Excluir Tipo de Evento - Sistema de
+Escalas{% endblock %} {% block page_title %}Confirmar Exclusão{% endblock %} {%
+block content %}
 <div class="card">
-    <div class="card-body text-center">
-        <div class="alert alert-danger mb-4">
-            <h4 class="alert-heading">
-                <i class="bi bi-exclamation-triangle"></i> Atenção!
-            </h4>
-            <p>Você está prestes a excluir o tipo de evento:</p>
-            <h5 class="my-3">
-                <span class="badge bg-dark">{{ tipo.codigo }}</span> - {{ tipo.nome }}
-            </h5>
-            <div class="d-flex justify-content-center gap-3 mt-3">
-                <span class="badge bg-primary">{{ tipo.periodo.sigla }}</span>
-                <span class="badge {% if tipo.horas >= 12 %}bg-danger{% elif tipo.horas >= 8 %}bg-warning{% else %}bg-success{% endif %}">
-                    {{ tipo.horas }}h
-                </span>
-                <div style="width: 20px; height: 20px; background-color: {{ tipo.cor }}; border-radius: 3px; border: 1px solid #ddd;"></div>
-            </div>
-        </div>
-        
-        {% if tipo.eventos.exists %}
-        <div class="alert alert-warning">
-            <h6><i class="bi bi-info-circle"></i> Este tipo está vinculado a:</h6>
-            <ul class="text-start">
-                <li>{{ tipo.eventos.count }} eventos na escala</li>
-                <li>Esses eventos ficarão sem tipo definido</li>
-                <li>A exclusão pode causar inconsistências</li>
-            </ul>
-        </div>
-        {% endif %}
-        
-        <form method="post" class="mt-4">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-lg">
-                <i class="bi bi-trash"></i> Confirmar Exclusão
-            </button>
-            <a href="{% url 'tipo_evento_list' %}" class="btn btn-secondary btn-lg">
-                <i class="bi bi-x-circle"></i> Cancelar
-            </a>
-        </form>
+  <div class="card-body text-center">
+    <div class="alert alert-danger mb-4">
+      <h4 class="alert-heading">
+        <i class="bi bi-exclamation-triangle"></i> Atenção!
+      </h4>
+      <p>Você está prestes a excluir o tipo de evento:</p>
+      <h5 class="my-3">
+        <span class="badge bg-dark">{{ tipo.codigo }}</span> - {{ tipo.nome }}
+      </h5>
+      <div class="d-flex justify-content-center gap-3 mt-3">
+        <span class="badge bg-primary">{{ tipo.periodo.sigla }}</span>
+        <span
+          class="badge {% if tipo.horas >= 12 %}bg-danger{% elif tipo.horas >= 8 %}bg-warning{% else %}bg-success{% endif %}"
+        >
+          {{ tipo.horas }}h
+        </span>
+        <div
+          style="width: 20px; height: 20px; background-color: {{ tipo.cor }}; border-radius: 3px; border: 1px solid #ddd;"
+        ></div>
+      </div>
     </div>
+
+    {% if tipo.eventos.exists %}
+    <div class="alert alert-warning">
+      <h6><i class="bi bi-info-circle"></i> Este tipo está vinculado a:</h6>
+      <ul class="text-start">
+        <li>{{ tipo.eventos.count }} eventos na escala</li>
+        <li>Esses eventos ficarão sem tipo definido</li>
+        <li>A exclusão pode causar inconsistências</li>
+      </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-lg">
+        <i class="bi bi-trash"></i> Confirmar Exclusão
+      </button>
+      <a href="{% url 'tipo_evento_list' %}" class="btn btn-secondary btn-lg">
+        <i class="bi bi-x-circle"></i> Cancelar
+      </a>
+    </form>
+  </div>
 </div>
 {% endblock %}

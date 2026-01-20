@@ -1,93 +1,95 @@
-<!-- escalas/templates/escalas/hospital/list.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}Hospitais - Sistema de Escalas{% endblock %}
-
-{% block page_title %}Hospitais ({{ total_count }}){% endblock %}
-
-{% block actions %}
-    <a href="{% url 'hospital_create' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Novo Hospital
-    </a>
-{% endblock %}
-
-{% block content %}
+<!-- templates/hospital/list.html -->
+{% extends base.html' %} {% block title %}Hospitais - Sistema de Escalas{%
+endblock %} {% block page_title %}Hospitais ({{ total_count }}){% endblock %} {%
+block actions %}
+<a href="{% url 'hospital_create' %}" class="btn btn-primary">
+  <i class="bi bi-plus-circle"></i> Novo Hospital
+</a>
+{% endblock %} {% block content %}
 <div class="card">
-    <div class="card-body">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Sigla</th>
-                    <th>Setores</th>
-                    <th class="text-end">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for hospital in page_obj %}
-                <tr>
-                    <td>{{ hospital.nome }}</td>
-                    <td>
-                        {% if hospital.sigla %}
-                            <span class="badge bg-secondary">{{ hospital.sigla }}</span>
-                        {% else %}
-                            <span class="text-muted">-</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="badge bg-info">{{ hospital.setores.count }}</span>
-                    </td>
-                    <td class="table-actions text-end">
-                        <a href="{% url 'hospital_detail' hospital.pk %}" class="btn btn-sm btn-info">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{% url 'hospital_update' hospital.pk %}" class="btn btn-sm btn-warning">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <a href="{% url 'hospital_delete' hospital.pk %}" class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center text-muted">
-                        Nenhum hospital cadastrado.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-        {% if page_obj.has_other_pages %}
-        <nav aria-label="Paginação">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
-                </li>
-                {% endif %}
-                
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
-                    </li>
-                    {% else %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                    </li>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
+  <div class="card-body">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Sigla</th>
+          <th>Setores</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for hospital in page_obj %}
+        <tr>
+          <td>{{ hospital.nome }}</td>
+          <td>
+            {% if hospital.sigla %}
+            <span class="badge bg-secondary">{{ hospital.sigla }}</span>
+            {% else %}
+            <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge bg-info">{{ hospital.setores.count }}</span>
+          </td>
+          <td class="table-actions text-end">
+            <a
+              href="{% url 'hospital_detail' hospital.pk %}"
+              class="btn btn-sm btn-info"
+            >
+              <i class="bi bi-eye"></i>
+            </a>
+            <a
+              href="{% url 'hospital_update' hospital.pk %}"
+              class="btn btn-sm btn-warning"
+            >
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a
+              href="{% url 'hospital_delete' hospital.pk %}"
+              class="btn btn-sm btn-danger"
+            >
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center text-muted">
+            Nenhum hospital cadastrado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Paginação">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
+            >&laquo;</a
+          >
+        </li>
+        {% endif %} {% for num in page_obj.paginator.page_range %} {% if
+        page_obj.number == num %}
+        <li class="page-item active">
+          <span class="page-link">{{ num }}</span>
+        </li>
+        {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endif %} {% endfor %} {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}"
+            >&raquo;</a
+          >
+        </li>
         {% endif %}
-    </div>
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}

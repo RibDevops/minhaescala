@@ -1,381 +1,412 @@
-<!-- escalas/templates/escalas/hospital/detail.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}{{ hospital.nome }} - Detalhes{% endblock %}
-
-{% block page_title %}
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <span class="badge bg-primary">{{ hospital.sigla|default:"Sem sigla" }}</span>
-            <span class="ms-2">{{ hospital.nome }}</span>
-        </div>
-        <div>
-            <a href="{% url 'hospital_list' %}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i> Voltar
-            </a>
-            <a href="{% url 'hospital_update' hospital.pk %}" class="btn btn-warning btn-sm">
-                <i class="bi bi-pencil"></i> Editar
-            </a>
-        </div>
-    </div>
-{% endblock %}
-
-{% block content %}
-<div class="row">
-    <!-- Informações Principais -->
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-info-circle"></i> Informações do Hospital
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="table table-sm">
-                            <tr>
-                                <th width="40%"><i class="bi bi-building"></i> Nome:</th>
-                                <td><strong>{{ hospital.nome }}</strong></td>
-                            </tr>
-                            <tr>
-                                <th><i class="bi bi-tag"></i> Sigla:</th>
-                                <td>
-                                    {% if hospital.sigla %}
-                                    <span class="badge bg-primary">{{ hospital.sigla }}</span>
-                                    {% else %}
-                                    <span class="text-muted">Não informada</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th><i class="bi bi-hash"></i> ID:</th>
-                                <td><code>#{{ hospital.pk }}</code></td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-info">
-                            <div class="card-body text-center py-3">
-                                <h6 class="card-title text-muted mb-2">Resumo</h6>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <h4 class="text-primary">{{ hospital.setores.count }}</h4>
-                                        <small class="text-muted">Setores</small>
-                                    </div>
-                                    <div class="col-6">
-                                        <h4 class="text-success">{{ hospital.matriculas.count }}</h4>
-                                        <small class="text-muted">Profissionais</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Lista de Setores -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-diagram-3"></i> Setores ({{ setores.count }})
-                </h5>
-                <a href="{% url 'setor_create' %}" class="btn btn-light btn-sm">
-                    <i class="bi bi-plus-lg"></i> Novo Setor
-                </a>
-            </div>
-            <div class="card-body">
-                {% if setores %}
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nome do Setor</th>
-                                <th width="30%">Profissionais</th>
-                                <th width="20%" class="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for setor in setores %}
-                            <tr>
-                                <td>
-                                    <strong>{{ setor.nome }}</strong>
-                                    <br>
-                                    <small class="text-muted">ID: #{{ setor.pk }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">
-                                        {{ setor.matriculas.count }} prof{{ setor.matriculas.count|pluralize:"issional,issionais" }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="#" class="btn btn-outline-info">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{% url 'setor_update' setor.pk %}" class="btn btn-outline-warning">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="{% url 'setor_delete' setor.pk %}" class="btn btn-outline-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-inbox display-6 text-muted"></i>
-                    <h5 class="mt-3 text-muted">Nenhum setor cadastrado</h5>
-                    <p class="text-muted">Este hospital ainda não possui setores</p>
-                    <a href="{% url 'setor_create' %}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Cadastrar Primeiro Setor
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Lista de Profissionais -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-people"></i> Profissionais Vinculados ({{ hospital.matriculas.count }})
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if hospital.matriculas.all %}
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Matrícula</th>
-                                <th>Nome</th>
-                                <th width="20%">Carga Horária</th>
-                                <th width="20%">Setores</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for matricula in hospital.matriculas.all|slice:":10" %}
-                            <tr>
-                                <td>
-                                    <span class="badge bg-dark">{{ matricula.numero }}</span>
-                                </td>
-                                <td>
-                                    <strong>{{ matricula.nome_exibicao }}</strong>
-                                    <br>
-                                    <small>{{ matricula.nome_completo }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}">
-                                        {{ matricula.carga_horaria_semanal }}h/sem
-                                    </span>
-                                </td>
-                                <td>
-                                    {% with setores_count=matricula.setores.all|length %}
-                                    <span class="badge bg-secondary">
-                                        {{ setores_count }} setor{{ setores_count|pluralize:"es" }}
-                                    </span>
-                                    {% endwith %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% if hospital.matriculas.count > 10 %}
-                <div class="text-center mt-3">
-                    <p class="text-muted mb-0">
-                        Mostrando 10 de {{ hospital.matriculas.count }} profissionais
-                    </p>
-                    <a href="#" class="btn btn-outline-primary btn-sm mt-2">
-                        <i class="bi bi-arrow-right"></i> Ver todos
-                    </a>
-                </div>
-                {% endif %}
-                {% else %}
-                <div class="text-center py-3">
-                    <i class="bi bi-person-x display-6 text-muted"></i>
-                    <p class="text-muted mt-2 mb-0">Nenhum profissional vinculado a este hospital</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Painel Lateral -->
-    <div class="col-md-4">
-        <!-- Ações Rápidas -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-warning text-white">
-                <h6 class="mb-0">
-                    <i class="bi bi-lightning"></i> Ações Rápidas
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'hospital_update' hospital.pk %}" class="btn btn-warning">
-                        <i class="bi bi-pencil"></i> Editar Hospital
-                    </a>
-                    <a href="{% url 'setor_create' %}" class="btn btn-success">
-                        <i class="bi bi-plus-lg"></i> Adicionar Setor
-                    </a>
-                    <a href="#" class="btn btn-info">
-                        <i class="bi bi-calendar-plus"></i> Nova Escala
-                    </a>
-                    <a href="{% url 'hospital_delete' hospital.pk %}" class="btn btn-outline-danger">
-                        <i class="bi bi-trash"></i> Excluir Hospital
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Estatísticas -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-secondary text-white">
-                <h6 class="mb-0">
-                    <i class="bi bi-graph-up"></i> Estatísticas
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="list-group list-group-flush">
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Setores Ativos</span>
-                        <span class="badge bg-primary rounded-pill">{{ hospital.setores.count }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Profissionais</span>
-                        <span class="badge bg-success rounded-pill">{{ hospital.matriculas.count }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Eventos Totais</span>
-                        <span class="badge bg-info rounded-pill">{{ hospital.eventos.count }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Escalas Ativas</span>
-                        <span class="badge bg-warning rounded-pill">0</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Informações do Sistema -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h6 class="mb-0">
-                    <i class="bi bi-info-square"></i> Informações do Sistema
-                </h6>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled small">
-                    <li class="mb-2">
-                        <i class="bi bi-hash text-muted"></i>
-                        <strong>ID:</strong> <code>#{{ hospital.pk }}</code>
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-calendar text-muted"></i>
-                        <strong>Cadastrado em:</strong> N/A
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-calendar-check text-muted"></i>
-                        <strong>Última atualização:</strong> N/A
-                    </li>
-                    <li>
-                        <i class="bi bi-diagram-3 text-muted"></i>
-                        <strong>Hierarquia:</strong> Hospital → Setores → Profissionais
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- QR Code para acesso rápido -->
-        <div class="card border-0 shadow-sm mt-4">
-            <div class="card-body text-center">
-                <h6 class="card-title">
-                    <i class="bi bi-qr-code"></i> Acesso Rápido
-                </h6>
-                <p class="small text-muted mb-2">
-                    Use este código para acessar rapidamente esta página
-                </p>
-                <div class="bg-light p-3 rounded d-inline-block">
-                    <!-- Placeholder para QR Code -->
-                    <div style="width: 120px; height: 120px; background: #e9ecef;" class="rounded"></div>
-                </div>
-                <p class="small text-muted mt-2 mb-0">
-                    Hospital ID: {{ hospital.pk }}
-                </p>
-            </div>
-        </div>
-    </div>
+<!-- templates/hospital/detail.html -->
+{% extends base.html' %} {% block title %}{{ hospital.nome }} - Detalhes{%
+endblock %} {% block page_title %}
+<div class="d-flex justify-content-between align-items-center">
+  <div>
+    <span class="badge bg-primary"
+      >{{ hospital.sigla|default:"Sem sigla" }}</span
+    >
+    <span class="ms-2">{{ hospital.nome }}</span>
+  </div>
+  <div>
+    <a
+      href="{% url 'hospital_list' %}"
+      class="btn btn-outline-secondary btn-sm"
+    >
+      <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+    <a
+      href="{% url 'hospital_update' hospital.pk %}"
+      class="btn btn-warning btn-sm"
+    >
+      <i class="bi bi-pencil"></i> Editar
+    </a>
+  </div>
 </div>
-{% endblock %}
+{% endblock %} {% block content %}
+<div class="row">
+  <!-- Informações Principais -->
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-info-circle"></i> Informações do Hospital
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <table class="table table-sm">
+              <tr>
+                <th width="40%"><i class="bi bi-building"></i> Nome:</th>
+                <td><strong>{{ hospital.nome }}</strong></td>
+              </tr>
+              <tr>
+                <th><i class="bi bi-tag"></i> Sigla:</th>
+                <td>
+                  {% if hospital.sigla %}
+                  <span class="badge bg-primary">{{ hospital.sigla }}</span>
+                  {% else %}
+                  <span class="text-muted">Não informada</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th><i class="bi bi-hash"></i> ID:</th>
+                <td><code>#{{ hospital.pk }}</code></td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-info">
+              <div class="card-body text-center py-3">
+                <h6 class="card-title text-muted mb-2">Resumo</h6>
+                <div class="row">
+                  <div class="col-6">
+                    <h4 class="text-primary">{{ hospital.setores.count }}</h4>
+                    <small class="text-muted">Setores</small>
+                  </div>
+                  <div class="col-6">
+                    <h4 class="text-success">
+                      {{ hospital.matriculas.count }}
+                    </h4>
+                    <small class="text-muted">Profissionais</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-{% block extra_js %}
+    <!-- Lista de Setores -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div
+        class="card-header bg-success text-white d-flex justify-content-between align-items-center"
+      >
+        <h5 class="mb-0">
+          <i class="bi bi-diagram-3"></i> Setores ({{ setores.count }})
+        </h5>
+        <a href="{% url 'setor_create' %}" class="btn btn-light btn-sm">
+          <i class="bi bi-plus-lg"></i> Novo Setor
+        </a>
+      </div>
+      <div class="card-body">
+        {% if setores %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Nome do Setor</th>
+                <th width="30%">Profissionais</th>
+                <th width="20%" class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for setor in setores %}
+              <tr>
+                <td>
+                  <strong>{{ setor.nome }}</strong>
+                  <br />
+                  <small class="text-muted">ID: #{{ setor.pk }}</small>
+                </td>
+                <td>
+                  <span class="badge bg-info">
+                    {{ setor.matriculas.count }} prof{{
+                    setor.matriculas.count|pluralize:"issional,issionais" }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm">
+                    <a href="#" class="btn btn-outline-info">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a
+                      href="{% url 'setor_update' setor.pk %}"
+                      class="btn btn-outline-warning"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <a
+                      href="{% url 'setor_delete' setor.pk %}"
+                      class="btn btn-outline-danger"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+          <i class="bi bi-inbox display-6 text-muted"></i>
+          <h5 class="mt-3 text-muted">Nenhum setor cadastrado</h5>
+          <p class="text-muted">Este hospital ainda não possui setores</p>
+          <a href="{% url 'setor_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Cadastrar Primeiro Setor
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Lista de Profissionais -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-people"></i> Profissionais Vinculados ({{
+          hospital.matriculas.count }})
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if hospital.matriculas.all %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th width="20%">Carga Horária</th>
+                <th width="20%">Setores</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for matricula in hospital.matriculas.all|slice:":10" %}
+              <tr>
+                <td>
+                  <span class="badge bg-dark">{{ matricula.numero }}</span>
+                </td>
+                <td>
+                  <strong>{{ matricula.nome_exibicao }}</strong>
+                  <br />
+                  <small>{{ matricula.nome_completo }}</small>
+                </td>
+                <td>
+                  <span
+                    class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}"
+                  >
+                    {{ matricula.carga_horaria_semanal }}h/sem
+                  </span>
+                </td>
+                <td>
+                  {% with setores_count=matricula.setores.all|length %}
+                  <span class="badge bg-secondary">
+                    {{ setores_count }} setor{{ setores_count|pluralize:"es" }}
+                  </span>
+                  {% endwith %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if hospital.matriculas.count > 10 %}
+        <div class="text-center mt-3">
+          <p class="text-muted mb-0">
+            Mostrando 10 de {{ hospital.matriculas.count }} profissionais
+          </p>
+          <a href="#" class="btn btn-outline-primary btn-sm mt-2">
+            <i class="bi bi-arrow-right"></i> Ver todos
+          </a>
+        </div>
+        {% endif %} {% else %}
+        <div class="text-center py-3">
+          <i class="bi bi-person-x display-6 text-muted"></i>
+          <p class="text-muted mt-2 mb-0">
+            Nenhum profissional vinculado a este hospital
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel Lateral -->
+  <div class="col-md-4">
+    <!-- Ações Rápidas -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-warning text-white">
+        <h6 class="mb-0"><i class="bi bi-lightning"></i> Ações Rápidas</h6>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <a
+            href="{% url 'hospital_update' hospital.pk %}"
+            class="btn btn-warning"
+          >
+            <i class="bi bi-pencil"></i> Editar Hospital
+          </a>
+          <a href="{% url 'setor_create' %}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Adicionar Setor
+          </a>
+          <a href="#" class="btn btn-info">
+            <i class="bi bi-calendar-plus"></i> Nova Escala
+          </a>
+          <a
+            href="{% url 'hospital_delete' hospital.pk %}"
+            class="btn btn-outline-danger"
+          >
+            <i class="bi bi-trash"></i> Excluir Hospital
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-secondary text-white">
+        <h6 class="mb-0"><i class="bi bi-graph-up"></i> Estatísticas</h6>
+      </div>
+      <div class="card-body">
+        <div class="list-group list-group-flush">
+          <div
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <span>Setores Ativos</span>
+            <span class="badge bg-primary rounded-pill"
+              >{{ hospital.setores.count }}</span
+            >
+          </div>
+          <div
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <span>Profissionais</span>
+            <span class="badge bg-success rounded-pill"
+              >{{ hospital.matriculas.count }}</span
+            >
+          </div>
+          <div
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <span>Eventos Totais</span>
+            <span class="badge bg-info rounded-pill"
+              >{{ hospital.eventos.count }}</span
+            >
+          </div>
+          <div
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <span>Escalas Ativas</span>
+            <span class="badge bg-warning rounded-pill">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informações do Sistema -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-dark text-white">
+        <h6 class="mb-0">
+          <i class="bi bi-info-square"></i> Informações do Sistema
+        </h6>
+      </div>
+      <div class="card-body">
+        <ul class="list-unstyled small">
+          <li class="mb-2">
+            <i class="bi bi-hash text-muted"></i>
+            <strong>ID:</strong> <code>#{{ hospital.pk }}</code>
+          </li>
+          <li class="mb-2">
+            <i class="bi bi-calendar text-muted"></i>
+            <strong>Cadastrado em:</strong> N/A
+          </li>
+          <li class="mb-2">
+            <i class="bi bi-calendar-check text-muted"></i>
+            <strong>Última atualização:</strong> N/A
+          </li>
+          <li>
+            <i class="bi bi-diagram-3 text-muted"></i>
+            <strong>Hierarquia:</strong> Hospital → Setores → Profissionais
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- QR Code para acesso rápido -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-body text-center">
+        <h6 class="card-title"><i class="bi bi-qr-code"></i> Acesso Rápido</h6>
+        <p class="small text-muted mb-2">
+          Use este código para acessar rapidamente esta página
+        </p>
+        <div class="bg-light p-3 rounded d-inline-block">
+          <!-- Placeholder para QR Code -->
+          <div
+            style="width: 120px; height: 120px; background: #e9ecef"
+            class="rounded"
+          ></div>
+        </div>
+        <p class="small text-muted mt-2 mb-0">Hospital ID: {{ hospital.pk }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Animação para os cards
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.style.transition = 'transform 0.3s, box-shadow 0.3s';
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
-            });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
-            });
-        });
-
-        // Copiar ID do hospital
-        const hospitalId = '{{ hospital.pk }}';
-        const copyButton = document.createElement('button');
-        copyButton.className = 'btn btn-outline-secondary btn-sm ms-2';
-        copyButton.innerHTML = '<i class="bi bi-clipboard"></i>';
-        copyButton.title = 'Copiar ID do hospital';
-        copyButton.addEventListener('click', function() {
-            navigator.clipboard.writeText(hospitalId).then(() => {
-                const originalHTML = this.innerHTML;
-                this.innerHTML = '<i class="bi bi-check"></i>';
-                this.classList.remove('btn-outline-secondary');
-                this.classList.add('btn-success');
-                setTimeout(() => {
-                    this.innerHTML = originalHTML;
-                    this.classList.remove('btn-success');
-                    this.classList.add('btn-outline-secondary');
-                }, 2000);
-            });
-        });
-
-        // Adiciona botão de copiar próximo ao ID
-        const idElement = document.querySelector('code');
-        if (idElement) {
-            idElement.parentNode.appendChild(copyButton);
-        }
+  document.addEventListener("DOMContentLoaded", function () {
+    // Animação para os cards
+    const cards = document.querySelectorAll(".card");
+    cards.forEach((card) => {
+      card.style.transition = "transform 0.3s, box-shadow 0.3s";
+      card.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-5px)";
+        this.style.boxShadow = "0 5px 15px rgba(0,0,0,0.1)";
+      });
+      card.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "0 0.125rem 0.25rem rgba(0,0,0,0.075)";
+      });
     });
+
+    // Copiar ID do hospital
+    const hospitalId = "{{ hospital.pk }}";
+    const copyButton = document.createElement("button");
+    copyButton.className = "btn btn-outline-secondary btn-sm ms-2";
+    copyButton.innerHTML = '<i class="bi bi-clipboard"></i>';
+    copyButton.title = "Copiar ID do hospital";
+    copyButton.addEventListener("click", function () {
+      navigator.clipboard.writeText(hospitalId).then(() => {
+        const originalHTML = this.innerHTML;
+        this.innerHTML = '<i class="bi bi-check"></i>';
+        this.classList.remove("btn-outline-secondary");
+        this.classList.add("btn-success");
+        setTimeout(() => {
+          this.innerHTML = originalHTML;
+          this.classList.remove("btn-success");
+          this.classList.add("btn-outline-secondary");
+        }, 2000);
+      });
+    });
+
+    // Adiciona botão de copiar próximo ao ID
+    const idElement = document.querySelector("code");
+    if (idElement) {
+      idElement.parentNode.appendChild(copyButton);
+    }
+  });
 </script>
 
 <style>
-    .card {
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
+  .card {
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
 
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-    }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
 
-    .list-group-item:hover {
-        background-color: #f8f9fa;
-    }
+  .list-group-item:hover {
+    background-color: #f8f9fa;
+  }
 
-    .badge {
-        font-size: 0.8em;
-        padding: 4px 8px;
-    }
+  .badge {
+    font-size: 0.8em;
+    padding: 4px 8px;
+  }
 </style>
 {% endblock %}

@@ -1,76 +1,100 @@
-<!-- escalas/templates/escalas/matricula/confirm_delete.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}Excluir Matrícula - Sistema de Escalas{% endblock %}
-
-{% block page_title %}Confirmar Exclusão{% endblock %}
-
-{% block content %}
+<!-- templates/matricula/confirm_delete.html -->
+{% extends base.html' %} {% block title %}Excluir Matrícula - Sistema de
+Escalas{% endblock %} {% block page_title %}Confirmar Exclusão{% endblock %} {%
+block content %}
 <div class="card">
-    <div class="card-body text-center">
-        <div class="alert alert-danger mb-4">
-            <h4 class="alert-heading">
-                <i class="bi bi-exclamation-triangle"></i> Atenção Crítica!
-            </h4>
-            <p>Você está prestes a excluir a matrícula e todos os dados associados:</p>
-            <h5 class="my-3">{{ matricula.nome_completo }}</h5>
-            <p>
-                <span class="badge bg-dark">{{ matricula.numero }}</span>
-                <span class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}">
-                    {{ matricula.carga_horaria_semanal }}h/sem
-                </span>
-            </p>
-        </div>
-        
-        <div class="alert alert-warning">
-            <h6><i class="bi bi-info-circle"></i> Impacto desta exclusão:</h6>
-            <ul class="text-start">
-                <li><strong>Usuário:</strong> {{ matricula.perfil.user.username }} será permanentemente removido</li>
-                <li><strong>Perfil:</strong> Perfil de acesso será excluído</li>
-                <li><strong>Eventos:</strong> {{ matricula.eventos.count }} eventos serão removidos</li>
-                <li><strong>Escalas:</strong> Todas as escalas deste profissional serão perdidas</li>
-                <li><strong>Ação Irreversível:</strong> Não será possível recuperar os dados</li>
-            </ul>
-        </div>
-        
-        <div class="alert alert-info">
-            <h6><i class="bi bi-lightbulb"></i> Alternativas recomendadas:</h6>
-            <ul class="text-start">
-                <li>Desative o usuário em vez de excluir</li>
-                <li>Remova apenas os vínculos se o profissional saiu</li>
-                <li>Considere arquivar os dados</li>
-            </ul>
-        </div>
-        
-        <form method="post" class="mt-4">
-            {% csrf_token %}
-            <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" id="confirmDelete" required>
-                <label class="form-check-label" for="confirmDelete">
-                    Eu compreendo que esta ação é irreversível e desejo continuar
-                </label>
-            </div>
-            
-            <button type="submit" class="btn btn-danger btn-lg" id="deleteButton" disabled>
-                <i class="bi bi-trash"></i> Confirmar Exclusão Total
-            </button>
-            <a href="{% url 'matricula_detail' matricula.pk %}" class="btn btn-secondary btn-lg">
-                <i class="bi bi-x-circle"></i> Cancelar
-            </a>
-        </form>
+  <div class="card-body text-center">
+    <div class="alert alert-danger mb-4">
+      <h4 class="alert-heading">
+        <i class="bi bi-exclamation-triangle"></i> Atenção Crítica!
+      </h4>
+      <p>
+        Você está prestes a excluir a matrícula e todos os dados associados:
+      </p>
+      <h5 class="my-3">{{ matricula.nome_completo }}</h5>
+      <p>
+        <span class="badge bg-dark">{{ matricula.numero }}</span>
+        <span
+          class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}"
+        >
+          {{ matricula.carga_horaria_semanal }}h/sem
+        </span>
+      </p>
     </div>
+
+    <div class="alert alert-warning">
+      <h6><i class="bi bi-info-circle"></i> Impacto desta exclusão:</h6>
+      <ul class="text-start">
+        <li>
+          <strong>Usuário:</strong> {{ matricula.perfil.user.username }} será
+          permanentemente removido
+        </li>
+        <li><strong>Perfil:</strong> Perfil de acesso será excluído</li>
+        <li>
+          <strong>Eventos:</strong> {{ matricula.eventos.count }} eventos serão
+          removidos
+        </li>
+        <li>
+          <strong>Escalas:</strong> Todas as escalas deste profissional serão
+          perdidas
+        </li>
+        <li>
+          <strong>Ação Irreversível:</strong> Não será possível recuperar os
+          dados
+        </li>
+      </ul>
+    </div>
+
+    <div class="alert alert-info">
+      <h6><i class="bi bi-lightbulb"></i> Alternativas recomendadas:</h6>
+      <ul class="text-start">
+        <li>Desative o usuário em vez de excluir</li>
+        <li>Remova apenas os vínculos se o profissional saiu</li>
+        <li>Considere arquivar os dados</li>
+      </ul>
+    </div>
+
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <div class="form-check mb-4">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="confirmDelete"
+          required
+        />
+        <label class="form-check-label" for="confirmDelete">
+          Eu compreendo que esta ação é irreversível e desejo continuar
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-danger btn-lg"
+        id="deleteButton"
+        disabled
+      >
+        <i class="bi bi-trash"></i> Confirmar Exclusão Total
+      </button>
+      <a
+        href="{% url 'matricula_detail' matricula.pk %}"
+        class="btn btn-secondary btn-lg"
+      >
+        <i class="bi bi-x-circle"></i> Cancelar
+      </a>
+    </form>
+  </div>
 </div>
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkbox = document.getElementById('confirmDelete');
-        const deleteButton = document.getElementById('deleteButton');
-        
-        checkbox.addEventListener('change', function() {
-            deleteButton.disabled = !this.checked;
-        });
+  document.addEventListener("DOMContentLoaded", function () {
+    const checkbox = document.getElementById("confirmDelete");
+    const deleteButton = document.getElementById("deleteButton");
+
+    checkbox.addEventListener("change", function () {
+      deleteButton.disabled = !this.checked;
     });
+  });
 </script>
-{% endblock %}
-{% endblock %}
+{% endblock %} {% endblock %}

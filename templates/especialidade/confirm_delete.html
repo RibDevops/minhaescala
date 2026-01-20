@@ -1,40 +1,38 @@
-<!-- escalas/templates/escalas/especialidade/confirm_delete.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}Excluir Especialidade - Sistema de Escalas{% endblock %}
-
-{% block page_title %}Confirmar Exclusão{% endblock %}
-
-{% block content %}
+<!-- templates/especialidade/confirm_delete.html -->
+{% extends base.html' %} {% block title %}Excluir Especialidade - Sistema de
+Escalas{% endblock %} {% block page_title %}Confirmar Exclusão{% endblock %} {%
+block content %}
 <div class="card">
-    <div class="card-body text-center">
-        <div class="alert alert-danger mb-4">
-            <h4 class="alert-heading">
-                <i class="bi bi-exclamation-triangle"></i> Atenção!
-            </h4>
-            <p>Você está prestes a excluir a especialidade:</p>
-            <h5 class="my-3">{{ especialidade.nome }}</h5>
-        </div>
-        
-        {% if especialidade.matriculas.exists %}
-        <div class="alert alert-warning">
-            <h6><i class="bi bi-info-circle"></i> Esta especialidade está vinculada a:</h6>
-            <ul class="text-start">
-                <li>{{ especialidade.matriculas.count }} profissionais</li>
-                <li>Esses profissionais perderão esta especialidade</li>
-            </ul>
-        </div>
-        {% endif %}
-        
-        <form method="post" class="mt-4">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-lg">
-                <i class="bi bi-trash"></i> Confirmar Exclusão
-            </button>
-            <a href="{% url 'especialidade_list' %}" class="btn btn-secondary btn-lg">
-                <i class="bi bi-x-circle"></i> Cancelar
-            </a>
-        </form>
+  <div class="card-body text-center">
+    <div class="alert alert-danger mb-4">
+      <h4 class="alert-heading">
+        <i class="bi bi-exclamation-triangle"></i> Atenção!
+      </h4>
+      <p>Você está prestes a excluir a especialidade:</p>
+      <h5 class="my-3">{{ especialidade.nome }}</h5>
     </div>
+
+    {% if especialidade.matriculas.exists %}
+    <div class="alert alert-warning">
+      <h6>
+        <i class="bi bi-info-circle"></i> Esta especialidade está vinculada a:
+      </h6>
+      <ul class="text-start">
+        <li>{{ especialidade.matriculas.count }} profissionais</li>
+        <li>Esses profissionais perderão esta especialidade</li>
+      </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-lg">
+        <i class="bi bi-trash"></i> Confirmar Exclusão
+      </button>
+      <a href="{% url 'especialidade_list' %}" class="btn btn-secondary btn-lg">
+        <i class="bi bi-x-circle"></i> Cancelar
+      </a>
+    </form>
+  </div>
 </div>
 {% endblock %}

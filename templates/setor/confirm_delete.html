@@ -1,40 +1,39 @@
-<!-- escalas/templates/escalas/setor/confirm_delete.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}Excluir Setor - Sistema de Escalas{% endblock %}
-
-{% block page_title %}Confirmar Exclusão{% endblock %}
-
-{% block content %}
+<!-- templates/setor/confirm_delete.html -->
+{% extends base.html' %} {% block title %}Excluir Setor - Sistema de Escalas{%
+endblock %} {% block page_title %}Confirmar Exclusão{% endblock %} {% block
+content %}
 <div class="card">
-    <div class="card-body text-center">
-        <div class="alert alert-danger mb-4">
-            <h4 class="alert-heading">
-                <i class="bi bi-exclamation-triangle"></i> Atenção!
-            </h4>
-            <p>Você está prestes a excluir o setor:</p>
-            <h5 class="my-3">{{ setor.nome }}</h5>
-            <p class="mb-0">Hospital: {{ setor.hospital.nome }}</p>
-        </div>
-        
-        <div class="alert alert-warning">
-            <h6><i class="bi bi-info-circle"></i> Impacto desta exclusão:</h6>
-            <ul class="text-start">
-                <li>{{ setor.eventos.count }} eventos serão desvinculados</li>
-                <li>{{ setor.matriculas.count }} profissionais perderão acesso a este setor</li>
-                <li>A ação não pode ser desfeita</li>
-            </ul>
-        </div>
-        
-        <form method="post" class="mt-4">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-lg">
-                <i class="bi bi-trash"></i> Confirmar Exclusão
-            </button>
-            <a href="{% url 'setor_list' %}" class="btn btn-secondary btn-lg">
-                <i class="bi bi-x-circle"></i> Cancelar
-            </a>
-        </form>
+  <div class="card-body text-center">
+    <div class="alert alert-danger mb-4">
+      <h4 class="alert-heading">
+        <i class="bi bi-exclamation-triangle"></i> Atenção!
+      </h4>
+      <p>Você está prestes a excluir o setor:</p>
+      <h5 class="my-3">{{ setor.nome }}</h5>
+      <p class="mb-0">Hospital: {{ setor.hospital.nome }}</p>
     </div>
+
+    <div class="alert alert-warning">
+      <h6><i class="bi bi-info-circle"></i> Impacto desta exclusão:</h6>
+      <ul class="text-start">
+        <li>{{ setor.eventos.count }} eventos serão desvinculados</li>
+        <li>
+          {{ setor.matriculas.count }} profissionais perderão acesso a este
+          setor
+        </li>
+        <li>A ação não pode ser desfeita</li>
+      </ul>
+    </div>
+
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-lg">
+        <i class="bi bi-trash"></i> Confirmar Exclusão
+      </button>
+      <a href="{% url 'setor_list' %}" class="btn btn-secondary btn-lg">
+        <i class="bi bi-x-circle"></i> Cancelar
+      </a>
+    </form>
+  </div>
 </div>
 {% endblock %}

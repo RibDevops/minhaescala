@@ -1,4 +1,4 @@
-# escalas/views/hospital_views.py
+# views/hospital_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -15,7 +15,7 @@ def hospital_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'escalas/hospital/list.html', {
+    return render(request, hospital/list.html', {
         'page_obj': page_obj,
         'total_count': hospitais.count()
     })
@@ -31,7 +31,7 @@ def hospital_create(request):
     else:
         form = HospitalForm()
     
-    return render(request, 'escalas/hospital/form.html', {
+    return render(request, hospital/form.html', {
         'form': form,
         'title': 'Novo Hospital',
         'action': 'Criar'
@@ -42,7 +42,7 @@ def hospital_detail(request, pk):
     hospital = get_object_or_404(Hospital, pk=pk)
     setores = hospital.setores.all()
     
-    return render(request, 'escalas/hospital/detail.html', {
+    return render(request, hospital/detail.html', {
         'hospital': hospital,
         'setores': setores
     })
@@ -60,7 +60,7 @@ def hospital_update(request, pk):
     else:
         form = HospitalForm(instance=hospital)
     
-    return render(request, 'escalas/hospital/form.html', {
+    return render(request, hospital/form.html', {
         'form': form,
         'title': 'Editar Hospital',
         'action': 'Atualizar',
@@ -76,6 +76,6 @@ def hospital_delete(request, pk):
         messages.success(request, 'Hospital excluído com sucesso!')
         return redirect('hospital_list')
     
-    return render(request, 'escalas/hospital/confirm_delete.html', {
+    return render(request, hospital/confirm_delete.html', {
         'hospital': hospital
     })

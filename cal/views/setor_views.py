@@ -1,4 +1,4 @@
-# escalas/views/setor_views.py
+# views/setor_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -22,7 +22,7 @@ def setor_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'escalas/setor/list.html', {
+    return render(request, setor/list.html', {
         'page_obj': page_obj,
         'hospitais': hospitais,
         'selected_hospital': hospital_id,
@@ -40,7 +40,7 @@ def setor_create(request):
     else:
         form = SetorForm()
     
-    return render(request, 'escalas/setor/form.html', {
+    return render(request, setor/form.html', {
         'form': form,
         'title': 'Novo Setor',
         'action': 'Criar'
@@ -59,7 +59,7 @@ def setor_update(request, pk):
     else:
         form = SetorForm(instance=setor)
     
-    return render(request, 'escalas/setor/form.html', {
+    return render(request, setor/form.html', {
         'form': form,
         'title': 'Editar Setor',
         'action': 'Atualizar'
@@ -74,6 +74,6 @@ def setor_delete(request, pk):
         messages.success(request, 'Setor excluído com sucesso!')
         return redirect('setor_list')
     
-    return render(request, 'escalas/setor/confirm_delete.html', {
+    return render(request, setor/confirm_delete.html', {
         'setor': setor
     })

@@ -1,162 +1,164 @@
-<!-- escalas/templates/escalas/matricula/detail.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}{{ matricula.nome_exibicao }} - Detalhes{% endblock %}
-
-{% block page_title %}Detalhes do Profissional{% endblock %}
-
-{% block actions %}
-    <a href="{% url 'matricula_update' matricula.pk %}" class="btn btn-warning">
-        <i class="bi bi-pencil"></i> Editar
-    </a>
-    <a href="{% url 'matricula_delete' matricula.pk %}" class="btn btn-danger">
-        <i class="bi bi-trash"></i> Excluir
-    </a>
-    <a href="{% url 'matricula_list' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Voltar
-    </a>
-{% endblock %}
-
-{% block content %}
+<!-- templates/matricula/detail.html -->
+{% extends base.html' %} {% block title %}{{ matricula.nome_exibicao }} -
+Detalhes{% endblock %} {% block page_title %}Detalhes do Profissional{% endblock
+%} {% block actions %}
+<a href="{% url 'matricula_update' matricula.pk %}" class="btn btn-warning">
+  <i class="bi bi-pencil"></i> Editar
+</a>
+<a href="{% url 'matricula_delete' matricula.pk %}" class="btn btn-danger">
+  <i class="bi bi-trash"></i> Excluir
+</a>
+<a href="{% url 'matricula_list' %}" class="btn btn-secondary">
+  <i class="bi bi-arrow-left"></i> Voltar
+</a>
+{% endblock %} {% block content %}
 <div class="row">
-    <!-- Informações Básicas -->
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-person-circle"></i> Informações Básicas</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-sm">
-                    <tr>
-                        <th>Matrícula:</th>
-                        <td><span class="badge bg-dark">{{ matricula.numero }}</span></td>
-                    </tr>
-                    <tr>
-                        <th>Nome Completo:</th>
-                        <td>{{ matricula.nome_completo }}</td>
-                    </tr>
-                    <tr>
-                        <th>Nome de Exibição:</th>
-                        <td><strong>{{ matricula.nome_exibicao }}</strong></td>
-                    </tr>
-                    <tr>
-                        <th>Carga Horária:</th>
-                        <td>
-                            <span class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}">
-                                {{ matricula.carga_horaria_semanal }}h/semana
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Usuário:</th>
-                        <td>{{ matricula.perfil.user.username }}</td>
-                    </tr>
-                    <tr>
-                        <th>Nível de Acesso:</th>
-                        <td>
-                            <span class="badge 
-                                {% if matricula.perfil.tipo_usuario == 'ADMIN' %}bg-danger
-                                {% elif matricula.perfil.tipo_usuario == 'CHEFE' %}bg-warning
-                                {% elif matricula.perfil.tipo_usuario == 'ESCALANTE' %}bg-info
-                                {% else %}bg-secondary{% endif %}">
-                                {{ matricula.perfil.get_tipo_usuario_display }}
-                            </span>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+  <!-- Informações Básicas -->
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-person-circle"></i> Informações Básicas
+        </h5>
+      </div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <tr>
+            <th>Matrícula:</th>
+            <td><span class="badge bg-dark">{{ matricula.numero }}</span></td>
+          </tr>
+          <tr>
+            <th>Nome Completo:</th>
+            <td>{{ matricula.nome_completo }}</td>
+          </tr>
+          <tr>
+            <th>Nome de Exibição:</th>
+            <td><strong>{{ matricula.nome_exibicao }}</strong></td>
+          </tr>
+          <tr>
+            <th>Carga Horária:</th>
+            <td>
+              <span
+                class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}"
+              >
+                {{ matricula.carga_horaria_semanal }}h/semana
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <th>Usuário:</th>
+            <td>{{ matricula.perfil.user.username }}</td>
+          </tr>
+          <tr>
+            <th>Nível de Acesso:</th>
+            <td>
+              <span
+                class="badge {% if matricula.perfil.tipo_usuario == 'ADMIN' %}bg-danger {% elif matricula.perfil.tipo_usuario == 'CHEFE' %}bg-warning {% elif matricula.perfil.tipo_usuario == 'ESCALANTE' %}bg-info {% else %}bg-secondary{% endif %}"
+              >
+                {{ matricula.perfil.get_tipo_usuario_display }}
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
-    
-    <!-- Hospitais e Setores -->
-    <div class="col-md-8">
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="bi bi-hospital"></i> Vínculos Hospitalares</h5>
+  </div>
+
+  <!-- Hospitais e Setores -->
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-hospital"></i> Vínculos Hospitalares
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Hospitais Vinculados ({{ matricula.hospitais.count }}):</h6>
+            {% if matricula.hospitais.exists %}
+            <div class="d-flex flex-wrap gap-2">
+              {% for hospital in matricula.hospitais.all %}
+              <span class="badge bg-info">
+                {{ hospital.nome }} {% if hospital.sigla %}({{ hospital.sigla
+                }}){% endif %}
+              </span>
+              {% endfor %}
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Hospitais Vinculados ({{ matricula.hospitais.count }}):</h6>
-                        {% if matricula.hospitais.exists %}
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for hospital in matricula.hospitais.all %}
-                            <span class="badge bg-info">
-                                {{ hospital.nome }}
-                                {% if hospital.sigla %}({{ hospital.sigla }}){% endif %}
-                            </span>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <p class="text-muted">Nenhum hospital vinculado.</p>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Setores Alocados ({{ matricula.setores.count }}):</h6>
-                        {% if matricula.setores.exists %}
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for setor in matricula.setores.all %}
-                            <span class="badge bg-success">
-                                {{ setor.nome }} ({{ setor.hospital.sigla|default:setor.hospital.nome }})
-                            </span>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <p class="text-muted">Nenhum setor alocado.</p>
-                        {% endif %}
-                    </div>
-                </div>
+            {% else %}
+            <p class="text-muted">Nenhum hospital vinculado.</p>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <h6>Setores Alocados ({{ matricula.setores.count }}):</h6>
+            {% if matricula.setores.exists %}
+            <div class="d-flex flex-wrap gap-2">
+              {% for setor in matricula.setores.all %}
+              <span class="badge bg-success">
+                {{ setor.nome }} ({{
+                setor.hospital.sigla|default:setor.hospital.nome }})
+              </span>
+              {% endfor %}
             </div>
+            {% else %}
+            <p class="text-muted">Nenhum setor alocado.</p>
+            {% endif %}
+          </div>
         </div>
-        
-        <!-- Especialidades -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-award"></i> Especialidades</h5>
-            </div>
-            <div class="card-body">
-                {% if matricula.especialidades.exists %}
-                <div class="d-flex flex-wrap gap-2">
-                    {% for esp in matricula.especialidades.all %}
-                    <span class="badge bg-primary" style="font-size: 1em; padding: 8px 12px;">
-                        {{ esp.nome }}
-                    </span>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="text-muted">Nenhuma especialidade cadastrada.</p>
-                {% endif %}
-            </div>
-        </div>
-        
-        <!-- Estatísticas -->
-        <div class="card">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Estatísticas</h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-4">
-                        <div class="p-3 border rounded">
-                            <h3 class="text-primary">{{ matricula.eventos.count }}</h3>
-                            <p class="mb-0">Total de Eventos</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3 border rounded">
-                            <h3 class="text-success">{{ matricula.hospitais.count }}</h3>
-                            <p class="mb-0">Hospitais</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3 border rounded">
-                            <h3 class="text-warning">{{ matricula.especialidades.count }}</h3>
-                            <p class="mb-0">Especialidades</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!-- Especialidades -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-award"></i> Especialidades</h5>
+      </div>
+      <div class="card-body">
+        {% if matricula.especialidades.exists %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for esp in matricula.especialidades.all %}
+          <span
+            class="badge bg-primary"
+            style="font-size: 1em; padding: 8px 12px"
+          >
+            {{ esp.nome }}
+          </span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">Nenhuma especialidade cadastrada.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="card">
+      <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Estatísticas</h5>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-4">
+            <div class="p-3 border rounded">
+              <h3 class="text-primary">{{ matricula.eventos.count }}</h3>
+              <p class="mb-0">Total de Eventos</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 border rounded">
+              <h3 class="text-success">{{ matricula.hospitais.count }}</h3>
+              <p class="mb-0">Hospitais</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 border rounded">
+              <h3 class="text-warning">{{ matricula.especialidades.count }}</h3>
+              <p class="mb-0">Especialidades</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

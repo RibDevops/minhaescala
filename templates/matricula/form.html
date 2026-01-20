@@ -1,273 +1,296 @@
-<!-- escalas/templates/escalas/matricula/form.html -->
-{% extends 'escalas/base.html' %}
-
-{% block title %}{{ title }} - Sistema de Escalas{% endblock %}
-
-{% block page_title %}{{ title }}{% endblock %}
-
-{% block actions %}
-    <a href="{% url 'matricula_list' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Voltar
-    </a>
-{% endblock %}
-
-{% block content %}
+<!-- templates/matricula/form.html -->
+{% extends base.html' %} {% block title %}{{ title }} - Sistema de Escalas{%
+endblock %} {% block page_title %}{{ title }}{% endblock %} {% block actions %}
+<a href="{% url 'matricula_list' %}" class="btn btn-secondary">
+  <i class="bi bi-arrow-left"></i> Voltar
+</a>
+{% endblock %} {% block content %}
 <div class="card">
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            
-            <div class="alert alert-info mb-4">
-                <i class="bi bi-info-circle"></i> 
-                Preencha todos os formulários para criar uma nova matrícula.
-            </div>
-            
-            <!-- Formulário de Usuário -->
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0"><i class="bi bi-person"></i> Dados do Usuário</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ user_form.username.id_for_label }}" class="form-label">
-                                    {{ user_form.username.label }}
-                                </label>
-                                {{ user_form.username }}
-                                {% if user_form.username.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in user_form.username.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ user_form.email.id_for_label }}" class="form-label">
-                                    {{ user_form.email.label }}
-                                </label>
-                                {{ user_form.email }}
-                                {% if user_form.email.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in user_form.email.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
-                                    {{ user_form.first_name.label }}
-                                </label>
-                                {{ user_form.first_name }}
-                                {% if user_form.first_name.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in user_form.first_name.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
-                                    {{ user_form.last_name.label }}
-                                </label>
-                                {{ user_form.last_name }}
-                                {% if user_form.last_name.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in user_form.last_name.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Formulário de Perfil -->
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0"><i class="bi bi-shield-check"></i> Perfil de Acesso</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ perfil_form.tipo_usuario.id_for_label }}" class="form-label">
-                                    {{ perfil_form.tipo_usuario.label }}
-                                </label>
-                                {{ perfil_form.tipo_usuario }}
-                                {% if perfil_form.tipo_usuario.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in perfil_form.tipo_usuario.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                <small class="text-muted">Define as permissões no sistema</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Formulário de Matrícula -->
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0"><i class="bi bi-person-badge"></i> Dados Profissionais</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ matricula_form.numero.id_for_label }}" class="form-label">
-                                    {{ matricula_form.numero.label }}
-                                </label>
-                                {{ matricula_form.numero }}
-                                {% if matricula_form.numero.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in matricula_form.numero.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ matricula_form.carga_horaria_semanal.id_for_label }}" class="form-label">
-                                    {{ matricula_form.carga_horaria_semanal.label }}
-                                </label>
-                                {{ matricula_form.carga_horaria_semanal }}
-                                {% if matricula_form.carga_horaria_semanal.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in matricula_form.carga_horaria_semanal.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                <small class="text-muted">Limite semanal de horas (ex: 20, 30, 40)</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ matricula_form.nome_exibicao.id_for_label }}" class="form-label">
-                                    {{ matricula_form.nome_exibicao.label }}
-                                </label>
-                                {{ matricula_form.nome_exibicao }}
-                                {% if matricula_form.nome_exibicao.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in matricula_form.nome_exibicao.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                <small class="text-muted">Nome que aparecerá no calendário</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ matricula_form.nome_completo.id_for_label }}" class="form-label">
-                                    {{ matricula_form.nome_completo.label }}
-                                </label>
-                                {{ matricula_form.nome_completo }}
-                                {% if matricula_form.nome_completo.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in matricula_form.nome_completo.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ matricula_form.hospitais.id_for_label }}" class="form-label">
-                                    {{ matricula_form.hospitais.label }}
-                                </label>
-                                {{ matricula_form.hospitais }}
-                                {% if matricula_form.hospitais.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in matricula_form.hospitais.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ matricula_form.setores.id_for_label }}" class="form-label">
-                                    {{ matricula_form.setores.label }}
-                                </label>
-                                {{ matricula_form.setores }}
-                                {% if matricula_form.setores.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in matricula_form.setores.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label for="{{ matricula_form.especialidades.id_for_label }}" class="form-label">
-                                    {{ matricula_form.especialidades.label }}
-                                </label>
-                                {{ matricula_form.especialidades }}
-                                {% if matricula_form.especialidades.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in matricula_form.especialidades.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> {{ action }}
-                </button>
-                <a href="{% url 'matricula_list' %}" class="btn btn-secondary">
-                    <i class="bi bi-x-circle"></i> Cancelar
-                </a>
-            </div>
-        </form>
-    </div>
-</div>
-{% endblock %}
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
 
-{% block extra_js %}
+      <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle"></i>
+        Preencha todos os formulários para criar uma nova matrícula.
+      </div>
+
+      <!-- Formulário de Usuário -->
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0"><i class="bi bi-person"></i> Dados do Usuário</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ user_form.username.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ user_form.username.label }}
+                </label>
+                {{ user_form.username }} {% if user_form.username.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in user_form.username.errors %} {{ error }} {%
+                  endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ user_form.email.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ user_form.email.label }}
+                </label>
+                {{ user_form.email }} {% if user_form.email.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in user_form.email.errors %} {{ error }} {%
+                  endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ user_form.first_name.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ user_form.first_name.label }}
+                </label>
+                {{ user_form.first_name }} {% if user_form.first_name.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in user_form.first_name.errors %} {{ error }} {%
+                  endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ user_form.last_name.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ user_form.last_name.label }}
+                </label>
+                {{ user_form.last_name }} {% if user_form.last_name.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in user_form.last_name.errors %} {{ error }} {%
+                  endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulário de Perfil -->
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">
+            <i class="bi bi-shield-check"></i> Perfil de Acesso
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ perfil_form.tipo_usuario.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ perfil_form.tipo_usuario.label }}
+                </label>
+                {{ perfil_form.tipo_usuario }} {% if
+                perfil_form.tipo_usuario.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in perfil_form.tipo_usuario.errors %} {{ error }}
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <small class="text-muted"
+                  >Define as permissões no sistema</small
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulário de Matrícula -->
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">
+            <i class="bi bi-person-badge"></i> Dados Profissionais
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ matricula_form.numero.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ matricula_form.numero.label }}
+                </label>
+                {{ matricula_form.numero }} {% if matricula_form.numero.errors
+                %}
+                <div class="invalid-feedback d-block">
+                  {% for error in matricula_form.numero.errors %} {{ error }} {%
+                  endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ matricula_form.carga_horaria_semanal.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ matricula_form.carga_horaria_semanal.label }}
+                </label>
+                {{ matricula_form.carga_horaria_semanal }} {% if
+                matricula_form.carga_horaria_semanal.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in matricula_form.carga_horaria_semanal.errors %}
+                  {{ error }} {% endfor %}
+                </div>
+                {% endif %}
+                <small class="text-muted"
+                  >Limite semanal de horas (ex: 20, 30, 40)</small
+                >
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ matricula_form.nome_exibicao.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ matricula_form.nome_exibicao.label }}
+                </label>
+                {{ matricula_form.nome_exibicao }} {% if
+                matricula_form.nome_exibicao.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in matricula_form.nome_exibicao.errors %} {{
+                  error }} {% endfor %}
+                </div>
+                {% endif %}
+                <small class="text-muted"
+                  >Nome que aparecerá no calendário</small
+                >
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ matricula_form.nome_completo.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ matricula_form.nome_completo.label }}
+                </label>
+                {{ matricula_form.nome_completo }} {% if
+                matricula_form.nome_completo.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in matricula_form.nome_completo.errors %} {{
+                  error }} {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ matricula_form.hospitais.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ matricula_form.hospitais.label }}
+                </label>
+                {{ matricula_form.hospitais }} {% if
+                matricula_form.hospitais.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in matricula_form.hospitais.errors %} {{ error }}
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label
+                  for="{{ matricula_form.setores.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ matricula_form.setores.label }}
+                </label>
+                {{ matricula_form.setores }} {% if matricula_form.setores.errors
+                %}
+                <div class="invalid-feedback d-block">
+                  {% for error in matricula_form.setores.errors %} {{ error }}
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="mb-3">
+                <label
+                  for="{{ matricula_form.especialidades.id_for_label }}"
+                  class="form-label"
+                >
+                  {{ matricula_form.especialidades.label }}
+                </label>
+                {{ matricula_form.especialidades }} {% if
+                matricula_form.especialidades.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in matricula_form.especialidades.errors %} {{
+                  error }} {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-circle"></i> {{ action }}
+        </button>
+        <a href="{% url 'matricula_list' %}" class="btn btn-secondary">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Adiciona classes Bootstrap aos inputs
-        const inputs = document.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            if (!input.classList.contains('form-control') && 
-                !input.classList.contains('form-check-input')) {
-                input.classList.add('form-control');
-            }
-        });
-        
-        // Ajusta altura dos selects multiple
-        const multipleSelects = document.querySelectorAll('select[multiple]');
-        multipleSelects.forEach(select => {
-            select.style.height = '120px';
-        });
+  document.addEventListener("DOMContentLoaded", function () {
+    // Adiciona classes Bootstrap aos inputs
+    const inputs = document.querySelectorAll("input, select, textarea");
+    inputs.forEach((input) => {
+      if (
+        !input.classList.contains("form-control") &&
+        !input.classList.contains("form-check-input")
+      ) {
+        input.classList.add("form-control");
+      }
     });
+
+    // Ajusta altura dos selects multiple
+    const multipleSelects = document.querySelectorAll("select[multiple]");
+    multipleSelects.forEach((select) => {
+      select.style.height = "120px";
+    });
+  });
 </script>
 {% endblock %}

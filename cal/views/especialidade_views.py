@@ -1,4 +1,4 @@
-# escalas/views/especialidade_views.py
+# views/especialidade_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,7 +14,7 @@ def especialidade_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'escalas/especialidade/list.html', {
+    return render(request, especialidade/list.html', {
         'page_obj': page_obj,
         'total_count': especialidades.count()
     })
@@ -30,7 +30,7 @@ def especialidade_create(request):
     else:
         form = EspecialidadeForm()
     
-    return render(request, 'escalas/especialidade/form.html', {
+    return render(request, especialidade/form.html', {
         'form': form,
         'title': 'Nova Especialidade',
         'action': 'Criar'
@@ -49,7 +49,7 @@ def especialidade_update(request, pk):
     else:
         form = EspecialidadeForm(instance=especialidade)
     
-    return render(request, 'escalas/especialidade/form.html', {
+    return render(request, especialidade/form.html', {
         'form': form,
         'title': 'Editar Especialidade',
         'action': 'Atualizar'
@@ -64,6 +64,6 @@ def especialidade_delete(request, pk):
         messages.success(request, 'Especialidade excluída com sucesso!')
         return redirect('especialidade_list')
     
-    return render(request, 'escalas/especialidade/confirm_delete.html', {
+    return render(request, especialidade/confirm_delete.html', {
         'especialidade': especialidade
     })

@@ -1,4 +1,4 @@
-# escalas/views/matricula_views.py
+# views/matricula_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -36,7 +36,7 @@ def matricula_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'escalas/matricula/list.html', {
+    return render(request, matricula/list.html', {
         'page_obj': page_obj,
         'hospitais': hospitais,
         'especialidades': especialidades,
@@ -77,7 +77,7 @@ def matricula_create(request):
         perfil_form = PerfilUsuarioForm()
         matricula_form = MatriculaForm()
     
-    return render(request, 'escalas/matricula/form.html', {
+    return render(request, matricula/form.html', {
         'user_form': user_form,
         'perfil_form': perfil_form,
         'matricula_form': matricula_form,
@@ -89,7 +89,7 @@ def matricula_create(request):
 def matricula_detail(request, pk):
     matricula = get_object_or_404(Matricula, pk=pk)
     
-    return render(request, 'escalas/matricula/detail.html', {
+    return render(request, matricula/detail.html', {
         'matricula': matricula
     })
 
@@ -117,7 +117,7 @@ def matricula_update(request, pk):
         perfil_form = PerfilUsuarioForm(instance=perfil)
         matricula_form = MatriculaForm(instance=matricula)
     
-    return render(request, 'escalas/matricula/form.html', {
+    return render(request, matricula/form.html', {
         'user_form': user_form,
         'perfil_form': perfil_form,
         'matricula_form': matricula_form,
@@ -135,6 +135,6 @@ def matricula_delete(request, pk):
         messages.success(request, 'Matrícula excluída com sucesso!')
         return redirect('matricula_list')
     
-    return render(request, 'escalas/matricula/confirm_delete.html', {
+    return render(request, matricula/confirm_delete.html', {
         'matricula': matricula
     })
