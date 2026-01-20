@@ -1,4 +1,4 @@
-# escalas/views/periodo_views.py
+# views/periodo_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,7 +14,7 @@ def periodo_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'escalas/periodo/list.html', {
+    return render(request, 'periodo/list.html', {
         'page_obj': page_obj,
         'total_count': periodos.count()
     })
@@ -30,7 +30,7 @@ def periodo_create(request):
     else:
         form = PeriodoForm()
     
-    return render(request, 'escalas/periodo/form.html', {
+    return render(request, 'periodo/form.html', {
         'form': form,
         'title': 'Novo Período',
         'action': 'Criar'
@@ -49,7 +49,7 @@ def periodo_update(request, pk):
     else:
         form = PeriodoForm(instance=periodo)
     
-    return render(request, 'escalas/periodo/form.html', {
+    return render(request, 'periodo/form.html', {
         'form': form,
         'title': 'Editar Período',
         'action': 'Atualizar'
@@ -64,6 +64,6 @@ def periodo_delete(request, pk):
         messages.success(request, 'Período excluído com sucesso!')
         return redirect('periodo_list')
     
-    return render(request, 'escalas/periodo/confirm_delete.html', {
+    return render(request, 'periodo/confirm_delete.html', {
         'periodo': periodo
     })
