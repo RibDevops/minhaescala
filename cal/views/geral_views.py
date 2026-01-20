@@ -1,7 +1,48 @@
 from django.urls import path, reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from cal.models import Hospital, Setor, Matricula
+from cal.models import Hospital, Setor, Matricula, Especialidade
+
+# ... (AdminRequiredMixin permanece igual)
+
+# Especialidade
+class EspecialidadeListView(AdminRequiredMixin, ListView):
+    model = Especialidade
+    template_name = 'cal/especialidade_list.html'
+    context_object_name = 'objetos'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': 'Especialidades', 'labels': ['Nome'], 'create_url': 'cal:especialidade_create', 'update_url': 'cal:especialidade_update', 'delete_url': 'cal:especialidade_delete'})
+        return context
+
+class EspecialidadeCreateView(AdminRequiredMixin, CreateView):
+    model = Especialidade
+    fields = ['nome']
+    template_name = 'cal/crud_base_form.html'
+    success_url = reverse_lazy('cal:especialidade_list')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': 'Nova Especialidade', 'cancel_url': reverse_lazy('cal:especialidade_list')})
+        return context
+
+class EspecialidadeUpdateView(AdminRequiredMixin, UpdateView):
+    model = Especialidade
+    fields = ['nome']
+    template_name = 'cal/crud_base_form.html'
+    success_url = reverse_lazy('cal:especialidade_list')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': f'Editar Especialidade: {self.object.nome}', 'cancel_url': reverse_lazy('cal:especialidade_list')})
+        return context
+
+class EspecialidadeDeleteView(AdminRequiredMixin, DeleteView):
+    model = Especialidade
+    template_name = 'cal/crud_base_confirm_delete.html'
+    success_url = reverse_lazy('cal:especialidade_list')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': 'Excluir Especialidade', 'cancel_url': reverse_lazy('cal:especialidade_list')})
+        return context
 
 class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):

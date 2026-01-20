@@ -40,4 +40,10 @@ urlpatterns = [
     path('matriculas/novo/', geral_views.MatriculaCreateView.as_view(), name='matricula_create'),
     path('matriculas/<int:pk>/editar/', geral_views.MatriculaUpdateView.as_view(), name='matricula_update'),
     path('matriculas/<int:pk>/excluir/', geral_views.MatriculaDeleteView.as_view(), name='matricula_delete'),
+    
+    # Especialidades
+    path('especialidades/', geral_views.EspecialidadeListView.as_view(), name='especialidade_list'),
+    path('especialidades/novo/', geral_views.EspecialidadeCreateView.as_view(), name='especialidade_create'),
+    path('especialidades/<int:pk>/editar/', geral_views.EspecialidadeUpdateView.as_view(), name='especialidade_update'),
+    path('especialidades/<int:pk>/excluir/', geral_views.EspecialidadeDeleteView.as_view(), name='especialidade_delete'),
 ]
