@@ -81,7 +81,7 @@ class Especialidade(models.Model):
         return self.nome
 
 class Matricula(models.Model):
-    numero = models.CharField(max_length=50, unique=True, verbose_name="Número da Matrícula")
+    numero = models.CharField(max_length=50, unique=True, verbose_name="Matrícula")
     perfil = models.OneToOneField(PerfilUsuario, on_delete=models.CASCADE, related_name='matricula', verbose_name="Perfil")
     nome_exibicao = models.CharField(max_length=50, help_text="Nome como aparecerá no calendário", verbose_name="Nome de Exibição")
     nome_completo = models.CharField(max_length=255, verbose_name="Nome Completo")
