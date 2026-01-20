@@ -15,7 +15,7 @@ def tipo_evento_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'tipo_evento/list.html', {
+    return render(request, 'cal/tipo_evento_list.html', {
         'page_obj': page_obj,
         'total_count': tipos.count()
     })

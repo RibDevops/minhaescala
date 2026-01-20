@@ -1,0 +1,8 @@
+{% extends 'cal/crud_base_list.html' %}
+{% block table_rows %}
+<td>{{ obj.codigo }}</td>
+<td>{{ obj.nome }}</td>
+<td>{{ obj.periodo }}</td>
+<td>{{ obj.horas }}h</td>
+<td><span class="badge" style="background-color: {{ obj.cor }}">{{ obj.cor }}</span></td>
+{% endblock %}
