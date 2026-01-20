@@ -136,7 +136,7 @@ class MatriculaListView(AdminRequiredMixin, ListView):
 
 class MatriculaCreateView(AdminRequiredMixin, CreateView):
     model = Matricula
-    fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospitais', 'setores', 'carga_horaria_semanal', 'especialidades']
+    fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospital', 'setor', 'carga_horaria_semanal', 'especialidade']
     template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:matricula_list')
     def get_context_data(self, **kwargs):
@@ -146,7 +146,7 @@ class MatriculaCreateView(AdminRequiredMixin, CreateView):
 
 class MatriculaUpdateView(AdminRequiredMixin, UpdateView):
     model = Matricula
-    fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospitais', 'setores', 'carga_horaria_semanal', 'especialidades']
+    fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospital', 'setor', 'carga_horaria_semanal', 'especialidade']
     template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:matricula_list')
     def get_context_data(self, **kwargs):

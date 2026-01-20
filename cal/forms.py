@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, Hospital, Setor, TipoEvento
+from .models import EventoEscala, Matricula, Hospital, Setor, TipoEvento, Periodo, Especialidade, PerfilUsuario
 
 class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
@@ -49,17 +49,11 @@ class PlantaoForm(forms.ModelForm):
         
         if user and hasattr(user, 'perfil'):
             if user.perfil.tipo_usuario == 'ESCALANTE':
-                matricula = getattr(user.perfil, 'matricula', None)
+                matricula = user.perfil.matriculas.first()
                 if matricula:
-                    self.fields['profissional'].queryset = Matricula.objects.filter(setores__in=matricula.setores.all())
-                    self.fields['setor'].queryset = matricula.setores.all()
-                    self.fields['hospital'].queryset = Hospital.objects.filter(id__in=matricula.hospitais.all())
-
-
-# forms.py
-from django import forms
-from .models import Hospital, Setor, Periodo, TipoEvento, Especialidade, Matricula, PerfilUsuario
-from django.contrib.auth.models import User
+                    self.fields['profissional'].queryset = Matricula.objects.filter(setor=matricula.setor)
+                    self.fields['setor'].queryset = Setor.objects.filter(id=matricula.setor.id)
+                    self.fields['hospital'].queryset = Hospital.objects.filter(id=matricula.hospital.id)
 
 class HospitalForm(forms.ModelForm):
     class Meta:
@@ -131,13 +125,14 @@ class PerfilUsuarioForm(forms.ModelForm):
 class MatriculaForm(forms.ModelForm):
     class Meta:
         model = Matricula
-        fields = ['numero', 'nome_exibicao', 'nome_completo', 'carga_horaria_semanal', 'hospitais', 'setores', 'especialidades']
+        fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'carga_horaria_semanal', 'hospital', 'setor', 'especialidade']
         widgets = {
             'numero': forms.TextInput(attrs={'class': 'form-control'}),
+            'perfil': forms.Select(attrs={'class': 'form-control'}),
             'nome_exibicao': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
             'carga_horaria_semanal': forms.NumberInput(attrs={'class': 'form-control'}),
-            'hospitais': forms.SelectMultiple(attrs={'class': 'form-control select2'}),
-            'setores': forms.SelectMultiple(attrs={'class': 'form-control select2'}),
-            'especialidades': forms.SelectMultiple(attrs={'class': 'form-control select2'}),
+            'hospital': forms.Select(attrs={'class': 'form-control'}),
+            'setor': forms.Select(attrs={'class': 'form-control'}),
+            'especialidade': forms.Select(attrs={'class': 'form-control'}),
         }

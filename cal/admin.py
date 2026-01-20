@@ -14,8 +14,8 @@ class EventoEscalaAdmin(admin.ModelAdmin):
 
 @admin.register(Matricula)
 class MatriculaAdmin(admin.ModelAdmin):
-    list_display = ('numero', 'nome_exibicao', 'carga_horaria_semanal')
-    filter_horizontal = ('hospitais', 'setores', 'especialidades')
+    list_display = ('numero', 'nome_exibicao', 'hospital', 'setor', 'especialidade', 'carga_horaria_semanal')
+    list_filter = ('hospital', 'setor', 'especialidade')
     search_fields = ('numero', 'nome_exibicao', 'nome_completo')
 
 @admin.register(Hospital)

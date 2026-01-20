@@ -85,10 +85,10 @@ class Matricula(models.Model):
     perfil = models.ForeignKey(PerfilUsuario, on_delete=models.SET_NULL, related_name='matriculas', verbose_name="Perfil", null=True, blank=True)
     nome_exibicao = models.CharField(max_length=50, help_text="Nome como aparecerá no calendário", verbose_name="Nome de Exibição")
     nome_completo = models.CharField(max_length=255, verbose_name="Nome Completo")
-    hospitais = models.ManyToManyField(Hospital, related_name='matriculas', verbose_name="Hospitais Vinculados")
-    setores = models.ManyToManyField(Setor, related_name='matriculas', verbose_name="Setores Alocados")
+    hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT, related_name='matriculas', verbose_name="Hospital Vinculado", null=True, blank=True)
+    setor = models.ForeignKey(Setor, on_delete=models.PROTECT, related_name='matriculas', verbose_name="Setor Alocado", null=True, blank=True)
     carga_horaria_semanal = models.PositiveIntegerField(default=40, help_text="Limite de horas por semana", verbose_name="Carga Horária Semanal")
-    especialidades = models.ManyToManyField(Especialidade, related_name='matriculas', blank=True, verbose_name="Especialidades")
+    especialidade = models.ForeignKey(Especialidade, on_delete=models.SET_NULL, related_name='matriculas', blank=True, null=True, verbose_name="Especialidade")
 
     class Meta:
         verbose_name = "Matrícula"
@@ -121,11 +121,11 @@ class EventoEscala(models.Model):
 
     def clean(self):
         if self.profissional_id and self.hospital_id:
-            if not self.profissional.hospitais.filter(id=self.hospital.id).exists():
+            if self.profissional.hospital != self.hospital:
                 raise ValidationError(f"O profissional não está vinculado ao hospital {self.hospital}.")
 
         if self.setor_id and self.profissional_id:
-            if not self.profissional.setores.filter(id=self.setor.id).exists():
+            if self.profissional.setor != self.setor:
                 raise ValidationError(f"O profissional não está alocado no setor {self.setor}.")
 
         if self.profissional_id and self.tipo_evento_id and self.tipo_evento.contabiliza_carga_horaria:
