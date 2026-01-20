@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from .views import views_cal, views_dashboard, views_user, geral_views
 
 app_name = 'cal'
@@ -6,9 +7,8 @@ app_name = 'cal'
 urlpatterns = [
     path('', views_user.home, name='home'),
     path('calendar/', views_cal.CalendarioView.as_view(), name='calendar'),
-    path('login/', views_user.login_view, name='login'),
-    path('logout/', views_user.logout_view, name='logout'),
-    path('register/', views_user.register_view, name='register'),
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='cal:login'), name='logout'),
     path('perfil/', views_user.perfil_usuario, name='perfil'),
     path('usuarios/', views_user.listar_usuarios, name='listar_usuarios'),
     path('usuarios/adicionar/', views_user.adicionar_usuario, name='adicionar_usuario'),

@@ -49,10 +49,15 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['enfermeiros'] = Matricula.objects.all()
-        context['tipos_plantao'] = TipoEvento.objects.all()
+        # Usando os nomes corretos dos modelos
+        from ..models import Enfermeiro, TipoPlantao, Hospital, Setor
+        context['enfermeiros'] = Enfermeiro.objects.all()
+        context['tipos_plantao'] = TipoPlantao.objects.all()
         context['hospitais'] = Hospital.objects.all()
         context['setores'] = Setor.objects.all()
+        # Adicionando formulário para compatibilidade com templates que usam form.errors
+        from ..forms import PlantaoForm
+        context['form'] = PlantaoForm(user=self.request.user)
         return context
 
     def post(self, request, *args, **kwargs):
