@@ -1,0 +1,369 @@
+<!-- escalas/templates/escalas/hospital/confirm_delete.html -->
+{% extends 'escalas/base.html' %}
+
+{% block title %}Confirmar Exclusão - {{ hospital.nome }}{% endblock %}
+
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <i class="bi bi-exclamation-triangle text-danger"></i>
+            Confirmar Exclusão
+        </div>
+        <div>
+            <a href="{% url 'hospital_detail' hospital.pk %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger border-2 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trash"></i> Exclusão de Hospital
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Alerta Principal -->
+                <div class="alert alert-danger border-danger">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-exclamation-octagon-fill fs-3"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="alert-heading">Atenção! Esta ação é irreversível</h5>
+                            <p class="mb-0">
+                                Você está prestes a excluir permanentemente o hospital:
+                                <strong class="text-danger">{{ hospital.nome }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações do Hospital -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle"></i> Hospital a ser excluído
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th width="40%"><i class="bi bi-building"></i> Nome:</th>
+                                        <td>{{ hospital.nome }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-tag"></i> Sigla:</th>
+                                        <td>
+                                            {% if hospital.sigla %}
+                                            <span class="badge bg-primary">{{ hospital.sigla }}</span>
+                                            {% else %}
+                                            <span class="text-muted">Não informada</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-hash"></i> ID:</th>
+                                        <td><code>#{{ hospital.pk }}</code></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-warning">
+                                    <div class="card-body py-2">
+                                        <h6 class="card-title text-warning mb-2">
+                                            <i class="bi bi-exclamation-triangle"></i> Impacto
+                                        </h6>
+                                        <ul class="small mb-0">
+                                            <li>{{ hospital.setores.count }} setor{{ hospital.setores.count|pluralize:"es" }}</li>
+                                            <li>{{ hospital.matriculas.count }} profissional{{ hospital.matriculas.count|pluralize:"es" }}</li>
+                                            <li>{{ hospital.eventos.count }} evento{{ hospital.eventos.count|pluralize:"s" }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análise de Impacto -->
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="bi bi-clipboard-x"></i> Análise de Impacto
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-danger">
+                                    <i class="bi bi-x-circle"></i> O que será PERDIDO:
+                                </h6>
+                                <ul class="small">
+                                    <li><strong>Todos os {{ hospital.setores.count }} setores</strong> vinculados</li>
+                                    <li><strong>Todos os {{ hospital.eventos.count }} eventos</strong> de escala</li>
+                                    <li>Vinculação de <strong>{{ hospital.matriculas.count }} profissionais</strong></li>
+                                    <li>Histórico completo do hospital</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-success">
+                                    <i class="bi bi-check-circle"></i> O que será PRESERVADO:
+                                </h6>
+                                <ul class="small">
+                                    <li>Profissionais (apenas o vínculo será removido)</li>
+                                    <li>Outros hospitais do sistema</li>
+                                    <li>Setores de outros hospitais</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Avisos Críticos -->
+                        {% if hospital.setores.count > 0 or hospital.eventos.count > 0 %}
+                        <div class="alert alert-danger mt-3">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-exclamation-octagon"></i> AVISO CRÍTICO
+                            </h6>
+                            <ul class="mb-0">
+                                {% if hospital.setores.count > 0 %}
+                                <li>Existem {{ hospital.setores.count }} setor{{ hospital.setores.count|pluralize:"es" }} vinculados que também serão excluídos</li>
+                                {% endif %}
+                                {% if hospital.eventos.count > 0 %}
+                                <li>Existem {{ hospital.eventos.count }} evento{{ hospital.eventos.count|pluralize:"s" }} de escala que serão perdidos</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Alternativas -->
+                <div class="card mb-4 border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-lightbulb"></i> Alternativas Recomendadas
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="bi bi-archive"></i> Arquivar</h6>
+                                <p class="small mb-2">
+                                    Em vez de excluir, você pode marcar o hospital como "inativo".
+                                </p>
+                                <a href="#" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-archive"></i> Arquivar Hospital
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="bi bi-arrow-left-right"></i> Transferir Dados</h6>
+                                <p class="small mb-2">
+                                    Transfira setores e profissionais para outro hospital antes de excluir.
+                                </p>
+                                <a href="#" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-arrow-left-right"></i> Transferir Dados
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulário de Confirmação -->
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+
+                    <div class="card mb-4 border-dark">
+                        <div class="card-header bg-dark text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-shield-check"></i> Confirmação Final
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirmImpact" required>
+                                <label class="form-check-label" for="confirmImpact">
+                                    <strong>Eu compreendo que {{ hospital.setores.count }} setor{{ hospital.setores.count|pluralize:"es" }} serão excluídos</strong>
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirmEvents" required>
+                                <label class="form-check-label" for="confirmEvents">
+                                    <strong>Eu compreendo que {{ hospital.eventos.count }} evento{{ hospital.eventos.count|pluralize:"s" }} serão perdidos</strong>
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirmIrreversible" required>
+                                <label class="form-check-label" for="confirmIrreversible">
+                                    <strong>Eu compreendo que esta ação é irreversível</strong>
+                                </label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmText" class="form-label">
+                                    <strong>Digite "EXCLUIR {{ hospital.nome|upper }}" para confirmar:</strong>
+                                </label>
+                                <input type="text" class="form-control" id="confirmText" 
+                                       placeholder='Digite "EXCLUIR {{ hospital.nome|upper }}"' 
+                                       pattern="EXCLUIR {{ hospital.nome|upper }}"
+                                       required>
+                                <div class="form-text">
+                                    Esta medida de segurança evita exclusões acidentais
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'hospital_detail' hospital.pk %}" class="btn btn-success">
+                                <i class="bi bi-arrow-left"></i> Cancelar e Voltar
+                            </a>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="showPreview()">
+                                <i class="bi bi-eye"></i> Visualizar Impacto
+                            </button>
+                            <button type="submit" class="btn btn-danger" id="deleteButton" disabled>
+                                <i class="bi bi-trash"></i> Confirmar Exclusão
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Mensagem Final -->
+        <div class="text-center mt-4">
+            <p class="text-muted small">
+                <i class="bi bi-info-circle"></i>
+                Em caso de dúvidas, entre em contato com o administrador do sistema.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pré-visualização -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="bi bi-binoculars"></i> Pré-visualização do Impacto
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Itens que serão excluídos:</h6>
+                <ul>
+                    {% for setor in hospital.setores.all %}
+                    <li>Setor: {{ setor.nome }} ({{ setor.matriculas.count }} profissionais)</li>
+                    {% endfor %}
+                </ul>
+                <p class="text-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Total de {{ hospital.setores.count|add:hospital.eventos.count }} itens serão removidos permanentemente.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButton = document.getElementById('deleteButton');
+        const confirmText = document.getElementById('confirmText');
+        const checkboxes = document.querySelectorAll('.form-check-input');
+        const deleteForm = document.getElementById('deleteForm');
+
+        function validateForm() {
+            const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            const textMatches = confirmText.value === 'EXCLUIR {{ hospital.nome|upper }}';
+            deleteButton.disabled = !(allChecked && textMatches);
+        }
+
+        // Validação em tempo real
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', validateForm);
+        });
+
+        confirmText.addEventListener('input', function() {
+            validateForm();
+            if (this.value.toUpperCase() === 'EXCLUIR {{ hospital.nome|upper }}'.toUpperCase()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+
+        // Modal de pré-visualização
+        window.showPreview = function() {
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+        };
+
+        // Confirmação final
+        deleteForm.addEventListener('submit', function(e) {
+            if (!deleteButton.disabled) {
+                const confirmed = confirm('Tem certeza absoluta que deseja excluir este hospital e todos os seus dados associados?');
+                if (!confirmed) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Desabilita botão e mostra loading
+                deleteButton.disabled = true;
+                deleteButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Excluindo...';
+
+                // Adiciona timer
+                setTimeout(() => {
+                    deleteButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Processando...';
+                }, 3000);
+            } else {
+                e.preventDefault();
+                alert('Por favor, preencha todos os campos de confirmação corretamente.');
+            }
+        });
+
+        // Foco no campo de texto
+        confirmText.focus();
+    });
+</script>
+
+<style>
+    .is-valid {
+        border-color: #198754 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    }
+
+    .card {
+        transition: transform 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    #deleteButton:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}

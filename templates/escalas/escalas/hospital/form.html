@@ -1,0 +1,277 @@
+<!-- escalas/templates/escalas/hospital/form.html -->
+{% extends 'escalas/base.html' %}
+
+{% block title %}{{ title }} - Sistema de Escalas{% endblock %}
+
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center">
+        <div>{{ title }}</div>
+        <div>
+            <a href="{% url 'hospital_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-hospital"></i>
+                    {% if form.instance.pk %}Editar Hospital{% else %}Cadastrar Novo Hospital{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Mensagens de erro gerais -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Erros encontrados:</strong>
+                        <ul class="mb-0 mt-1">
+                            {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- Nome do Hospital -->
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.nome.id_for_label }}" class="form-label fw-bold">
+                                {{ form.nome.label }} *
+                            </label>
+                            {{ form.nome }}
+                            {% if form.nome.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.nome.errors %}
+                                <i class="bi bi-x-circle"></i> {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> Nome completo do hospital
+                            </div>
+                        </div>
+
+                        <!-- Sigla -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.sigla.id_for_label }}" class="form-label fw-bold">
+                                {{ form.sigla.label }}
+                            </label>
+                            {{ form.sigla }}
+                            {% if form.sigla.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.sigla.errors %}
+                                <i class="bi bi-x-circle"></i> {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> Sigla ou abreviação (ex: HGG, UPA)
+                            </div>
+                        </div>
+
+                        <!-- Campos ocultos para valor inicial -->
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-end h-100">
+                                <div class="card border-info w-100">
+                                    <div class="card-body py-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-hash"></i>
+                                            {% if form.instance.pk %}
+                                                ID: {{ form.instance.pk }}
+                                            {% else %}
+                                                Novo registro
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card de informações -->
+                    <div class="card border-info mb-4">
+                        <div class="card-header bg-info bg-opacity-10">
+                            <h6 class="mb-0">
+                                <i class="bi bi-lightbulb"></i> Informações Importantes
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0 small">
+                                <li>Após cadastrar o hospital, você poderá adicionar setores</li>
+                                <li>A sigla é opcional, mas ajuda na identificação</li>
+                                <li>O nome do hospital deve ser único no sistema</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Botões de ação -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a href="{% url 'hospital_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> {{ action }}
+                            </button>
+                            {% if form.instance.pk %}
+                            <a href="{% url 'hospital_create' %}" class="btn btn-outline-primary ms-2">
+                                <i class="bi bi-plus-circle"></i> Novo
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel lateral de ajuda -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-question-circle"></i> Ajuda
+                </h6>
+            </div>
+            <div class="card-body">
+                <h6><i class="bi bi-star"></i> Campos Obrigatórios</h6>
+                <ul class="small mb-3">
+                    <li><strong>Nome do Hospital</strong>: Deve ser único e descritivo</li>
+                </ul>
+
+                <h6><i class="bi bi-lightbulb"></i> Dicas</h6>
+                <ul class="small">
+                    <li>Use siglas curtas (máx. 20 caracteres)</li>
+                    <li>Verifique se o hospital já não existe</li>
+                    <li>Após salvar, você será redirecionado</li>
+                </ul>
+
+                {% if form.instance.pk %}
+                <hr>
+                <h6><i class="bi bi-clock-history"></i> Histórico</h6>
+                <ul class="small">
+                    <li>Criado: {{ form.instance.data_criacao|default:"N/A" }}</li>
+                    <li>Atualizado: {{ form.instance.data_atualizacao|default:"N/A" }}</li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-warning">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightning"></i> Ações Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'hospital_list' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-list"></i> Listar Hospitais
+                    </a>
+                    {% if form.instance.pk %}
+                    <a href="{% url 'setor_create' %}" class="btn btn-outline-success">
+                        <i class="bi bi-plus-lg"></i> Adicionar Setor
+                    </a>
+                    <a href="{% url 'hospital_detail' form.instance.pk %}" class="btn btn-outline-info">
+                        <i class="bi bi-eye"></i> Ver Detalhes
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Adiciona classes Bootstrap aos inputs
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control') && 
+                !input.classList.contains('form-check-input') &&
+                !input.classList.contains('form-select')) {
+                input.classList.add('form-control');
+            }
+        });
+
+        // Foco no primeiro campo
+        const firstInput = document.querySelector('input[type="text"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
+
+        // Validação em tempo real
+        const nomeInput = document.getElementById('{{ form.nome.id_for_label }}');
+        if (nomeInput) {
+            nomeInput.addEventListener('blur', function() {
+                if (this.value.trim().length > 0 && this.value.trim().length < 3) {
+                    this.classList.add('is-invalid');
+                    const errorDiv = this.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('form-text')) {
+                        errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Nome muito curto (mín. 3 caracteres)';
+                        errorDiv.classList.remove('text-muted');
+                        errorDiv.classList.add('text-danger');
+                    }
+                } else {
+                    this.classList.remove('is-invalid');
+                    const errorDiv = this.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('form-text')) {
+                        errorDiv.innerHTML = '<i class="bi bi-info-circle"></i> Nome completo do hospital';
+                        errorDiv.classList.remove('text-danger');
+                        errorDiv.classList.add('text-muted');
+                    }
+                }
+            });
+        }
+
+        // Validação da sigla
+        const siglaInput = document.getElementById('{{ form.sigla.id_for_label }}');
+        if (siglaInput) {
+            siglaInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+            });
+        }
+
+        // Prevenir envio duplo do formulário
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const submitButton = this.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Processando...';
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    .is-invalid:focus {
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+    }
+</style>
+{% endblock %}
