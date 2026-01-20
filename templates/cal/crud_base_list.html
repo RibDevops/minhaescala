@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo|default:"Gerenciamento" }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ titulo }}</h1>
+    <a href="{% url create_url %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Novo
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        {% for label in labels %}
+                        <th>{{ label }}</th>
+                        {% endfor %}
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obj in objetos %}
+                    <tr>
+                        {% block table_rows %}{% endblock %}
+                        <td class="text-end">
+                            <a href="{% url update_url obj.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url delete_url obj.pk %}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ labels|length|add:1 }}" class="text-center text-muted py-4">
+                            Nenhum registro encontrado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'cal/crud_base_list.html' %}
+
+{% block table_rows %}
+<td>{{ obj.nome }}</td>
+<td>{{ obj.hospital.nome }}</td>
+{% endblock %}
