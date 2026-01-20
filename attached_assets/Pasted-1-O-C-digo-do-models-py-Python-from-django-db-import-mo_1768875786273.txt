@@ -1,3 +1,6 @@
+1. O Código do models.py
+Python
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -112,3 +115,63 @@ class EventoEscala(models.Model):
     def __str__(self):
         # Nome formatado para exibição clara no calendário do Admin
         return f"{self.profissional.nome_exibicao} | {self.tipo_evento.codigo} | {self.setor.nome}"
+
+2. O Código do admin.py
+Python
+
+from django.contrib import admin
+from .models import Hospital, Setor, Periodo, TipoEvento, PerfilUsuario, Matricula, EventoEscala
+
+@admin.register(EventoEscala)
+class EventoEscalaAdmin(admin.ModelAdmin):
+    list_display = ('data', 'profissional_nome', 'tipo_evento', 'setor', 'hospital')
+    list_filter = ('hospital', 'setor', 'tipo_evento', 'data')
+    search_fields = ('profissional__nome_exibicao', 'profissional__numero')
+    date_hierarchy = 'data'
+    
+    def profissional_nome(self, obj):
+        return obj.profissional.nome_exibicao
+    profissional_nome.short_description = 'Profissional'
+
+@admin.register(Matricula)
+class MatriculaAdmin(admin.ModelAdmin):
+    list_display = ('numero', 'nome_exibicao', 'carga_horaria_semanal')
+    filter_horizontal = ('hospitais', 'setores')
+
+admin.site.register(Hospital)
+admin.site.register(Setor)
+admin.site.register(Periodo)
+admin.site.register(TipoEvento)
+admin.site.register(PerfilUsuario)
+
+3. Orientação para a IA do Replit (Prompt de Aplicação)
+
+Copie e cole este comando exatamente como está para que o Replit processe sem erros:
+
+    "IA do Replit, por favor atualize meu projeto Django. Como estou utilizando o modo free, realize as operações de forma otimizada e sequencial:
+
+        Substitua todo o conteúdo do arquivo models.py pelo novo código fornecido (que inclui a lógica de carga_horaria_semanal na Matricula e o campo contabiliza_carga_horaria no TipoEvento).
+
+        Remova completamente a classe Escala e renomeie/ajuste a classe de plantões para EventoEscala.
+
+        Atualize o arquivo admin.py com as configurações de list_display e filter_horizontal para que o nome de exibição apareça corretamente no calendário do painel administrativo.
+
+        No terminal, execute os seguintes comandos em ordem:
+
+            python manage.py makemigrations
+
+            python manage.py migrate
+
+        Se houver conflitos de migração por causa da remoção da classe Escala, tente deletar os arquivos da pasta migrations (exceto __init__.py) e rodar makemigrations novamente, pois estamos em fase inicial de desenvolvimento.
+
+        Garanta que o método save() em EventoEscala chame self.full_clean() para que as validações de carga horária e de vínculos hospitalares funcionem no Admin."
+
+O que mudou e por que é melhor?
+
+    Nome na Exibição: O __str__ do EventoEscala agora retorna o nome de exibição do profissional e o setor, facilitando muito a leitura em calendários.
+
+    Carga Horária Semanal: Agora você define se o enfermeiro é 20h, 30h, 40h na ficha dele (Matricula).
+
+    Filtro TPD: Ao criar o tipo de evento "TPD", basta desmarcar a caixa no Admin e ele será ignorado no cálculo de horas, permitindo extras sem travar o sistema.
+
+    Inteligência do Modo Free: O prompt para o Replit foi desenhado para ser direto, evitando loops de erro que consomem o limite de uso da IA.

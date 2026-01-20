@@ -1,5 +1,5 @@
 from calendar import HTMLCalendar
-from .models import Plantao
+from .models import EventoEscala
 
 class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None, plantoes=None):
@@ -14,21 +14,18 @@ class Calendar(HTMLCalendar):
         resumo = {}
         
         for plantao in plantoes_do_dia:
-            # Prioriza o campo 'nome', depois 'nome_completo'
-            nome_exibicao = plantao.enfermeiro.nome or plantao.enfermeiro.nome_completo
+            # Prioriza o campo 'nome_exibicao'
+            nome_exibicao = plantao.profissional.nome_exibicao
             
-            # Adicionando o código do plantão e as horas (trata o caso de tipo_evento ser None)
-            codigo = plantao.tipo_evento.codigo if plantao.tipo_evento else 'N/A'
-            horas = plantao.tipo_evento.horas if plantao.tipo_evento else 0
+            # Adicionando o código do plantão e as horas
+            codigo = plantao.tipo_evento.codigo
+            horas = plantao.tipo_evento.horas
             d += f'<li>{nome_exibicao} ({codigo} - {horas}h)</li>'
             
-            # Contagem por especialidade (dos enfermeiros escalados no dia)
-            for esp in plantao.enfermeiro.especialidades.all():
-                esp_nome = esp.nome
-                resumo[esp_nome] = resumo.get(esp_nome, 0) + 1
-            
-            if not plantao.enfermeiro.especialidades.exists():
-                resumo['S/E'] = resumo.get('S/E', 0) + 1
+            # Contagem por tipo de evento (ou especialidade se preferir)
+            # Como a Especialidade foi removida no novo modelo, vamos usar o código do evento como resumo ou o setor
+            chave_resumo = plantao.tipo_evento.codigo
+            resumo[chave_resumo] = resumo.get(chave_resumo, 0) + 1
 
         resumo_html = ''
         if resumo:

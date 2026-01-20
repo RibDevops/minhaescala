@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
-from ..models import Plantao, Enfermeiro, Escala, TipoEvento, Hospital, Setor
+from ..models import EventoEscala, Matricula, TipoEvento, Hospital, Setor
 from ..forms import PlantaoForm
 from ..utils import Calendar
 
@@ -29,9 +29,7 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         else:
             ultimo_dia = primeiro_dia.replace(month=primeiro_dia.month+1, day=1) - timedelta(days=1)
         
-        plantoes = Plantao.objects.filter(data__range=[primeiro_dia, ultimo_dia])
-        # Removida a restrição de visualização para profissionais
-        # Qualquer usuário logado pode ver todos os plantões no calendário
+        plantoes = EventoEscala.objects.filter(data__range=[primeiro_dia, ultimo_dia])
         
         cal = Calendar(d.year, d.month, plantoes)
         html_cal = cal.formatmonth(withyear=True)
@@ -51,8 +49,8 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['enfermeiros'] = Enfermeiro.objects.all()
-        context['tipos_plantao'] = TipoPlantao.objects.all()
+        context['enfermeiros'] = Matricula.objects.all()
+        context['tipos_plantao'] = TipoEvento.objects.all()
         context['hospitais'] = Hospital.objects.all()
         context['setores'] = Setor.objects.all()
         return context
@@ -69,7 +67,7 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
             messages.error(request, 'Dados inválidos')
             return redirect('cal:event_new')
 
-        enfermeiro = get_object_or_404(Enfermeiro, pk=enfermeiro_id)
+        enfermeiro = get_object_or_404(Matricula, pk=enfermeiro_id)
         
         for i in range(len(datas)):
             if not datas[i] or not tipos[i]: continue
@@ -79,27 +77,21 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
             setor = get_object_or_404(Setor, pk=setores[i])
             hospital = get_object_or_404(Hospital, pk=hospitais[i])
             
-            escala, _ = Escala.objects.get_or_create(
-                mes_referencia=data_dt.replace(day=1),
-                setor=setor,
-                defaults={'criado_por': request.user}
-            )
-            
-            Plantao.objects.create(
-                escala=escala,
-                enfermeiro=enfermeiro,
+            EventoEscala.objects.create(
+                profissional=enfermeiro,
                 tipo_evento=tipo,
                 data=data_dt,
                 setor=setor,
                 hospital=hospital,
-                observacoes=obs[i] if i < len(obs) else ''
+                observacoes=obs[i] if i < len(obs) else '',
+                criado_por=request.user
             )
             
-        messages.success(request, f'Plantões registrados para {enfermeiro.nome_completo}')
+        messages.success(request, f'Plantões registrados para {enfermeiro.nome_exibicao}')
         return redirect('cal:calendar')
 
 class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
-    model = Plantao
+    model = EventoEscala
     form_class = PlantaoForm
     template_name = 'cal/event.html'
     success_url = reverse_lazy('cal:calendar')
@@ -110,19 +102,19 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
 class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
-    model = Plantao
+    model = EventoEscala
     success_url = reverse_lazy('cal:calendar')
 
 class MeusPlantoesListView(LoginRequiredMixin, ListView):
-    model = Plantao
+    model = EventoEscala
     template_name = 'cal/lista_eventos.html'
     context_object_name = 'eventos'
     def get_queryset(self):
-        if hasattr(self.request.user, 'perfil') and hasattr(self.request.user.perfil, 'enfermeiro'):
-            return Plantao.objects.filter(enfermeiro=self.request.user.perfil.enfermeiro, data__gte=date.today()).order_by('data')
-        return Plantao.objects.none()
+        if hasattr(self.request.user, 'perfil') and hasattr(self.request.user.perfil, 'matricula'):
+            return EventoEscala.objects.filter(profissional=self.request.user.perfil.matricula, data__gte=date.today()).order_by('data')
+        return EventoEscala.objects.none()
 
 def excluir_evento(request, event_id):
-    p = get_object_or_404(Plantao, pk=event_id)
+    p = get_object_or_404(EventoEscala, pk=event_id)
     p.delete()
     return redirect('cal:listar_eventos')

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Plantao, Enfermeiro, Hospital, Setor, TipoEvento, Periodo, Especialidade, Matricula
+from .models import EventoEscala, Matricula, Hospital, Setor, TipoEvento, Periodo, PerfilUsuario
 from datetime import datetime
 
 class UserRegisterForm(forms.ModelForm):
@@ -35,8 +35,8 @@ class UsuarioPasswordResetForm(forms.Form):
 
 class PlantaoForm(forms.ModelForm):
     class Meta:
-        model = Plantao
-        fields = ['enfermeiro', 'tipo_evento', 'data', 'setor', 'hospital', 'observacoes']
+        model = EventoEscala
+        fields = ['profissional', 'tipo_evento', 'data', 'setor', 'hospital', 'observacoes']
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'observacoes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
@@ -50,8 +50,8 @@ class PlantaoForm(forms.ModelForm):
         
         if user and hasattr(user, 'perfil'):
             if user.perfil.tipo_usuario == 'ESCALANTE':
-                enf = getattr(user.perfil, 'enfermeiro_perfil', None)
-                if enf:
-                    self.fields['enfermeiro'].queryset = Enfermeiro.objects.filter(setores__in=enf.setores.all())
-                    self.fields['setor'].queryset = enf.setores.all()
-                    self.fields['hospital'].queryset = Hospital.objects.filter(id__in=enf.hospitais.all())
+                matricula = getattr(user.perfil, 'matricula', None)
+                if matricula:
+                    self.fields['profissional'].queryset = Matricula.objects.filter(setores__in=matricula.setores.all())
+                    self.fields['setor'].queryset = matricula.setores.all()
+                    self.fields['hospital'].queryset = Hospital.objects.filter(id__in=matricula.hospitais.all())

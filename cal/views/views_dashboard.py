@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from ..models import Plantao, Enfermeiro, Hospital, Setor
+from ..models import EventoEscala, Matricula, Hospital, Setor
 from django.db.models import Count, Sum
 from django.contrib.auth.decorators import login_required
 from datetime import date
@@ -12,43 +12,35 @@ def dashboard(request):
     mes_selecionado = int(request.GET.get('mes', hoje.month))
     ano_selecionado = int(request.GET.get('ano', hoje.year))
     
-    plantoes_base = Plantao.objects.filter(
+    eventos_base = EventoEscala.objects.filter(
         data__year=ano_selecionado,
         data__month=mes_selecionado
     )
     
     if not user.is_staff and not (hasattr(user, 'perfil') and user.perfil.tipo_usuario in ['ESCALANTE', 'CHEFE', 'ADMIN']):
-        if hasattr(user, 'perfil') and hasattr(user.perfil, 'enfermeiro'):
-            plantoes_base = plantoes_base.filter(enfermeiro=user.perfil.enfermeiro)
+        if hasattr(user, 'perfil') and hasattr(user.perfil, 'matricula'):
+            eventos_base = eventos_base.filter(profissional=user.perfil.matricula)
         else:
-            plantoes_base = plantoes_base.none()
+            eventos_base = eventos_base.none()
 
-    total_plantoes = plantoes_base.count()
-    total_horas = plantoes_base.aggregate(total=Sum('tipo_plantao__horas'))['total'] or 0
+    total_plantoes = eventos_base.count()
+    total_horas = eventos_base.aggregate(total=Sum('tipo_evento__horas'))['total'] or 0
     
-    # Distribuição por Tipo de Plantão
-    por_tipo = plantoes_base.values('tipo_plantao__codigo').annotate(total=Count('id')).order_by('-total')
+    # Distribuição por Tipo de Evento
+    por_tipo = eventos_base.values('tipo_evento__codigo').annotate(total=Count('id')).order_by('-total')
     
     # Dados para Gráficos
-    # 1. Profissionais por Dia
-    profissionais_por_dia = list(plantoes_base.values('data__day').annotate(total=Count('enfermeiro', distinct=True)).order_by('data__day'))
+    profissionais_por_dia = list(eventos_base.values('data__day').annotate(total=Count('profissional', distinct=True)).order_by('data__day'))
     
-    # 2. Profissionais por Turno (Período)
-    profissionais_por_turno = list(plantoes_base.values('tipo_plantao__periodo').annotate(total=Count('enfermeiro', distinct=True)))
-    
-    # Mapeamento de períodos para nomes amigáveis
-    # Buscando o modelo TipoPlantao corretamente
-    from ..models import TipoPlantao
-    periodo_map = dict(TipoPlantao.PERIODO_CHOICES)
-    for item in profissionais_por_turno:
-        item['periodo_nome'] = periodo_map.get(item['tipo_plantao__periodo'], item['tipo_plantao__periodo'])
+    # Profissionais por Turno (Período)
+    profissionais_por_turno = list(eventos_base.values('tipo_evento__periodo__nome').annotate(total=Count('profissional', distinct=True)))
 
-    # Top Profissionais (se tiver permissão)
+    # Top Profissionais
     top_profissionais = None
     if user.is_staff or (hasattr(user, 'perfil') and user.perfil.tipo_usuario != 'PROFISSIONAL'):
-        top_profissionais = plantoes_base.values('enfermeiro__nome').annotate(
+        top_profissionais = eventos_base.values('profissional__nome_exibicao').annotate(
             total=Count('id'),
-            horas=Sum('tipo_plantao__horas')
+            horas=Sum('tipo_evento__horas')
         ).order_by('-horas')[:5]
 
     anos_disponiveis = range(hoje.year - 2, hoje.year + 2)
@@ -67,6 +59,6 @@ def dashboard(request):
         'top_profissionais': top_profissionais,
         'grafico_dias_labels': [item['data__day'] for item in profissionais_por_dia],
         'grafico_dias_valores': [item['total'] for item in profissionais_por_dia],
-        'grafico_turnos_labels': [item['periodo_nome'] for item in profissionais_por_turno],
+        'grafico_turnos_labels': [item['tipo_evento__periodo__nome'] for item in profissionais_por_turno],
         'grafico_turnos_valores': [item['total'] for item in profissionais_por_turno],
     })
