@@ -1,0 +1,60 @@
+<!-- escalas/templates/escalas/periodo/confirm_delete.html -->
+{% extends 'escalas/base.html' %}
+
+{% block title %}Excluir Período - Sistema de Escalas{% endblock %}
+
+{% block page_title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body text-center">
+        <div class="alert alert-danger mb-4">
+            <h4 class="alert-heading">
+                <i class="bi bi-exclamation-triangle"></i> Atenção!
+            </h4>
+            <p>Você está prestes a excluir o período:</p>
+            <h5 class="my-3">{{ periodo.nome }} ({{ periodo.sigla }})</h5>
+        </div>
+        
+        {% if periodo.tipos_evento.exists %}
+        <div class="alert alert-warning">
+            <h6><i class="bi bi-info-circle"></i> Este período está vinculado a:</h6>
+            <ul class="text-start">
+                <li>{{ periodo.tipos_evento.count }} tipos de evento</li>
+                <li>Esses tipos de evento não poderão ser utilizados</li>
+                <li>Considere alterar o período dos tipos de evento primeiro</li>
+            </ul>
+            
+            <div class="mt-3">
+                <h6>Tipos de Evento vinculados:</h6>
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    {% for tipo in periodo.tipos_evento.all|slice:":5" %}
+                    <span class="badge bg-secondary">{{ tipo.codigo }}</span>
+                    {% endfor %}
+                    {% if periodo.tipos_evento.count > 5 %}
+                    <span class="badge bg-secondary">+{{ periodo.tipos_evento.count|add:"-5" }} mais</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-lg" 
+                    {% if periodo.tipos_evento.exists %}disabled{% endif %}>
+                <i class="bi bi-trash"></i> Confirmar Exclusão
+            </button>
+            <a href="{% url 'periodo_list' %}" class="btn btn-secondary btn-lg">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </form>
+        
+        {% if periodo.tipos_evento.exists %}
+        <div class="mt-3 text-muted">
+            <small><i class="bi bi-exclamation-circle"></i> Remova os tipos de evento primeiro</small>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

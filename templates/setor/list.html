@@ -1,0 +1,128 @@
+<!-- escalas/templates/escalas/setor/list.html -->
+{% extends 'escalas/base.html' %}
+
+{% block title %}Setores - Sistema de Escalas{% endblock %}
+
+{% block page_title %}Setores ({{ total_count }}){% endblock %}
+
+{% block actions %}
+    <a href="{% url 'setor_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Novo Setor
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="hospital" class="form-label">Filtrar por Hospital:</label>
+                <select name="hospital" id="hospital" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todos os Hospitais</option>
+                    {% for hospital in hospitais %}
+                    <option value="{{ hospital.id }}" 
+                            {% if selected_hospital == hospital.id|stringformat:"i" %}selected{% endif %}>
+                        {{ hospital.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+                {% if selected_hospital %}
+                <a href="{% url 'setor_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Limpar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Hospital</th>
+                    <th>Sigla</th>
+                    <th>Profissionais</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for setor in page_obj %}
+                <tr>
+                    <td>{{ setor.nome }}</td>
+                    <td>{{ setor.hospital.nome }}</td>
+                    <td>
+                        {% if setor.hospital.sigla %}
+                            <span class="badge bg-secondary">{{ setor.hospital.sigla }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-info">{{ setor.matriculas.count }}</span>
+                    </td>
+                    <td class="table-actions text-end">
+                        <a href="{% url 'setor_update' setor.pk %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'setor_delete' setor.pk %}" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        {% if selected_hospital %}
+                            Nenhum setor encontrado para este hospital.
+                        {% else %}
+                            Nenhum setor cadastrado.
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginação">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_hospital %}&hospital={{ selected_hospital }}{% endif %}">
+                        &laquo;
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if selected_hospital %}&hospital={{ selected_hospital }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_hospital %}&hospital={{ selected_hospital }}{% endif %}">
+                        &raquo;
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

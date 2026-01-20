@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = 'cal'
@@ -23,4 +23,11 @@ urlpatterns = [
     path('plantao/<int:pk>/excluir/', views.PlantaoDeleteView.as_view(), name='plantao_delete'),
     path('eventos/', views.MeusPlantoesListView.as_view(), name='listar_eventos'),
     path('eventos/excluir/<int:event_id>/', views.excluir_evento, name='excluir_evento'),
+
+    path('hospitais/', include('cal.urls.hospital_urls')),
+    path('setores/', include('cal.urls.setor_urls')),
+    path('periodos/', include('cal.urls.periodo_urls')),
+    path('tipos-evento/', include('cal.urls.tipo_evento_urls')),
+    path('especialidades/', include('cal.urls.especialidade_urls')),
+    path('matriculas/', include('cal.urls.matricula_urls')),
 ]

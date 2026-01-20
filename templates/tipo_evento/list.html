@@ -1,0 +1,108 @@
+<!-- escalas/templates/escalas/tipo_evento/list.html -->
+{% extends 'escalas/base.html' %}
+
+{% block title %}Tipos de Evento - Sistema de Escalas{% endblock %}
+
+{% block page_title %}Tipos de Evento ({{ total_count }}){% endblock %}
+
+{% block actions %}
+    <a href="{% url 'tipo_evento_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Novo Tipo
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Período</th>
+                    <th>Horas</th>
+                    <th>Contabiliza</th>
+                    <th>Cor</th>
+                    <th>Eventos</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tipo in page_obj %}
+                <tr>
+                    <td>
+                        <span class="badge bg-dark">{{ tipo.codigo }}</span>
+                    </td>
+                    <td>{{ tipo.nome }}</td>
+                    <td>
+                        <span class="badge bg-primary">{{ tipo.periodo.sigla }}</span>
+                    </td>
+                    <td>
+                        <span class="badge {% if tipo.horas >= 12 %}bg-danger{% elif tipo.horas >= 8 %}bg-warning{% else %}bg-success{% endif %}">
+                            {{ tipo.horas }}h
+                        </span>
+                    </td>
+                    <td>
+                        {% if tipo.contabiliza_carga_horaria %}
+                        <span class="badge bg-success">Sim</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Não (TPD)</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="width: 20px; height: 20px; background-color: {{ tipo.cor }}; border-radius: 3px; border: 1px solid #ddd;"></div>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">{{ tipo.eventos.count }}</span>
+                    </td>
+                    <td class="table-actions text-end">
+                        <a href="{% url 'tipo_evento_update' tipo.pk %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'tipo_evento_delete' tipo.pk %}" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">
+                        Nenhum tipo de evento cadastrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginação">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

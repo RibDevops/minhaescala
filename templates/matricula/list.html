@@ -1,0 +1,170 @@
+<!-- escalas/templates/escalas/matricula/list.html -->
+{% extends 'escalas/base.html' %}
+
+{% block title %}Matrículas - Sistema de Escalas{% endblock %}
+
+{% block page_title %}Profissionais ({{ total_count }}){% endblock %}
+
+{% block actions %}
+    <a href="{% url 'matricula_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nova Matrícula
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Buscar:</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Nome, matrícula..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <label for="hospital" class="form-label">Hospital:</label>
+                <select name="hospital" id="hospital" class="form-select">
+                    <option value="">Todos</option>
+                    {% for hospital in hospitais %}
+                    <option value="{{ hospital.id }}" 
+                            {% if selected_hospital == hospital.id|stringformat:"i" %}selected{% endif %}>
+                        {{ hospital.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="especialidade" class="form-label">Especialidade:</label>
+                <select name="especialidade" id="especialidade" class="form-select">
+                    <option value="">Todas</option>
+                    {% for esp in especialidades %}
+                    <option value="{{ esp.id }}" 
+                            {% if selected_especialidade == esp.id|stringformat:"i" %}selected{% endif %}>
+                        {{ esp.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                {% if search or selected_hospital or selected_especialidade %}
+                <a href="{% url 'matricula_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Matrícula</th>
+                    <th>Nome</th>
+                    <th>Nome de Exibição</th>
+                    <th>Carga Horária</th>
+                    <th>Hospitais</th>
+                    <th>Especialidades</th>
+                    <th>Eventos</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for matricula in page_obj %}
+                <tr>
+                    <td>
+                        <span class="badge bg-dark">{{ matricula.numero }}</span>
+                    </td>
+                    <td>{{ matricula.nome_completo }}</td>
+                    <td>
+                        <strong>{{ matricula.nome_exibicao }}</strong>
+                    </td>
+                    <td>
+                        <span class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}">
+                            {{ matricula.carga_horaria_semanal }}h/sem
+                        </span>
+                    </td>
+                    <td>
+                        {% for hospital in matricula.hospitais.all|slice:":2" %}
+                        <span class="badge bg-info">{{ hospital.sigla|default:hospital.nome|truncatechars:10 }}</span>
+                        {% endfor %}
+                        {% if matricula.hospitais.count > 2 %}
+                        <span class="badge bg-secondary">+{{ matricula.hospitais.count|add:"-2" }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% for esp in matricula.especialidades.all|slice:":2" %}
+                        <span class="badge bg-primary">{{ esp.nome|truncatechars:10 }}</span>
+                        {% endfor %}
+                        {% if matricula.especialidades.count > 2 %}
+                        <span class="badge bg-secondary">+{{ matricula.especialidades.count|add:"-2" }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">{{ matricula.eventos.count }}</span>
+                    </td>
+                    <td class="table-actions text-end">
+                        <a href="{% url 'matricula_detail' matricula.pk %}" class="btn btn-sm btn-info">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'matricula_update' matricula.pk %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'matricula_delete' matricula.pk %}" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">
+                        {% if search or selected_hospital or selected_especialidade %}
+                            Nenhum profissional encontrado com os filtros aplicados.
+                        {% else %}
+                            Nenhuma matrícula cadastrada.
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginação">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_hospital %}&hospital={{ selected_hospital }}{% endif %}{% if selected_especialidade %}&especialidade={{ selected_especialidade }}{% endif %}">
+                        &laquo;
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if selected_hospital %}&hospital={{ selected_hospital }}{% endif %}{% if selected_especialidade %}&especialidade={{ selected_especialidade }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_hospital %}&hospital={{ selected_hospital }}{% endif %}{% if selected_especialidade %}&especialidade={{ selected_especialidade }}{% endif %}">
+                        &raquo;
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
