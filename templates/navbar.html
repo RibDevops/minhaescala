@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark">
     <div class="container-fluid">
         <!-- Logo/Brand -->
-        <a class="navbar-brand" href="{% url 'cal:home' %}">Minha Escala</a>
+        <a class="navbar-brand" href="{% url 'cal:home' %}"><i class="bi bi-calendar3"></i> Minha Escala</a>
         
         <!-- Botão Toggler para Offcanvas -->
         <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
@@ -16,13 +16,25 @@
             </div>
             <div class="offcanvas-body">
                 <div class="navbar-nav me-auto">
+                    <a class="nav-link" href="{% url 'cal:home' %}"><i class="bi bi-house-door"></i> Home</a>
                     <a class="nav-link" href="{% url 'cal:calendar' %}">Calendário</a>
                     <a class="nav-link" href="{% url 'cal:event_new' %}">Novo Plantão</a>
-                    <a class="nav-link" href="{% url 'cal:listar_eventos' %}">Lista de Plantões</a>
                     <a class="nav-link" href="{% url 'cal:dashboard' %}">Dashboard</a>
                     
+                    {% if user.is_staff %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Gerenciamento
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="{% url 'cal:hospital_list' %}">Hospitais</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:setor_list' %}">Setores</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:matricula_list' %}">Matrículas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/">Painel Admin</a></li>
                         </ul>
                     </div>
+                    {% endif %}
                 </div>
                 <div class="navbar-nav">
                     {% if user.is_authenticated %}
