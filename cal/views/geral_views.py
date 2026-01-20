@@ -3,7 +3,9 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from cal.models import Hospital, Setor, Matricula, Especialidade
 
-# ... (AdminRequiredMixin permanece igual)
+class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_staff
 
 # Especialidade
 class EspecialidadeListView(AdminRequiredMixin, ListView):
@@ -43,10 +45,6 @@ class EspecialidadeDeleteView(AdminRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context.update({'titulo': 'Excluir Especialidade', 'cancel_url': reverse_lazy('cal:especialidade_list')})
         return context
-
-class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_staff
 
 # Hospital
 class HospitalListView(AdminRequiredMixin, ListView):
