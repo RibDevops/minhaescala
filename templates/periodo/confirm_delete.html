@@ -41,16 +41,11 @@ content %}
       <button
         type="submit"
         class="btn btn-danger btn-lg"
-        {%
-        if
-        periodo.tipos_evento.exists
-        %}disabled{%
-        endif
-        %}
+        {% if periodo.tipos_evento.exists %}disabled{% endif %}
       >
         <i class="bi bi-trash"></i> Confirmar Exclusão
       </button>
-      <a href="{% url 'periodo_list' %}" class="btn btn-secondary btn-lg">
+      <a href="{% url 'cal:periodo_list' %}" class="btn btn-secondary btn-lg">
         <i class="bi bi-x-circle"></i> Cancelar
       </a>
     </form>
