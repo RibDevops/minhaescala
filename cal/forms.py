@@ -35,8 +35,9 @@ class UsuarioPasswordResetForm(forms.Form):
 class PlantaoForm(forms.ModelForm):
     class Meta:
         model = EventoEscala
-        fields = ['profissional', 'tipo_evento', 'data', 'setor', 'hospital', 'observacoes']
+        fields = ['data', 'profissional', 'tipo_evento', 'hospital', 'setor', 'cor', 'observacoes']
         widgets = {
+            'cor': forms.TextInput(attrs={'type': 'color', 'class': 'form-control'}),
             'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'observacoes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
@@ -45,10 +46,16 @@ class PlantaoForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
+            if field != 'cor':
+                self.fields[field].widget.attrs.update({'class': 'form-control'})
         
         if user and hasattr(user, 'perfil'):
-            if user.perfil.tipo_usuario == 'ESCALANTE':
+            if user.perfil.tipo_usuario == 'PROFISSIONAL':
+                minha_matricula = user.perfil.matriculas.all()
+                self.fields['profissional'].queryset = minha_matricula
+                self.fields['profissional'].initial = minha_matricula.first()
+                self.fields['profissional'].widget.attrs['readonly'] = True
+            elif user.perfil.tipo_usuario == 'ESCALANTE':
                 matricula = user.perfil.matriculas.first()
                 if matricula:
                     self.fields['profissional'].queryset = Matricula.objects.filter(setor=matricula.setor)

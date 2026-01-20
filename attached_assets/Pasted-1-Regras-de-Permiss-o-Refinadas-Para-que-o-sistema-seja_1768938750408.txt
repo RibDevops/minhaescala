@@ -1,0 +1,160 @@
+1. Regras de Permissão Refinadas
+
+Para que o sistema seja seguro e funcional, as regras devem ser aplicadas na camada da View (QuerySet filtering):
+
+    Administrador: Acesso total (visualização, edição e exclusão de todos os registros).
+
+    Escalante: * Visualiza todos os eventos do seu Hospital e Setor.
+
+        Pode editar apenas os eventos criados por ele ou por outros escalantes do mesmo setor.
+
+        Importante: Não visualiza eventos marcados como "privados" por enfermeiros (registros que o enfermeiro fez para si mesmo).
+
+    Profissional (Enfermeiro):
+
+        Pode visualizar os eventos criados pelo Escalante para o setor dele (escala oficial).
+
+        Pode criar/editar seus próprios registros (ex: lembretes de plantão, trocas).
+
+        Privacidade: Registros criados pelo enfermeiro só são visíveis para ele mesmo.
+
+        Trava de Segurança: O enfermeiro só pode lançar eventos para a sua própria Matricula.
+
+2. Ajustes Necessários na Model
+
+Para suportar a diferenciação de cores por evento e facilitar o filtro, vamos ajustar a classe EventoEscala.
+O que mudou:
+
+    Adicionamos o campo cor para personalização individual do evento.
+
+    O campo criado_por agora é obrigatório para controle de permissões.
+
+Python
+
+class EventoEscala(models.Model):
+    # ... (campos anteriores mantidos)
+    cor = models.CharField(max_length=7, default='#3498db', verbose_name="Cor Personalizada", help_text="Cor específica para este evento")
+    criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='meus_eventos', verbose_name="Criado por")
+    # ...
+
+    def clean(self):
+        super().clean()
+        # Regra de Ouro: Enfermeiro só lança para ele mesmo
+        if self.criado_por and hasattr(self.criado_por, 'perfil'):
+            if self.criado_por.perfil.tipo_usuario == 'PROFISSIONAL':
+                # Verifica se a matrícula escolhida pertence ao usuário logado
+                if not self.profissional.perfil or self.profissional.perfil.user != self.criado_por:
+                    raise ValidationError("Você só pode registrar eventos para sua própria matrícula.")
+
+3. Prompt para o Replit (Copie e Cole)
+
+    Contexto: Estou desenvolvendo um sistema de escala hospitalar em Django. Preciso refinar a view de listagem de eventos e as permissões de acesso.
+
+    Tarefa: Ajuste a view evento_escala_list e o formulário de criação para seguir as seguintes regras de segurança:
+
+        Modelo: Adicione o campo cor (CharField, max_length=7, default='#3498db') à classe EventoEscala no arquivo models.py.
+
+        Filtro de Listagem (QuerySet):
+
+            Se o usuário for ADMIN, retorne EventoEscala.objects.all().
+
+            Se o usuário for ESCALANTE, retorne eventos do seu Hospital/Setor onde o criado_por__perfil__tipo_usuario seja 'ESCALANTE' ou 'ADMIN'. Ele não deve ver os registros privados dos enfermeiros.
+
+            Se o usuário for PROFISSIONAL, retorne: (Eventos criados por Escalantes/Admin para o setor dele) OU (Eventos criados por ele mesmo).
+
+        Segurança no Formulário:
+
+            No EventoEscalaForm, se o usuário for 'PROFISSIONAL', o campo profissional deve vir pré-selecionado com a matrícula dele e ser desabilitado ou oculto para evitar que ele registre para terceiros.
+
+            Adicione o seletor de cor no formulário.
+
+        Criptografia: Certifique-se de que se houver campos de observação sensíveis, eles utilizem o método de criptografia EncryptedCharField configurado anteriormente.
+
+    Resultado esperado: Código da view filtrado por permissão e arquivo de template evento_escala_form.html atualizado com o campo de cor.
+
+
+
+Com base na sua confirmação, aqui está o código técnico para a View filtrada e o Formulário com as travas de segurança.
+1. Ajuste na View (views.py)
+
+Esta lógica garante que cada usuário veja apenas o que lhe é permitido, tratando a hierarquia e a privacidade dos enfermeiros.
+Python
+
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def evento_escala_list(request):
+    user = request.user
+    perfil = user.perfil
+    
+    # 1. ADMIN: Vê absolutamente tudo
+    if perfil.tipo_usuario == 'ADMIN':
+        eventos = EventoEscala.objects.all()
+    
+    # 2. ESCALANTE: Vê o setor dele, mas não vê registros privados de enfermeiros
+    elif perfil.tipo_usuario == 'ESCALANTE':
+        # Busca a matrícula do escalante para saber o hospital/setor
+        matricula = user.perfil.matriculas.first() 
+        eventos = EventoEscala.objects.filter(
+            hospital=matricula.hospital,
+            setor=matricula.setor
+        ).exclude(
+            criado_por__perfil__tipo_usuario='PROFISSIONAL'
+        )
+    
+    # 3. PROFISSIONAL (Enfermeiro): Vê a escala oficial (Escalante) + Seus próprios registros
+    else:
+        matricula = user.perfil.matriculas.first()
+        eventos = EventoEscala.objects.filter(
+            Q(criado_por=user) | # Seus próprios registros
+            (Q(setor=matricula.setor) & Q(criado_por__perfil__tipo_usuario='ESCALANTE')) # Escala oficial
+        )
+
+    return render(request, 'eventos/list.html', {'eventos': eventos})
+
+2. Ajuste no Formulário (forms.py)
+
+O formulário impede que um enfermeiro lance plantões para outra pessoa.
+Python
+
+from django import forms
+from .models import EventoEscala
+
+class EventoEscalaForm(forms.ModelForm):
+    class Meta:
+        model = EventoEscala
+        fields = ['data', 'profissional', 'tipo_evento', 'hospital', 'setor', 'cor', 'observacoes']
+        widgets = {
+            'cor': forms.TextInput(attrs={'type': 'color'}), # Seletor de cor nativo
+            'data': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None) # Recebe o usuário logado da view
+        super().__init__(*args, **kwargs)
+        
+        if user and user.perfil.tipo_usuario == 'PROFISSIONAL':
+            # Trava o campo profissional para a matrícula do próprio usuário
+            minha_matricula = user.perfil.matriculas.all()
+            self.fields['profissional'].queryset = minha_matricula
+            self.fields['profissional'].initial = minha_matricula.first()
+            # Opcional: Desabilitar para não permitir troca no HTML
+            self.fields['profissional'].widget.attrs['readonly'] = True
+
+3. Prompt Consolidado para o Replit
+
+Copie este texto e envie para o chat do Replit para aplicar as mudanças de uma vez:
+Plaintext
+
+Ajuste o arquivo models.py, views.py e forms.py conforme as seguintes regras de negócio:
+
+1. No models.py, adicione o campo 'cor' (CharField, max_length=7) à classe EventoEscala e torne o campo 'criado_por' obrigatório.
+2. No forms.py, crie o EventoEscalaForm. Se o usuário for 'PROFISSIONAL', o campo 'profissional' deve ser restrito à matrícula dele. O campo 'cor' deve usar o widget de input tipo 'color'.
+3. Na view de listagem de eventos:
+   - Admin vê tudo.
+   - Escalante vê tudo do seu setor, exceto o que foi criado por usuários 'PROFISSIONAL'.
+   - Profissional vê o que ele mesmo criou e o que foi criado por 'ESCALANTE' para o seu setor.
+4. Na view de criação, garanta que o campo 'criado_por' seja preenchido automaticamente com o 'request.user'.
+
+Dica de Segurança: Como você está usando criptografia (Fernet) que configuramos antes, o campo observacoes na model EventoEscala agora está protegido contra leitura direta no banco de dados.

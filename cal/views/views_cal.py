@@ -93,12 +93,16 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
             data_dt = datetime.strptime(datas[i], '%Y-%m-%d').date()
             tipo = get_object_or_404(TipoEvento, pk=tipos[i])
             
+            # Use color from form if provided, otherwise default to tipo_evento color
+            cor_evento = request.POST.get('cor', tipo.cor)
+
             EventoEscala.objects.create(
                 profissional=enfermeiro,
                 tipo_evento=tipo,
                 data=data_dt,
                 setor=enfermeiro.setor,
                 hospital=enfermeiro.hospital,
+                cor=cor_evento,
                 observacoes=obs[i] if i < len(obs) else '',
                 criado_por=request.user
             )
@@ -121,14 +125,45 @@ class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
     model = EventoEscala
     success_url = reverse_lazy('cal:calendar')
 
+from django.db.models import Q
+
 class MeusPlantoesListView(LoginRequiredMixin, ListView):
     model = EventoEscala
     template_name = 'cal/lista_eventos.html'
     context_object_name = 'eventos'
+    
     def get_queryset(self):
-        if hasattr(self.request.user, 'perfil') and hasattr(self.request.user.perfil, 'matricula'):
-            return EventoEscala.objects.filter(profissional=self.request.user.perfil.matricula, data__gte=date.today()).order_by('data')
-        return EventoEscala.objects.none()
+        user = self.request.user
+        if not hasattr(user, 'perfil'):
+            return EventoEscala.objects.none()
+            
+        perfil = user.perfil
+        
+        # 1. ADMIN: Vê absolutamente tudo
+        if perfil.tipo_usuario == 'ADMIN':
+            return EventoEscala.objects.all().order_by('data')
+        
+        # 2. ESCALANTE: Vê o setor dele, mas não vê registros privados de enfermeiros
+        elif perfil.tipo_usuario == 'ESCALANTE':
+            matricula = perfil.matriculas.first() 
+            if not matricula:
+                return EventoEscala.objects.none()
+            return EventoEscala.objects.filter(
+                hospital=matricula.hospital,
+                setor=matricula.setor
+            ).exclude(
+                criado_por__perfil__tipo_usuario='PROFISSIONAL'
+            ).order_by('data')
+        
+        # 3. PROFISSIONAL (Enfermeiro): Vê a escala oficial (Escalante) + Seus próprios registros
+        else:
+            matricula = perfil.matriculas.first()
+            if not matricula:
+                return EventoEscala.objects.filter(criado_por=user).order_by('data')
+            return EventoEscala.objects.filter(
+                Q(criado_por=user) | # Seus próprios registros
+                (Q(setor=matricula.setor) & Q(criado_por__perfil__tipo_usuario='ESCALANTE')) # Escala oficial
+            ).order_by('data')
 
 def excluir_evento(request, event_id):
     p = get_object_or_404(EventoEscala, pk=event_id)

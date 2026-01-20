@@ -103,7 +103,8 @@ class EventoEscala(models.Model):
     tipo_evento = models.ForeignKey(TipoEvento, on_delete=models.PROTECT, related_name='eventos', verbose_name="Tipo de Evento")
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='eventos', verbose_name="Hospital")
     setor = models.ForeignKey(Setor, on_delete=models.CASCADE, related_name='eventos', verbose_name="Setor")
-    criado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Criado por")
+    cor = models.CharField(max_length=7, default='#3498db', verbose_name="Cor Personalizada", help_text="Cor específica para este evento")
+    criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='meus_eventos', verbose_name="Criado por", null=True, blank=True)
     observacoes = models.TextField(blank=True, null=True, verbose_name="Observações")
 
     class Meta:
@@ -120,19 +121,34 @@ class EventoEscala(models.Model):
         return sum(e.tipo_evento.horas for e in eventos)
 
     def clean(self):
+        super().clean()
+        # Regra de Ouro: Enfermeiro só lança para ele mesmo
+        if self.criado_por and hasattr(self.criado_por, 'perfil'):
+            if self.criado_por.perfil.tipo_usuario == 'PROFISSIONAL':
+                # Verifica se a matrícula escolhida pertence ao usuário logado
+                if not self.profissional.perfil or self.profissional.perfil.user != self.criado_por:
+                    raise ValidationError("Você só pode registrar eventos para sua própria matrícula.")
+
         if self.profissional_id and self.hospital_id:
-            if self.profissional.hospital != self.hospital:
-                raise ValidationError(f"O profissional não está vinculado ao hospital {self.hospital}.")
+            profissional = Matricula.objects.get(id=self.profissional_id)
+            hospital = Hospital.objects.get(id=self.hospital_id)
+            if profissional.hospital != hospital:
+                raise ValidationError(f"O profissional não está vinculado ao hospital {hospital}.")
 
         if self.setor_id and self.profissional_id:
-            if self.profissional.setor != self.setor:
-                raise ValidationError(f"O profissional não está alocado no setor {self.setor}.")
+            profissional = Matricula.objects.get(id=self.profissional_id)
+            setor = Setor.objects.get(id=self.setor_id)
+            if profissional.setor != setor:
+                raise ValidationError(f"O profissional não está alocado no setor {setor}.")
 
-        if self.profissional_id and self.tipo_evento_id and self.tipo_evento.contabiliza_carga_horaria:
-            horas_acumuladas = self.calcular_horas_semanais_acumuladas()
-            nova_soma = horas_acumuladas + self.tipo_evento.horas
-            if nova_soma > self.profissional.carga_horaria_semanal:
-                raise ValidationError(f"Alerta: Excesso de carga horária! O profissional já possui {horas_acumuladas}h nos últimos 7 dias. Com este evento, chegará a {nova_soma}h (Limite: {self.profissional.carga_horaria_semanal}h).")
+        if self.profissional_id and self.tipo_evento_id:
+            tipo_evento = TipoEvento.objects.get(id=self.tipo_evento_id)
+            if tipo_evento.contabiliza_carga_horaria:
+                horas_acumuladas = self.calcular_horas_semanais_acumuladas()
+                nova_soma = horas_acumuladas + tipo_evento.horas
+                profissional = Matricula.objects.get(id=self.profissional_id)
+                if nova_soma > profissional.carga_horaria_semanal:
+                    raise ValidationError(f"Alerta: Excesso de carga horária! O profissional já possui {horas_acumuladas}h nos últimos 7 dias. Com este evento, chegará a {nova_soma}h (Limite: {profissional.carga_horaria_semanal}h).")
 
     def save(self, *args, **kwargs):
         self.full_clean()
