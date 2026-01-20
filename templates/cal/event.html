@@ -18,7 +18,7 @@
                         <select name="enfermeiro" class="form-select form-select-lg" required>
                             <option value="">Selecione o Enfermeiro</option>
                             {% for e in enfermeiros %}
-                            <option value="{{ e.id }}">{{ e.nome|default:e.nome_completo }} ({{ e.matricula }})</option>
+                            <option value="{{ e.id }}">{{ e.nome_exibicao }} ({{ e.numero }})</option>
                             {% endfor %}
                         </select>
                         <div class="form-text">Selecione o profissional uma vez e adicione vários plantões abaixo.</div>
@@ -48,7 +48,7 @@
                                     <select name="tipo_plantao[]" class="form-select" required>
                                         <option value="">Selecione...</option>
                                         {% for t in tipos_plantao %}
-                                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.descricao }} ({{ t.horas }}h)</option>
+                                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.nome }} ({{ t.horas }}h)</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -58,14 +58,14 @@
                                         <div class="col-6">
                                             <select name="hospital[]" class="form-select form-select-sm" required>
                                                 {% for h in hospitais %}
-                                                <option value="{{ h.id }}">{{ h.nome_hospital }}</option>
+                                                <option value="{{ h.id }}">{{ h.nome }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
                                         <div class="col-6">
                                             <select name="setor[]" class="form-select form-select-sm" required>
                                                 {% for s in setores %}
-                                                <option value="{{ s.id }}">{{ s.nome_setor }}</option>
+                                                <option value="{{ s.id }}">{{ s.nome }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -117,7 +117,7 @@
                     <select name="tipo_plantao[]" class="form-select" required>
                         <option value="">Selecione...</option>
                         {% for t in tipos_plantao %}
-                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.descricao }} ({{ t.horas }}h)</option>
+                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.nome }} ({{ t.horas }}h)</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -127,14 +127,14 @@
                         <div class="col-6">
                             <select name="hospital[]" class="form-select form-select-sm" required>
                                 {% for h in hospitais %}
-                                <option value="{{ h.id }}">{{ h.nome_hospital }}</option>
+                                <option value="{{ h.id }}">{{ h.nome }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-6">
                             <select name="setor[]" class="form-select form-select-sm" required>
                                 {% for s in setores %}
-                                <option value="{{ s.id }}">{{ s.nome_setor }}</option>
+                                <option value="{{ s.id }}">{{ s.nome }}</option>
                                 {% endfor %}
                             </select>
                         </div>
