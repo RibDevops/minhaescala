@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
+from django.db.models import Q
 from ..models import EventoEscala, Matricula, TipoEvento
 from core.models import Hospital, Setor
 from ..forms import PlantaoForm
@@ -30,7 +31,19 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         else:
             ultimo_dia = primeiro_dia.replace(month=primeiro_dia.month+1, day=1) - timedelta(days=1)
         
+        user = self.request.user
+        perfil = getattr(user, 'cal_perfil', None)
         plantoes = EventoEscala.objects.filter(data__range=[primeiro_dia, ultimo_dia])
+        
+        if not user.is_staff and perfil:
+            if perfil.tipo == 'ESCALANTE':
+                if hasattr(user, 'matricula'):
+                    plantoes = plantoes.filter(hospital=user.matricula.hospital, setor=user.matricula.setor)
+            elif perfil.tipo == 'ENFERMEIRO':
+                if hasattr(user, 'matricula'):
+                    plantoes = plantoes.filter(
+                        Q(profissional=user.matricula) | Q(setor=user.matricula.setor)
+                    )
         
         cal = Calendar(d.year, d.month, plantoes)
         html_cal = cal.formatmonth(withyear=True)
@@ -50,17 +63,19 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
         user = self.request.user
+        perfil = getattr(user, 'cal_perfil', None)
+        
         if user.is_staff:
             context['enfermeiros'] = Matricula.objects.filter(ativo=True)
-        elif hasattr(user, 'matricula') and user.matricula:
-            matricula = user.matricula
+        elif perfil and perfil.tipo == 'ESCALANTE' and hasattr(user, 'matricula'):
             context['enfermeiros'] = Matricula.objects.filter(
-                hospital=matricula.hospital,
-                setor=matricula.setor,
+                hospital=user.matricula.hospital,
+                setor=user.matricula.setor,
                 ativo=True
             )
+        elif perfil and perfil.tipo == 'ENFERMEIRO' and hasattr(user, 'matricula'):
+            context['enfermeiros'] = Matricula.objects.filter(id=user.matricula.id)
         else:
             context['enfermeiros'] = Matricula.objects.none()
             
@@ -80,16 +95,20 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
 
         enfermeiro = get_object_or_404(Matricula, pk=enfermeiro_id)
         
-        if not enfermeiro.hospital or not enfermeiro.setor:
-            messages.error(request, f'O profissional {enfermeiro.nome_guerra} não possui hospital ou setor vinculado.')
-            return redirect('cal:event_new')
+        user = request.user
+        perfil = getattr(user, 'cal_perfil', None)
+        if not user.is_staff:
+            if perfil.tipo == 'ENFERMEIRO' and enfermeiro.user != user:
+                messages.error(request, 'Você só pode registrar plantões para si mesmo.')
+                return redirect('cal:event_new')
+            if perfil.tipo == 'ESCALANTE' and (enfermeiro.hospital != user.matricula.hospital or enfermeiro.setor != user.matricula.setor):
+                messages.error(request, 'Você só pode escalar profissionais do seu hospital e setor.')
+                return redirect('cal:event_new')
 
         for i in range(len(datas)):
             if not datas[i] or not tipos[i]: continue
-            
             data_dt = datetime.strptime(datas[i], '%Y-%m-%d').date()
             tipo = get_object_or_404(TipoEvento, pk=tipos[i])
-
             EventoEscala.objects.create(
                 profissional=enfermeiro,
                 tipo=tipo,
@@ -118,8 +137,6 @@ class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
     model = EventoEscala
     success_url = reverse_lazy('cal:calendar')
 
-from django.db.models import Q
-
 class MeusPlantoesListView(LoginRequiredMixin, ListView):
     model = EventoEscala
     template_name = 'cal/lista_eventos.html'
@@ -127,16 +144,19 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         user = self.request.user
+        perfil = getattr(user, 'cal_perfil', None)
         
         if user.is_superuser or user.is_staff:
             return EventoEscala.objects.all().order_by('data')
         
-        if hasattr(user, 'matricula') and user.matricula:
-            matricula = user.matricula
+        if perfil and perfil.tipo == 'ESCALANTE' and hasattr(user, 'matricula'):
             return EventoEscala.objects.filter(
-                Q(profissional=matricula) |
-                Q(setor=matricula.setor, hospital=matricula.hospital)
+                hospital=user.matricula.hospital,
+                setor=user.matricula.setor
             ).order_by('data')
+            
+        if perfil and perfil.tipo == 'ENFERMEIRO' and hasattr(user, 'matricula'):
+            return EventoEscala.objects.filter(profissional=user.matricula).order_by('data')
             
         return EventoEscala.objects.filter(criado_por=user).order_by('data')
 

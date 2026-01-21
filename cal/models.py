@@ -48,6 +48,22 @@ class TipoEvento(models.Model):
         return f"{self.codigo} ({self.horas}h)"
 
 # =========================
+# PERFIL DE USUÁRIO
+# =========================
+class PerfilUsuario(models.Model):
+    TIPO_USUARIO_CHOICES = [
+        ('ADMIN', 'Administrador'),
+        ('ESCALANTE', 'Escalante'),
+        ('ENFERMEIRO', 'Enfermeiro'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cal_perfil')
+    tipo = models.CharField(max_length=20, choices=TIPO_USUARIO_CHOICES, default='ENFERMEIRO')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.get_tipo_display()}"
+
+# =========================
 # PROFISSIONAL (MATRÍCULA)
 # =========================
 class Matricula(models.Model):
@@ -58,6 +74,8 @@ class Matricula(models.Model):
         null=True,
         blank=True
     )
+    # Adicionado para facilitar o acesso ao perfil
+    perfil = models.ForeignKey(PerfilUsuario, on_delete=models.SET_NULL, null=True, blank=True, related_name='matriculas_vinculadas')
 
     nome_completo = models.CharField(max_length=200)
     nome_guerra = models.CharField(max_length=50)

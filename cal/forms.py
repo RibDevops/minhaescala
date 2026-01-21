@@ -1,7 +1,15 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade
+from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade, PerfilUsuario
 from core.models import Hospital, Setor
+
+class PerfilUsuarioForm(forms.ModelForm):
+    class Meta:
+        model = PerfilUsuario
+        fields = ['tipo']
+        widgets = {
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
+        }
 
 class PeriodoForm(forms.ModelForm):
     class Meta:
@@ -65,13 +73,17 @@ class PlantaoForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
         
-        if user and hasattr(user, 'matricula'):
-            matricula = user.matricula
-            if matricula:
-                self.fields['profissional'].queryset = Matricula.objects.filter(id=matricula.id)
-                self.fields['profissional'].initial = matricula
-                self.fields['setor'].queryset = Setor.objects.filter(id=matricula.setor.id) if matricula.setor else Setor.objects.all()
-                self.fields['hospital'].queryset = Hospital.objects.filter(id=matricula.hospital.id)
+        if user:
+            perfil = getattr(user, 'cal_perfil', None)
+            if not user.is_staff and perfil:
+                if perfil.tipo == 'ESCALANTE' or perfil.tipo == 'ENFERMEIRO':
+                    if hasattr(user, 'matricula'):
+                        matricula = user.matricula
+                        self.fields['hospital'].queryset = Hospital.objects.filter(id=matricula.hospital.id)
+                        self.fields['setor'].queryset = Setor.objects.filter(id=matricula.setor.id)
+                        if perfil.tipo == 'ENFERMEIRO':
+                            self.fields['profissional'].queryset = Matricula.objects.filter(id=matricula.id)
+                            self.fields['profissional'].initial = matricula
 
 class HospitalForm(forms.ModelForm):
     class Meta:
@@ -117,7 +129,7 @@ class UserForm(forms.ModelForm):
 class MatriculaForm(forms.ModelForm):
     class Meta:
         model = Matricula
-        fields = ['matricula', 'nome_completo', 'nome_guerra', 'coren', 'carga_horaria_semanal', 'hospital', 'setor', 'ativo']
+        fields = ['matricula', 'nome_completo', 'nome_guerra', 'coren', 'carga_horaria_semanal', 'hospital', 'setor', 'ativo', 'perfil']
         widgets = {
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
@@ -127,4 +139,5 @@ class MatriculaForm(forms.ModelForm):
             'hospital': forms.Select(attrs={'class': 'form-control'}),
             'setor': forms.Select(attrs={'class': 'form-control'}),
             'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'perfil': forms.Select(attrs={'class': 'form-control'}),
         }
