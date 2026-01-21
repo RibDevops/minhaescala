@@ -32,9 +32,13 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
+                                {% if obj.user.id %}
                                 <a href="{% url 'cal:editar_usuario' obj.user.id %}" class="btn btn-outline-primary btn-sm">
                                     <i class="bi bi-pencil"></i> Editar
                                 </a>
+                                {% else %}
+                                <span class="text-muted small">Sem usuário vinculado</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% empty %}
