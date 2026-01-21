@@ -1,2 +1,4 @@
 django
 python-dateutil
+django
+python-dateutil
