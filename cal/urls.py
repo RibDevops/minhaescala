@@ -1,7 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import views_cal, views_dashboard, views_user, geral_views
-from .views import tipo_evento_views, periodo_views
 app_name = 'cal'
 
 
@@ -41,24 +40,10 @@ urlpatterns = [
     path('matriculas/novo/', geral_views.MatriculaCreateView.as_view(), name='matricula_create'),
     path('matriculas/<int:pk>/editar/', geral_views.MatriculaUpdateView.as_view(), name='matricula_update'),
     path('matriculas/<int:pk>/excluir/', geral_views.MatriculaDeleteView.as_view(), name='matricula_delete'),
-    
-    # Especialidades
-    path('especialidades/', geral_views.EspecialidadeListView.as_view(), name='especialidade_list'),
-    path('especialidades/novo/', geral_views.EspecialidadeCreateView.as_view(), name='especialidade_create'),
-    path('especialidades/<int:pk>/editar/', geral_views.EspecialidadeUpdateView.as_view(), name='especialidade_update'),
-    path('especialidades/<int:pk>/excluir/', geral_views.EspecialidadeDeleteView.as_view(), name='especialidade_delete'),
 
-    # URLs para Tipo de Evento
-    path('tipo-evento/', tipo_evento_views.tipo_evento_list, name='tipo_evento_list'),
-    path('tipo-evento/novo/', tipo_evento_views.tipo_evento_create, name='tipo_evento_create'),
-    path('tipo-evento/editar/<int:pk>/', tipo_evento_views.tipo_evento_update, name='tipo_evento_update'),
-    path('tipo-evento/excluir/<int:pk>/', tipo_evento_views.tipo_evento_delete, name='tipo_evento_delete'),
-
-    # URLs para Período
-    path('periodo/', periodo_views.periodo_list, name='periodo_list'),
-    path('periodo/novo/', periodo_views.periodo_create, name='periodo_create'),
-    path('periodo/editar/<int:pk>/', periodo_views.periodo_update, name='periodo_update'),
-    path('periodo/excluir/<int:pk>/', periodo_views.periodo_delete, name='periodo_delete'),
-
-    
+    # Tipos de Evento
+    path('tipo-evento/', geral_views.TipoEventoListView.as_view(), name='tipo_evento_list'),
+    path('tipo-evento/novo/', geral_views.TipoEventoCreateView.as_view(), name='tipo_evento_create'),
+    path('tipo-evento/<int:pk>/editar/', geral_views.TipoEventoUpdateView.as_view(), name='tipo_evento_update'),
+    path('tipo-evento/<int:pk>/excluir/', geral_views.TipoEventoDeleteView.as_view(), name='tipo_evento_delete'),
 ]

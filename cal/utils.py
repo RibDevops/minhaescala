@@ -14,19 +14,18 @@ class Calendar(HTMLCalendar):
         resumo = {}
         
         for plantao in plantoes_do_dia:
-            nome_exibicao = plantao.profissional.nome_exibicao
-            codigo = plantao.tipo_evento.codigo
-            horas = plantao.tipo_evento.horas
-            d += f'<li>{nome_exibicao} ({codigo} - {horas}h)</li>'
+            nome = plantao.profissional.nome_guerra
+            codigo = plantao.tipo.codigo
+            horas = plantao.tipo.horas
+            d += f'<li>{nome} ({codigo} - {horas}h)</li>'
             
-            # Ajuste: Contar por especialidade do profissional
-            especialidade = plantao.profissional.especialidade
-            nome_esp = especialidade.nome if especialidade else 'Sem Especialidade'
-            resumo[nome_esp] = resumo.get(nome_esp, 0) + 1
+            setor = plantao.setor
+            nome_setor = setor.nome if setor else 'Sem Setor'
+            resumo[nome_setor] = resumo.get(nome_setor, 0) + 1
 
         resumo_html = ''
         if resumo:
-            resumo_html = '<div class="calendar-summary"><strong>QTD ESP:</strong><br/>'
+            resumo_html = '<div class="calendar-summary"><strong>QTD:</strong><br/>'
             resumo_html += ' '.join([f'<span>{nome}: {qtd}</span><br />' for nome, qtd in resumo.items()])
             resumo_html += '</div>'
 

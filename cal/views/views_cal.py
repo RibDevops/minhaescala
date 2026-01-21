@@ -5,7 +5,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
-from ..models import EventoEscala, Matricula, TipoEvento, Hospital, Setor
+from ..models import EventoEscala, Matricula, TipoEvento
+from core.models import Hospital, Setor
 from ..forms import PlantaoForm
 from ..utils import Calendar
 
@@ -49,24 +50,21 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from ..models import Matricula, TipoEvento, Hospital, Setor
         
         user = self.request.user
         if user.is_staff:
-            context['enfermeiros'] = Matricula.objects.all()
-        elif hasattr(user, 'perfil') and user.perfil.matriculas.exists():
-            # Pegamos o hospital e setor da primeira matrícula do perfil logado
-            primeira_matricula = user.perfil.matriculas.first()
+            context['enfermeiros'] = Matricula.objects.filter(ativo=True)
+        elif hasattr(user, 'matricula') and user.matricula:
+            matricula = user.matricula
             context['enfermeiros'] = Matricula.objects.filter(
-                hospital=primeira_matricula.hospital,
-                setor=primeira_matricula.setor
+                hospital=matricula.hospital,
+                setor=matricula.setor,
+                ativo=True
             )
         else:
             context['enfermeiros'] = Matricula.objects.none()
             
         context['tipos_plantao'] = TipoEvento.objects.all()
-        # Adicionando formulário para compatibilidade
-        from ..forms import PlantaoForm
         context['form'] = PlantaoForm(user=self.request.user)
         return context
 
@@ -82,9 +80,8 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
 
         enfermeiro = get_object_or_404(Matricula, pk=enfermeiro_id)
         
-        # Como agora a matrícula tem hospital e setor fixos, usamos os dela
         if not enfermeiro.hospital or not enfermeiro.setor:
-            messages.error(request, f'O profissional {enfermeiro.nome_exibicao} não possui hospital ou setor vinculado.')
+            messages.error(request, f'O profissional {enfermeiro.nome_guerra} não possui hospital ou setor vinculado.')
             return redirect('cal:event_new')
 
         for i in range(len(datas)):
@@ -92,22 +89,18 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
             
             data_dt = datetime.strptime(datas[i], '%Y-%m-%d').date()
             tipo = get_object_or_404(TipoEvento, pk=tipos[i])
-            
-            # Use color from form if provided, otherwise default to tipo_evento color
-            cor_evento = request.POST.get('cor', tipo.cor)
 
             EventoEscala.objects.create(
                 profissional=enfermeiro,
-                tipo_evento=tipo,
+                tipo=tipo,
                 data=data_dt,
                 setor=enfermeiro.setor,
                 hospital=enfermeiro.hospital,
-                cor=cor_evento,
-                observacoes=obs[i] if i < len(obs) else '',
+                observacao=obs[i] if i < len(obs) else '',
                 criado_por=request.user
             )
             
-        messages.success(request, f'Plantões registrados para {enfermeiro.nome_exibicao}')
+        messages.success(request, f'Plantões registrados para {enfermeiro.nome_guerra}')
         return redirect('cal:calendar')
 
 class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
@@ -135,36 +128,17 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         
-        # 1. ADMIN: Vê absolutamente tudo
-        if user.is_superuser or (hasattr(user, 'perfil') and user.perfil.tipo_usuario == 'ADMIN'):
+        if user.is_superuser or user.is_staff:
             return EventoEscala.objects.all().order_by('data')
         
-        if not hasattr(user, 'perfil'):
-            return EventoEscala.objects.none()
+        if hasattr(user, 'matricula') and user.matricula:
+            matricula = user.matricula
+            return EventoEscala.objects.filter(
+                Q(profissional=matricula) |
+                Q(setor=matricula.setor, hospital=matricula.hospital)
+            ).order_by('data')
             
-        perfil = user.perfil
-        
-        # 2. ESCALANTE: Vê o setor dele, mas não vê registros privados de enfermeiros
-        if perfil.tipo_usuario == 'ESCALANTE':
-            matricula = perfil.matriculas.first() 
-            if not matricula:
-                return EventoEscala.objects.none()
-            return EventoEscala.objects.filter(
-                hospital=matricula.hospital,
-                setor=matricula.setor
-            ).exclude(
-                criado_por__perfil__tipo_usuario='PROFISSIONAL'
-            ).order_by('data')
-        
-        # 3. PROFISSIONAL (Enfermeiro): Vê a escala oficial (Escalante) + Seus próprios registros
-        else:
-            matricula = perfil.matriculas.first()
-            if not matricula:
-                return EventoEscala.objects.filter(criado_por=user).order_by('data')
-            return EventoEscala.objects.filter(
-                Q(criado_por=user) | # Seus próprios registros
-                (Q(setor=matricula.setor) & Q(criado_por__perfil__tipo_usuario='ESCALANTE')) # Escala oficial
-            ).order_by('data')
+        return EventoEscala.objects.filter(criado_por=user).order_by('data')
 
 def excluir_evento(request, event_id):
     p = get_object_or_404(EventoEscala, pk=event_id)

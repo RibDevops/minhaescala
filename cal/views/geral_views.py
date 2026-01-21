@@ -1,50 +1,12 @@
 from django.urls import path, reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from cal.models import Hospital, Setor, Matricula, Especialidade
+from cal.models import Matricula, TipoEvento
+from core.models import Hospital, Setor
 
 class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_staff
-
-# Especialidade
-class EspecialidadeListView(AdminRequiredMixin, ListView):
-    model = Especialidade
-    template_name = 'cal/especialidade_list.html'
-    context_object_name = 'objetos'
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({'titulo': 'Especialidades', 'labels': ['Nome'], 'create_url': 'cal:especialidade_create', 'update_url': 'cal:especialidade_update', 'delete_url': 'cal:especialidade_delete'})
-        return context
-
-class EspecialidadeCreateView(AdminRequiredMixin, CreateView):
-    model = Especialidade
-    fields = ['nome']
-    template_name = 'cal/crud_base_form.html'
-    success_url = reverse_lazy('cal:especialidade_list')
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({'titulo': 'Nova Especialidade', 'cancel_url': reverse_lazy('cal:especialidade_list')})
-        return context
-
-class EspecialidadeUpdateView(AdminRequiredMixin, UpdateView):
-    model = Especialidade
-    fields = ['nome']
-    template_name = 'cal/crud_base_form.html'
-    success_url = reverse_lazy('cal:especialidade_list')
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({'titulo': f'Editar Especialidade: {self.object.nome}', 'cancel_url': reverse_lazy('cal:especialidade_list')})
-        return context
-
-class EspecialidadeDeleteView(AdminRequiredMixin, DeleteView):
-    model = Especialidade
-    template_name = 'cal/crud_base_confirm_delete.html'
-    success_url = reverse_lazy('cal:especialidade_list')
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({'titulo': 'Excluir Especialidade', 'cancel_url': reverse_lazy('cal:especialidade_list')})
-        return context
 
 # Hospital
 class HospitalListView(AdminRequiredMixin, ListView):
@@ -131,12 +93,12 @@ class MatriculaListView(AdminRequiredMixin, ListView):
     context_object_name = 'objetos'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({'titulo': 'Matrículas', 'labels': ['Número', 'Nome de Exibição', 'Carga Horária'], 'create_url': 'cal:matricula_create', 'update_url': 'cal:matricula_update', 'delete_url': 'cal:matricula_delete'})
+        context.update({'titulo': 'Matrículas', 'labels': ['Matrícula', 'Nome Guerra', 'Carga Horária'], 'create_url': 'cal:matricula_create', 'update_url': 'cal:matricula_update', 'delete_url': 'cal:matricula_delete'})
         return context
 
 class MatriculaCreateView(AdminRequiredMixin, CreateView):
     model = Matricula
-    fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospital', 'setor', 'carga_horaria_semanal', 'especialidade']
+    fields = ['matricula', 'nome_completo', 'nome_guerra', 'coren', 'hospital', 'setor', 'carga_horaria_semanal', 'ativo']
     template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:matricula_list')
     def get_context_data(self, **kwargs):
@@ -146,12 +108,12 @@ class MatriculaCreateView(AdminRequiredMixin, CreateView):
 
 class MatriculaUpdateView(AdminRequiredMixin, UpdateView):
     model = Matricula
-    fields = ['numero', 'perfil', 'nome_exibicao', 'nome_completo', 'hospital', 'setor', 'carga_horaria_semanal', 'especialidade']
+    fields = ['matricula', 'nome_completo', 'nome_guerra', 'coren', 'hospital', 'setor', 'carga_horaria_semanal', 'ativo']
     template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:matricula_list')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({'titulo': f'Editar Matrícula: {self.object.numero}', 'cancel_url': reverse_lazy('cal:matricula_list')})
+        context.update({'titulo': f'Editar Matrícula: {self.object.matricula}', 'cancel_url': reverse_lazy('cal:matricula_list')})
         return context
 
 class MatriculaDeleteView(AdminRequiredMixin, DeleteView):
@@ -161,4 +123,43 @@ class MatriculaDeleteView(AdminRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({'titulo': 'Excluir Matrícula', 'cancel_url': reverse_lazy('cal:matricula_list')})
+        return context
+
+# TipoEvento
+class TipoEventoListView(AdminRequiredMixin, ListView):
+    model = TipoEvento
+    template_name = 'cal/tipo_evento_list.html'
+    context_object_name = 'objetos'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': 'Tipos de Evento', 'labels': ['Código', 'Descrição', 'Horas'], 'create_url': 'cal:tipo_evento_create', 'update_url': 'cal:tipo_evento_update', 'delete_url': 'cal:tipo_evento_delete'})
+        return context
+
+class TipoEventoCreateView(AdminRequiredMixin, CreateView):
+    model = TipoEvento
+    fields = ['codigo', 'descricao', 'horas', 'cor', 'contabiliza']
+    template_name = 'cal/crud_base_form.html'
+    success_url = reverse_lazy('cal:tipo_evento_list')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': 'Novo Tipo de Evento', 'cancel_url': reverse_lazy('cal:tipo_evento_list')})
+        return context
+
+class TipoEventoUpdateView(AdminRequiredMixin, UpdateView):
+    model = TipoEvento
+    fields = ['codigo', 'descricao', 'horas', 'cor', 'contabiliza']
+    template_name = 'cal/crud_base_form.html'
+    success_url = reverse_lazy('cal:tipo_evento_list')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': f'Editar Tipo de Evento: {self.object.codigo}', 'cancel_url': reverse_lazy('cal:tipo_evento_list')})
+        return context
+
+class TipoEventoDeleteView(AdminRequiredMixin, DeleteView):
+    model = TipoEvento
+    template_name = 'cal/crud_base_confirm_delete.html'
+    success_url = reverse_lazy('cal:tipo_evento_list')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'titulo': 'Excluir Tipo de Evento', 'cancel_url': reverse_lazy('cal:tipo_evento_list')})
         return context
