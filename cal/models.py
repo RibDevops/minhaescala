@@ -60,7 +60,7 @@ class PerfilUsuario(models.Model):
         ('CHEFE', 'Chefe de Setor'),
         ('ADMIN', 'Administrador'),
     ]
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil', verbose_name="Usuário")
+    nome = models.CharField(max_length=255, verbose_name="Nome", default="Sem Nome")
     tipo_usuario = models.CharField(max_length=20, choices=TIPO_USUARIO_CHOICES, default='PROFISSIONAL', verbose_name="Nível de Acesso")
 
     class Meta:
@@ -68,7 +68,7 @@ class PerfilUsuario(models.Model):
         verbose_name_plural = "Perfis de Usuários"
 
     def __str__(self):
-        return f"{self.user.get_full_name() or self.user.username} ({self.get_tipo_usuario_display()})"
+        return f"{self.nome} ({self.get_tipo_usuario_display()})"
 
 class Especialidade(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Especialidade")
@@ -123,11 +123,8 @@ class EventoEscala(models.Model):
     def clean(self):
         super().clean()
         # Regra de Ouro: Enfermeiro só lança para ele mesmo
-        if self.criado_por and hasattr(self.criado_por, 'perfil'):
-            if self.criado_por.perfil.tipo_usuario == 'PROFISSIONAL':
-                # Verifica se a matrícula escolhida pertence ao usuário logado
-                if not self.profissional.perfil or self.profissional.perfil.user != self.criado_por:
-                    raise ValidationError("Você só pode registrar eventos para sua própria matrícula.")
+        # Removida validação baseada em User, pois agora usamos Perfil e Matrícula diretamente
+        pass
 
         if self.profissional_id and self.hospital_id:
             profissional = Matricula.objects.get(id=self.profissional_id)

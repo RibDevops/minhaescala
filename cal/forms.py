@@ -124,8 +124,9 @@ class UserForm(forms.ModelForm):
 class PerfilUsuarioForm(forms.ModelForm):
     class Meta:
         model = PerfilUsuario
-        fields = ['tipo_usuario']
+        fields = ['nome', 'tipo_usuario']
         widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'tipo_usuario': forms.Select(attrs={'class': 'form-control'}),
         }
 
