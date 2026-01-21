@@ -1,5 +1,5 @@
 <!-- templates/matricula/list.html -->
-{% extends base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Matrículas - Sistema de Escalas{% endblock %}
 
@@ -62,10 +62,10 @@
                 <tr>
                     <th>Matrícula</th>
                     <th>Nome</th>
-                    <th>Nome de Exibição</th>
+                    <th>Nome Guerra</th>
                     <th>Carga Horária</th>
-                    <th>Hospitais</th>
-                    <th>Especialidades</th>
+                    <th>Hospital</th>
+                    <th>Setor</th>
                     <th>Eventos</th>
                     <th class="text-end">Ações</th>
                 </tr>
@@ -74,44 +74,31 @@
                 {% for matricula in page_obj %}
                 <tr>
                     <td>
-                        <span class="badge bg-dark">{{ matricula.numero }}</span>
+                        <span class="badge bg-dark">{{ matricula.matricula }}</span>
                     </td>
                     <td>{{ matricula.nome_completo }}</td>
                     <td>
-                        <strong>{{ matricula.nome_exibicao }}</strong>
+                        <strong>{{ matricula.nome_guerra }}</strong>
                     </td>
                     <td>
                         <span class="badge {% if matricula.carga_horaria_semanal >= 40 %}bg-danger{% elif matricula.carga_horaria_semanal >= 30 %}bg-warning{% else %}bg-success{% endif %}">
-                            {{ matricula.carga_horaria_semanal }}h/sem
+                            {{ matricula.carga_horaria_semanal }}h
                         </span>
                     </td>
                     <td>
-                        {% for hospital in matricula.hospitais.all|slice:":2" %}
-                        <span class="badge bg-info">{{ hospital.sigla|default:hospital.nome|truncatechars:10 }}</span>
-                        {% endfor %}
-                        {% if matricula.hospitais.count > 2 %}
-                        <span class="badge bg-secondary">+{{ matricula.hospitais.count|add:"-2" }}</span>
-                        {% endif %}
+                        {{ matricula.hospital.sigla|default:matricula.hospital.nome }}
                     </td>
                     <td>
-                        {% for esp in matricula.especialidades.all|slice:":2" %}
-                        <span class="badge bg-primary">{{ esp.nome|truncatechars:10 }}</span>
-                        {% endfor %}
-                        {% if matricula.especialidades.count > 2 %}
-                        <span class="badge bg-secondary">+{{ matricula.especialidades.count|add:"-2" }}</span>
-                        {% endif %}
+                        {{ matricula.setor.nome|default:"-" }}
                     </td>
                     <td>
                         <span class="badge bg-secondary">{{ matricula.eventos.count }}</span>
                     </td>
                     <td class="table-actions text-end">
-                        <a href="{% url 'matricula_detail' matricula.pk %}" class="btn btn-sm btn-info">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{% url 'matricula_update' matricula.pk %}" class="btn btn-sm btn-warning">
+                        <a href="{% url 'cal:editar_usuario' matricula.user.id %}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a href="{% url 'matricula_delete' matricula.pk %}" class="btn btn-sm btn-danger">
+                        <a href="{% url 'cal:excluir_usuario' matricula.user.id %}" class="btn btn-sm btn-danger">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>
