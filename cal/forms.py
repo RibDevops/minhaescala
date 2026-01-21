@@ -143,3 +143,8 @@ class MatriculaForm(forms.ModelForm):
             'setor': forms.Select(attrs={'class': 'form-control'}),
             'especialidade': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtra para mostrar apenas perfis que são do tipo PROFISSIONAL (agora Enfermeiro)
+        self.fields['perfil'].queryset = PerfilUsuario.objects.filter(tipo_usuario='PROFISSIONAL')
