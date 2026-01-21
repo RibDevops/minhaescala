@@ -60,7 +60,8 @@ class PerfilUsuario(models.Model):
         ('CHEFE', 'Chefe de Setor'),
         ('ADMIN', 'Administrador'),
     ]
-    nome = models.CharField(max_length=255, verbose_name="Nome", default="Sem Nome")
+
+    nome = models.CharField(max_length=255, verbose_name="Nome do Perfil")
     tipo_usuario = models.CharField(max_length=20, choices=TIPO_USUARIO_CHOICES, default='PROFISSIONAL', verbose_name="Nível de Acesso")
 
     class Meta:
