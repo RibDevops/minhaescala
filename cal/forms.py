@@ -146,8 +146,10 @@ class UserForm(forms.ModelForm):
 class MatriculaForm(forms.ModelForm):
     class Meta:
         model = Matricula
-        fields = ['matricula', 'nome_completo', 'nome_guerra', 'coren', 'carga_horaria_semanal', 'hospital', 'setor', 'ativo', 'perfil']
+        fields = ['user', 'perfil', 'matricula', 'nome_completo', 'nome_guerra', 'coren', 'carga_horaria_semanal', 'hospital', 'setor', 'ativo']
         widgets = {
+            'user': forms.Select(attrs={'class': 'form-control'}),
+            'perfil': forms.Select(attrs={'class': 'form-control'}),
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_guerra': forms.TextInput(attrs={'class': 'form-control'}),
@@ -156,5 +158,4 @@ class MatriculaForm(forms.ModelForm):
             'hospital': forms.Select(attrs={'class': 'form-control'}),
             'setor': forms.Select(attrs={'class': 'form-control'}),
             'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'perfil': forms.Select(attrs={'class': 'form-control'}),
         }
