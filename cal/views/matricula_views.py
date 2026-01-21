@@ -56,12 +56,17 @@ def matricula_create(request):
         if user_form.is_valid() and perfil_form.is_valid() and matricula_form.is_valid():
             # 1. Criar User
             user = user_form.save(commit=False)
-            user.set_password('senha123')  # Senha padrão
+            # Define uma senha padrão baseada na matrícula ou fixa
+            matricula_numero = matricula_form.cleaned_data.get('numero')
+            user.set_password(matricula_numero or 'senha123')
             user.save()
             
             # 2. Criar PerfilUsuario
             perfil = perfil_form.save(commit=False)
             perfil.user = user
+            # Garante que o tipo seja PROFISSIONAL se não especificado
+            if not perfil.tipo_usuario:
+                perfil.tipo_usuario = 'PROFISSIONAL'
             perfil.save()
             
             # 3. Criar Matricula
@@ -70,14 +75,14 @@ def matricula_create(request):
             matricula.save()
             matricula_form.save_m2m()  # Salvar relações ManyToMany
             
-            messages.success(request, 'Matrícula criada com sucesso!')
-            return redirect('matricula_list')
+            messages.success(request, f'Matrícula e usuário ({user.username}) criados com sucesso! Senha inicial: {matricula_numero or "senha123"}')
+            return redirect('cal:matricula_list')
     else:
         user_form = UserForm()
-        perfil_form = PerfilUsuarioForm()
+        perfil_form = PerfilUsuarioForm(initial={'tipo_usuario': 'PROFISSIONAL'})
         matricula_form = MatriculaForm()
     
-    return render(request, matricula/form.html', {
+    return render(request, 'cal/matricula/form.html', {
         'user_form': user_form,
         'perfil_form': perfil_form,
         'matricula_form': matricula_form,

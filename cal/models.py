@@ -82,7 +82,7 @@ class Especialidade(models.Model):
 
 class Matricula(models.Model):
     numero = models.CharField(max_length=50, unique=True, verbose_name="Matrícula")
-    perfil = models.ForeignKey(PerfilUsuario, on_delete=models.SET_NULL, related_name='matriculas', verbose_name="Perfil", null=True, blank=True)
+    perfil = models.OneToOneField(PerfilUsuario, on_delete=models.CASCADE, related_name='matricula', verbose_name="Perfil")
     nome_exibicao = models.CharField(max_length=50, help_text="Nome como aparecerá no calendário", verbose_name="Nome de Exibição")
     nome_completo = models.CharField(max_length=255, verbose_name="Nome Completo")
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT, related_name='matriculas', verbose_name="Hospital Vinculado", null=True, blank=True)
