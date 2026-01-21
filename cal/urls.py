@@ -1,12 +1,12 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views, especialidade_views
+from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views, especialidade_views, perfil_views
 app_name = 'cal'
-
 
 urlpatterns = [
     path('', views_user.home, name='home'),
     path('calendar/', views_cal.CalendarioView.as_view(), name='calendar'),
+    path('perfis/', perfil_views.perfil_list, name='perfil_list'),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
     path('perfil/', views_user.perfil_usuario, name='perfil'),
