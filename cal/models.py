@@ -55,7 +55,7 @@ class TipoEvento(models.Model):
 
 class PerfilUsuario(models.Model):
     TIPO_USUARIO_CHOICES = [
-        ('PROFISSIONAL', 'Profissional'),
+        ('PROFISSIONAL', 'Enfermeiro'),
         ('ESCALANTE', 'Escalante'),
         ('CHEFE', 'Chefe de Setor'),
         ('ADMIN', 'Administrador'),
