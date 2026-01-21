@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, TipoEvento, Periodo
+from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade
 from core.models import Hospital, Setor
 
 class PeriodoForm(forms.ModelForm):
@@ -10,6 +10,14 @@ class PeriodoForm(forms.ModelForm):
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'sigla': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class EspecialidadeForm(forms.ModelForm):
+    class Meta:
+        model = Especialidade
+        fields = ['nome']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class UserRegisterForm(forms.ModelForm):

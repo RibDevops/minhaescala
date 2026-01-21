@@ -19,6 +19,19 @@ class Periodo(models.Model):
         return self.nome
 
 # =========================
+# ESPECIALIDADE
+# =========================
+class Especialidade(models.Model):
+    nome = models.CharField(max_length=100, verbose_name="Especialidade")
+
+    class Meta:
+        verbose_name = "Especialidade"
+        verbose_name_plural = "Especialidades"
+
+    def __str__(self):
+        return self.nome
+
+# =========================
 # TIPO DE TURNO (TIPO DE EVENTO)
 # =========================
 class TipoEvento(models.Model):

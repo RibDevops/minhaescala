@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views
+from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views, especialidade_views
 app_name = 'cal'
 
 
@@ -52,4 +52,10 @@ urlpatterns = [
     path('periodos/novo/', periodo_views.periodo_create, name='periodo_create'),
     path('periodos/<int:pk>/editar/', periodo_views.periodo_update, name='periodo_update'),
     path('periodos/<int:pk>/excluir/', periodo_views.periodo_delete, name='periodo_delete'),
+
+    # Especialidades
+    path('especialidades/', especialidade_views.especialidade_list, name='especialidade_list'),
+    path('especialidades/novo/', especialidade_views.especialidade_create, name='especialidade_create'),
+    path('especialidades/<int:pk>/editar/', especialidade_views.especialidade_update, name='especialidade_update'),
+    path('especialidades/<int:pk>/excluir/', especialidade_views.especialidade_delete, name='especialidade_delete'),
 ]
