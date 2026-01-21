@@ -76,14 +76,31 @@ class PlantaoForm(forms.ModelForm):
         if user:
             perfil = getattr(user, 'cal_perfil', None)
             if not user.is_staff and perfil:
-                if perfil.tipo == 'ESCALANTE' or perfil.tipo == 'ENFERMEIRO':
-                    if hasattr(user, 'matricula'):
-                        matricula = user.matricula
-                        self.fields['hospital'].queryset = Hospital.objects.filter(id=matricula.hospital.id)
-                        self.fields['setor'].queryset = Setor.objects.filter(id=matricula.setor.id)
-                        if perfil.tipo == 'ENFERMEIRO':
-                            self.fields['profissional'].queryset = Matricula.objects.filter(id=matricula.id)
-                            self.fields['profissional'].initial = matricula
+                # Tanto ESCALANTE quanto ENFERMEIRO agora DEVEM ter matrícula para vincular hospital/setor
+                if hasattr(user, 'matricula') and user.matricula:
+                    matricula = user.matricula
+                    self.fields['hospital'].queryset = Hospital.objects.filter(id=matricula.hospital.id)
+                    self.fields['setor'].queryset = Setor.objects.filter(id=matricula.setor.id)
+                    
+                    # Define valores iniciais para facilitar
+                    self.initial['hospital'] = matricula.hospital
+                    self.initial['setor'] = matricula.setor
+                    
+                    if perfil.tipo == 'ENFERMEIRO':
+                        self.fields['profissional'].queryset = Matricula.objects.filter(id=matricula.id)
+                        self.initial['profissional'] = matricula
+                    elif perfil.tipo == 'ESCALANTE':
+                        # Escalante vê todos do seu setor
+                        self.fields['profissional'].queryset = Matricula.objects.filter(
+                            hospital=matricula.hospital,
+                            setor=matricula.setor,
+                            ativo=True
+                        )
+                else:
+                    # Se não tiver matrícula, não pode escalar nada se não for staff
+                    self.fields['profissional'].queryset = Matricula.objects.none()
+                    self.fields['hospital'].queryset = Hospital.objects.none()
+                    self.fields['setor'].queryset = Setor.objects.none()
 
 class HospitalForm(forms.ModelForm):
     class Meta:

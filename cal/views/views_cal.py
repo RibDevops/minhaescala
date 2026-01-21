@@ -98,6 +98,10 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
         user = request.user
         perfil = getattr(user, 'cal_perfil', None)
         if not user.is_staff:
+            if not hasattr(user, 'matricula') or not user.matricula:
+                messages.error(request, 'Seu usuário não possui uma matrícula vinculada.')
+                return redirect('cal:event_new')
+                
             if perfil.tipo == 'ENFERMEIRO' and enfermeiro.user != user:
                 messages.error(request, 'Você só pode registrar plantões para si mesmo.')
                 return redirect('cal:event_new')
