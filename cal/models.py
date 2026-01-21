@@ -69,7 +69,10 @@ class PerfilUsuario(models.Model):
         verbose_name_plural = "Perfis de Usuários"
 
     def __str__(self):
-        return f"{self.nome} ({self.get_tipo_usuario_display()})"
+        try:
+            return f"{self.nome} ({self.get_tipo_usuario_display()})"
+        except:
+            return self.nome
 
 class Especialidade(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Especialidade")
