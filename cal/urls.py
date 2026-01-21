@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import views_cal, views_dashboard, views_user, geral_views
+from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views
 app_name = 'cal'
 
 
@@ -46,4 +46,10 @@ urlpatterns = [
     path('tipo-evento/novo/', geral_views.TipoEventoCreateView.as_view(), name='tipo_evento_create'),
     path('tipo-evento/<int:pk>/editar/', geral_views.TipoEventoUpdateView.as_view(), name='tipo_evento_update'),
     path('tipo-evento/<int:pk>/excluir/', geral_views.TipoEventoDeleteView.as_view(), name='tipo_evento_delete'),
+
+    # Períodos
+    path('periodos/', periodo_views.periodo_list, name='periodo_list'),
+    path('periodos/novo/', periodo_views.periodo_create, name='periodo_create'),
+    path('periodos/<int:pk>/editar/', periodo_views.periodo_update, name='periodo_update'),
+    path('periodos/<int:pk>/excluir/', periodo_views.periodo_delete, name='periodo_delete'),
 ]

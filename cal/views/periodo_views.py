@@ -27,7 +27,7 @@ def periodo_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Período criado com sucesso!')
-            return redirect('periodo_list')
+            return redirect('cal:periodo_list')
     else:
         form = PeriodoForm()
     
@@ -46,7 +46,7 @@ def periodo_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Período atualizado com sucesso!')
-            return redirect('periodo_list')
+            return redirect('cal:periodo_list')
     else:
         form = PeriodoForm(instance=periodo)
     
@@ -63,7 +63,7 @@ def periodo_delete(request, pk):
     if request.method == 'POST':
         periodo.delete()
         messages.success(request, 'Período excluído com sucesso!')
-        return redirect('periodo_list')
+        return redirect('cal:periodo_list')
     
     return render(request, 'periodo/confirm_delete.html', {
         'periodo': periodo

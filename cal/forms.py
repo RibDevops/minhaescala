@@ -1,7 +1,16 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, TipoEvento
+from .models import EventoEscala, Matricula, TipoEvento, Periodo
 from core.models import Hospital, Setor
+
+class PeriodoForm(forms.ModelForm):
+    class Meta:
+        model = Periodo
+        fields = ['nome', 'sigla']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'sigla': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
 class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
