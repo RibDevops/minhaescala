@@ -161,10 +161,10 @@ class MatriculaSimplificadaForm(forms.ModelForm):
 
     class Meta:
         model = Matricula
-        fields = ['matricula', 'nome_guerra', 'coren', 'hospital', 'setor', 'especialidade', 'carga_horaria_semanal', 'ativo']
+        fields = ['matricula', 'nome_exibicao', 'coren', 'hospital', 'setor', 'especialidade', 'carga_horaria_semanal', 'ativo']
         widgets = {
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
-            'nome_guerra': forms.TextInput(attrs={'class': 'form-control'}),
+            'nome_exibicao': forms.TextInput(attrs={'class': 'form-control'}),
             'coren': forms.TextInput(attrs={'class': 'form-control'}),
             'hospital': forms.Select(attrs={'class': 'form-control'}),
             'setor': forms.Select(attrs={'class': 'form-control'}),

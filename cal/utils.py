@@ -14,7 +14,7 @@ class Calendar(HTMLCalendar):
         resumo_especialidade = {}
         
         for plantao in plantoes_do_dia:
-            nome = plantao.profissional.nome_guerra
+            nome = plantao.profissional.nome_exibicao
             codigo = plantao.tipo.codigo
             horas = plantao.tipo.horas
             d += f'<li>{nome} ({codigo} - {horas}h)</li>'

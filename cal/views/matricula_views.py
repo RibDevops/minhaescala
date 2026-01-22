@@ -10,7 +10,7 @@ from ..forms import MatriculaSimplificadaForm
 
 @login_required
 def matricula_list(request):
-    matriculas = Matricula.objects.all().select_related('user', 'perfil', 'hospital', 'setor').order_by('nome_guerra')
+    matriculas = Matricula.objects.all().select_related('user', 'perfil', 'hospital', 'setor').order_by('nome_exibicao')
     
     # Filtros
     search = request.GET.get('search')
@@ -19,7 +19,7 @@ def matricula_list(request):
     if search:
         matriculas = matriculas.filter(
             Q(matricula__icontains=search) |
-            Q(nome_guerra__icontains=search) |
+            Q(nome_exibicao__icontains=search) |
             Q(nome_completo__icontains=search)
         )
     
@@ -70,7 +70,7 @@ def matricula_create(request):
                     matricula.nome_completo = f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}".strip()
                     matricula.save()
                     
-                messages.success(request, f"Matrícula, usuário e perfil de {matricula.nome_guerra} criados com sucesso!")
+                messages.success(request, f"Matrícula, usuário e perfil de {matricula.nome_exibicao} criados com sucesso!")
                 return redirect('cal:matricula_list')
             except Exception as e:
                 messages.error(request, f"Erro ao criar registro: {str(e)}")
@@ -127,7 +127,7 @@ def matricula_toggle_status(request, pk):
         matricula.ativo = not matricula.ativo
         matricula.save()
         status = "ativada" if matricula.ativo else "desativada"
-        messages.success(request, f"Matrícula de {matricula.nome_guerra} {status} com sucesso.")
+        messages.success(request, f"Matrícula de {matricula.nome_exibicao} {status} com sucesso.")
     return redirect('cal:matricula_list')
 
 @login_required

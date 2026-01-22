@@ -78,7 +78,7 @@ class Matricula(models.Model):
     perfil = models.ForeignKey(PerfilUsuario, on_delete=models.SET_NULL, null=True, blank=True, related_name='matriculas_vinculadas')
 
     nome_completo = models.CharField(max_length=200)
-    nome_guerra = models.CharField(max_length=50)
+    nome_exibicao = models.CharField(max_length=50, verbose_name="Nome de Exibição")
     matricula = models.CharField(max_length=30, unique=True)
     coren = models.CharField(max_length=30, blank=True, null=True)
 
@@ -107,10 +107,10 @@ class Matricula(models.Model):
     ativo = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ["nome_guerra"]
+        ordering = ["nome_exibicao"]
 
     def __str__(self):
-        return f"{self.nome_guerra} ({self.matricula})"
+        return f"{self.nome_exibicao} ({self.matricula})"
 
 # =========================
 # EVENTO DE ESCALA

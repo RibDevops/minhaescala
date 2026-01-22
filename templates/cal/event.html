@@ -18,7 +18,7 @@
                         <select name="enfermeiro" class="form-select form-select-lg" required>
                             <option value="">Selecione o Enfermeiro</option>
                             {% for e in enfermeiros %}
-                            <option value="{{ e.id }}">{{ e.nome_guerra }} ({{ e.matricula }})</option>
+                            <option value="{{ e.id }}">{{ e.nome_exibicao }} ({{ e.matricula }})</option>
                             {% endfor %}
                         </select>
                         <div class="form-text">Selecione o profissional uma vez e adicione vários plantões abaixo.</div>

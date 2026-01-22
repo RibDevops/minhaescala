@@ -123,7 +123,7 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
                 criado_por=request.user
             )
             
-        messages.success(request, f'Plantões registrados para {enfermeiro.nome_guerra}')
+        messages.success(request, f'Plantões registrados para {enfermeiro.nome_exibicao}')
         return redirect('cal:calendar')
 
 class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
