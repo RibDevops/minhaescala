@@ -1,8 +1,19 @@
 {% extends 'cal/crud_base_list.html' %}
 {% block table_rows %}
-<td>{{ obj.codigo }}</td>
-<td>{{ obj.nome }}</td>
-<td>{{ obj.periodo }}</td>
+<td>
+    <div class="rounded-circle" style="width: 25px; height: 25px; background-color: {{ obj.cor }}; border: 1px solid #dee2e6;" title="{{ obj.cor }}"></div>
+</td>
+<td class="fw-bold">{{ obj.codigo }}</td>
+<td>{{ obj.descricao|default:"-" }}</td>
 <td>{{ obj.horas }}h</td>
-<td><span class="badge" style="background-color: {{ obj.cor }}">{{ obj.cor }}</span></td>
+<td class="text-end">
+    <div class="btn-group btn-group-sm">
+        <a href="{% url 'cal:tipo_evento_update' obj.id %}" class="btn btn-outline-primary" title="Editar">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{% url 'cal:tipo_evento_delete' obj.id %}" class="btn btn-outline-danger" title="Excluir">
+            <i class="bi bi-trash"></i> Excluir
+        </a>
+    </div>
+</td>
 {% endblock %}
