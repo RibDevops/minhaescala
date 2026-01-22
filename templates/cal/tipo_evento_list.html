@@ -6,14 +6,13 @@
 <td class="fw-bold">{{ obj.codigo }}</td>
 <td>{{ obj.descricao|default:"-" }}</td>
 <td>{{ obj.horas }}h</td>
-<td class="text-end">
-    <div class="btn-group btn-group-sm">
-        <a href="{% url 'cal:tipo_evento_update' obj.id %}" class="btn btn-outline-primary" title="Editar">
-            <i class="bi bi-pencil"></i> Editar
-        </a>
-        <a href="{% url 'cal:tipo_evento_delete' obj.id %}" class="btn btn-outline-danger" title="Excluir">
-            <i class="bi bi-trash"></i> Excluir
-        </a>
-    </div>
-</td>
+{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'cal:tipo_evento_update' obj.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
+    <i class="bi bi-pencil"></i> Editar
+</a>
+<a href="{% url 'cal:tipo_evento_delete' obj.id %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+    <i class="bi bi-trash"></i> Excluir
+</a>
 {% endblock %}

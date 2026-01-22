@@ -135,7 +135,7 @@ class TipoEventoListView(AdminRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context.update({
             'titulo': 'Tipos de Evento',
-            'labels': ['Cor', 'Código', 'Descrição', 'Horas', 'Ações'],
+            'labels': ['Cor', 'Código', 'Descrição', 'Horas'],
             'create_url': 'cal:tipo_evento_create',
             'update_url': 'cal:tipo_evento_update',
             'delete_url': 'cal:tipo_evento_delete'
