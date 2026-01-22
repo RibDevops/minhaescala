@@ -80,18 +80,25 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Hospital</label>
                                 {{ form.hospital }}
                                 {% if form.hospital.errors %}
                                 <div class="text-danger small">{{ form.hospital.errors }}</div>
                                 {% endif %}
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Setor</label>
                                 {{ form.setor }}
                                 {% if form.setor.errors %}
                                 <div class="text-danger small">{{ form.setor.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Especialidade</label>
+                                {{ form.especialidade }}
+                                {% if form.especialidade.errors %}
+                                <div class="text-danger small">{{ form.especialidade.errors }}</div>
                                 {% endif %}
                             </div>
                         </div>

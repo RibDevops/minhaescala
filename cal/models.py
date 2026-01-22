@@ -95,6 +95,13 @@ class Matricula(models.Model):
         null=True,
         blank=True
     )
+    especialidade = models.ForeignKey(
+        Especialidade,
+        on_delete=models.SET_NULL,
+        related_name="profissionais",
+        null=True,
+        blank=True
+    )
 
     carga_horaria_semanal = models.PositiveIntegerField(default=40)
     ativo = models.BooleanField(default=True)
