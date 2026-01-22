@@ -35,7 +35,7 @@ def dashboard(request):
 
     top_profissionais = None
     if user.is_staff:
-        top_profissionais = eventos_base.values('profissional__nome_guerra').annotate(
+        top_profissionais = eventos_base.values('profissional__nome_exibicao').annotate(
             total=Count('id'),
             horas=Sum('tipo__horas')
         ).order_by('-horas')[:5]
