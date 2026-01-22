@@ -53,7 +53,7 @@ class Tipo(models.Model):
 # TIPO DE TURNO (TIPO DE EVENTO)
 # =========================
 class TipoEvento(models.Model):
-    tipo_base = models.ForeignKey(Tipo, on_delete=models.CASCADE, related_name="eventos", verbose_name="Tipo Base")
+    tipo_base = models.ForeignKey(Tipo, on_delete=models.CASCADE, related_name="eventos", verbose_name="Tipo Base", null=True, blank=True)
     codigo = models.CharField(max_length=10, verbose_name="Código")
     descricao = models.CharField(max_length=50, verbose_name="Descrição")
     horas = models.PositiveIntegerField(verbose_name="Carga Horária (Horas)")
@@ -168,12 +168,12 @@ class EventoEscala(models.Model):
         eventos = EventoEscala.objects.filter(
             profissional=self.profissional,
             data__range=(inicio, self.data),
-            tipo__contabiliza=True
+            tipo__tipo_base__contabiliza=True
         )
         return sum(e.tipo.horas for e in eventos)
 
     def clean(self):
-        if self.tipo.contabiliza:
+        if self.tipo.tipo_base.contabiliza:
             total = self.carga_ultimos_7_dias() + self.tipo.horas
             if total > self.profissional.carga_horaria_semanal:
                 raise ValidationError(

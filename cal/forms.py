@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade, PerfilUsuario
+from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade, PerfilUsuario, Tipo
 from core.models import Hospital, Setor
 
 class PerfilUsuarioForm(forms.ModelForm):
@@ -77,28 +77,22 @@ class PlantaoForm(forms.ModelForm):
         if user:
             perfil = getattr(user, 'cal_perfil', None)
             if not user.is_staff and perfil:
-                # Tanto ESCALANTE quanto ENFERMEIRO agora DEVEM ter matrícula para vincular hospital/setor
                 if hasattr(user, 'matricula') and user.matricula:
                     matricula = user.matricula
                     self.fields['hospital'].queryset = Hospital.objects.filter(id=matricula.hospital.id)
                     self.fields['setor'].queryset = Setor.objects.filter(id=matricula.setor.id)
-                    
-                    # Define valores iniciais para facilitar
                     self.initial['hospital'] = matricula.hospital
                     self.initial['setor'] = matricula.setor
-                    
                     if perfil.tipo == 'ENFERMEIRO':
                         self.fields['profissional'].queryset = Matricula.objects.filter(id=matricula.id)
                         self.initial['profissional'] = matricula
                     elif perfil.tipo == 'ESCALANTE':
-                        # Escalante vê todos do seu setor
                         self.fields['profissional'].queryset = Matricula.objects.filter(
                             hospital=matricula.hospital,
                             setor=matricula.setor,
                             ativo=True
                         )
                 else:
-                    # Se não tiver matrícula, não pode escalar nada se não for staff
                     self.fields['profissional'].queryset = Matricula.objects.none()
                     self.fields['hospital'].queryset = Hospital.objects.none()
                     self.fields['setor'].queryset = Setor.objects.none()
@@ -121,6 +115,16 @@ class SetorForm(forms.ModelForm):
             'hospital': forms.Select(attrs={'class': 'form-control'}),
         }
 
+class TipoForm(forms.ModelForm):
+    class Meta:
+        model = Tipo
+        fields = ['tipo', 'tipo_descricao', 'contabiliza']
+        widgets = {
+            'tipo': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo_descricao': forms.TextInput(attrs={'class': 'form-control'}),
+            'contabiliza': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
 class TipoEventoForm(forms.ModelForm):
     COLOR_CHOICES = [
         ('#007bff', 'Azul (Padrão)'),
@@ -136,21 +140,15 @@ class TipoEventoForm(forms.ModelForm):
         ('#6c757d', 'Cinza'),
         ('#343a40', 'Preto'),
     ]
-    
-    cor = forms.ChoiceField(
-        choices=COLOR_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-select', 'onchange': 'updateColorPreview(this)'}),
-        label="Cor do Evento"
-    )
-
+    cor = forms.ChoiceField(choices=COLOR_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}), label="Cor do Evento")
     class Meta:
         model = TipoEvento
-        fields = ['codigo', 'descricao', 'horas', 'cor', 'contabiliza']
+        fields = ['tipo_base', 'codigo', 'descricao', 'horas', 'cor']
         widgets = {
+            'tipo_base': forms.Select(attrs={'class': 'form-select'}),
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.TextInput(attrs={'class': 'form-control'}),
             'horas': forms.NumberInput(attrs={'class': 'form-control'}),
-            'contabiliza': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 class UserForm(forms.ModelForm):
@@ -165,20 +163,11 @@ class UserForm(forms.ModelForm):
         }
 
 class MatriculaSimplificadaForm(forms.ModelForm):
-    # Campos de Usuário
     username = forms.CharField(max_length=150, label="Nome de Usuário (Login)", widget=forms.TextInput(attrs={'class': 'form-control'}))
     first_name = forms.CharField(max_length=150, label="Primeiro Nome", widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(max_length=150, label="Último Nome", widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(label="E-mail", widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    
-    # Campo de Perfil
-    tipo_perfil = forms.ChoiceField(
-        choices=PerfilUsuario.TIPO_USUARIO_CHOICES,
-        label="Tipo de Perfil (Acesso)",
-        initial='ENFERMEIRO',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
+    tipo_perfil = forms.ChoiceField(choices=PerfilUsuario.TIPO_USUARIO_CHOICES, label="Tipo de Perfil (Acesso)", initial='ENFERMEIRO', widget=forms.Select(attrs={'class': 'form-control'}))
     class Meta:
         model = Matricula
         fields = ['matricula', 'nome_exibicao', 'coren', 'hospital', 'setor', 'especialidade', 'carga_horaria_semanal', 'ativo']
@@ -192,7 +181,6 @@ class MatriculaSimplificadaForm(forms.ModelForm):
             'carga_horaria_semanal': forms.NumberInput(attrs={'class': 'form-control'}),
             'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
-
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():

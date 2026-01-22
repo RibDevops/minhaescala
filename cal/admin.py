@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario
+from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo
 from core.models import Hospital, Setor
 
 @admin.register(PerfilUsuario)
@@ -16,7 +16,7 @@ class EventoEscalaAdmin(admin.ModelAdmin):
     date_hierarchy = 'data'
     
     def get_profissional(self, obj):
-        return obj.profissional.nome_guerra
+        return obj.profissional.nome_exibicao
     get_profissional.short_description = 'Profissional'
 
 @admin.register(Matricula)
@@ -36,8 +36,14 @@ class SetorAdmin(admin.ModelAdmin):
     list_filter = ('hospital',)
     search_fields = ('nome',)
 
+@admin.register(Tipo)
+class TipoAdmin(admin.ModelAdmin):
+    list_display = ('tipo', 'tipo_descricao', 'contabiliza')
+    list_filter = ('contabiliza',)
+    search_fields = ('tipo', 'tipo_descricao')
+
 @admin.register(TipoEvento)
 class TipoEventoAdmin(admin.ModelAdmin):
-    list_display = ('codigo', 'descricao', 'horas', 'contabiliza')
-    list_filter = ('contabiliza',)
+    list_display = ('codigo', 'descricao', 'horas', 'tipo_base')
+    list_filter = ('tipo_base',)
     search_fields = ('descricao', 'codigo')
