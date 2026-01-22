@@ -116,9 +116,20 @@ def matricula_delete(request, pk):
     matricula = get_object_or_404(Matricula, pk=pk)
     if request.method == 'POST':
         user = matricula.user
-        matricula.delete()
-        if user:
-            user.delete()
-        messages.success(request, "Matrícula e usuário removidos com sucesso.")
+        # Se houver um perfilUsuario no app 'accounts', ele pode estar causando o erro no cascade.
+        # Mas o erro diz 'no such table: accounts_perfilusuario', o que indica que algo
+        # está tentando acessar uma tabela que não foi criada ou migrada.
+        try:
+            with transaction.atomic():
+                if user:
+                    # Deletar o usuário deletará o perfil e a matrícula via CASCADE
+                    # Mas vamos deletar a matrícula primeiro para ser explícito
+                    matricula.delete()
+                    user.delete()
+                else:
+                    matricula.delete()
+            messages.success(request, "Matrícula e usuário removidos com sucesso.")
+        except Exception as e:
+            messages.error(request, f"Erro ao excluir: {str(e)}")
         return redirect('cal:matricula_list')
     return render(request, 'cal/matricula/confirm_delete.html', {'matricula': matricula})
