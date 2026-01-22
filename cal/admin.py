@@ -1,6 +1,12 @@
 from django.contrib import admin
-from .models import Matricula, TipoEvento, EventoEscala
+from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario
 from core.models import Hospital, Setor
+
+@admin.register(PerfilUsuario)
+class PerfilUsuarioAdmin(admin.ModelAdmin):
+    list_display = ('user', 'tipo')
+    list_filter = ('tipo',)
+    search_fields = ('user__username', 'user__email')
 
 @admin.register(EventoEscala)
 class EventoEscalaAdmin(admin.ModelAdmin):

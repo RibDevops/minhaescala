@@ -6,8 +6,9 @@ from core.models import Hospital, Setor
 class PerfilUsuarioForm(forms.ModelForm):
     class Meta:
         model = PerfilUsuario
-        fields = ['tipo']
+        fields = ['user', 'tipo']
         widgets = {
+            'user': forms.Select(attrs={'class': 'form-control'}),
             'tipo': forms.Select(attrs={'class': 'form-control'}),
         }
 
