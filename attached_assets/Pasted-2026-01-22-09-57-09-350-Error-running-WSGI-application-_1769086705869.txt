@@ -1,0 +1,58 @@
+2026-01-22 09:57:09,350: Error running WSGI application
+2026-01-22 09:57:09,383: ValueError: Unable to configure handler 'my_handler'
+2026-01-22 09:57:09,383:   File "/var/www/minhaescala_pythonanywhere_com_wsgi.py", line 22, in <module>
+2026-01-22 09:57:09,384:     application = get_wsgi_application()
+2026-01-22 09:57:09,384: 
+2026-01-22 09:57:09,384:   File "/usr/local/lib/python3.13/site-packages/django/core/wsgi.py", line 12, in get_wsgi_application
+2026-01-22 09:57:09,384:     django.setup(set_prefix=False)
+2026-01-22 09:57:09,396:     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+2026-01-22 09:57:09,396: 
+2026-01-22 09:57:09,397:   File "/usr/local/lib/python3.13/site-packages/django/__init__.py", line 19, in setup
+2026-01-22 09:57:09,397:     configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+2026-01-22 09:57:09,397:     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-22 09:57:09,397: 
+2026-01-22 09:57:09,397:   File "/usr/local/lib/python3.13/site-packages/django/utils/log.py", line 76, in configure_logging
+2026-01-22 09:57:09,397:     logging_config_func(logging_settings)
+2026-01-22 09:57:09,397:     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+2026-01-22 09:57:09,398: 
+2026-01-22 09:57:09,398:   File "/usr/local/lib/python3.13/logging/config.py", line 935, in dictConfig
+2026-01-22 09:57:09,398:     dictConfigClass(config).configure()
+2026-01-22 09:57:09,398:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-01-22 09:57:09,399: 
+2026-01-22 09:57:09,399:   File "/usr/local/lib/python3.13/logging/config.py", line 611, in configure
+2026-01-22 09:57:09,400:     raise ValueError('Unable to configure handler '
+2026-01-22 09:57:09,400:                      '%r' % name) from e
+2026-01-22 09:57:09,400: ***************************************************
+2026-01-22 09:57:09,405: If you're seeing an import error and don't know why,
+2026-01-22 09:57:09,405: we have a dedicated help page to help you debug: 
+2026-01-22 09:57:09,405: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2026-01-22 09:57:09,406: ***************************************************
+2026-01-22 09:57:24,236: Error running WSGI application
+2026-01-22 09:57:24,250: ValueError: Unable to configure handler 'my_handler'
+2026-01-22 09:57:24,250:   File "/var/www/minhaescala_pythonanywhere_com_wsgi.py", line 22, in <module>
+2026-01-22 09:57:24,250:     application = get_wsgi_application()
+2026-01-22 09:57:24,250: 
+2026-01-22 09:57:24,251:   File "/usr/local/lib/python3.13/site-packages/django/core/wsgi.py", line 12, in get_wsgi_application
+2026-01-22 09:57:24,251:     django.setup(set_prefix=False)
+2026-01-22 09:57:24,251:     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+2026-01-22 09:57:24,251: 
+2026-01-22 09:57:24,251:   File "/usr/local/lib/python3.13/site-packages/django/__init__.py", line 19, in setup
+2026-01-22 09:57:24,251:     configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+2026-01-22 09:57:24,251:     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-22 09:57:24,252: 
+2026-01-22 09:57:24,252:   File "/usr/local/lib/python3.13/site-packages/django/utils/log.py", line 76, in configure_logging
+2026-01-22 09:57:24,252:     logging_config_func(logging_settings)
+2026-01-22 09:57:24,252:     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+2026-01-22 09:57:24,256: 
+2026-01-22 09:57:24,258:   File "/usr/local/lib/python3.13/logging/config.py", line 935, in dictConfig
+2026-01-22 09:57:24,258:     dictConfigClass(config).configure()
+2026-01-22 09:57:24,258:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-01-22 09:57:24,259: 
+2026-01-22 09:57:24,259:   File "/usr/local/lib/python3.13/logging/config.py", line 611, in configure
+2026-01-22 09:57:24,259:     raise ValueError('Unable to configure handler '
+2026-01-22 09:57:24,259:                      '%r' % name) from e
+2026-01-22 09:57:24,259: ***************************************************
+2026-01-22 09:57:24,259: If you're seeing an import error and don't know why,
+2026-01-22 09:57:24,260: we have a dedicated help page to help you debug: 
+2026-01-22 09:57:24,260: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2026-01-22 09:57:24,260: ***************************************************
