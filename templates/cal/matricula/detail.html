@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Detalhes da Matrícula</h4>
+                    <a href="{% url 'cal:matricula_list' %}" class="btn btn-sm btn-outline-secondary">Voltar</a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Matrícula:</div>
+                        <div class="col-sm-8">{{ matricula.matricula }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Nome Completo:</div>
+                        <div class="col-sm-8">{{ matricula.nome_completo }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Nome Guerra:</div>
+                        <div class="col-sm-8">{{ matricula.nome_guerra }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">COREN:</div>
+                        <div class="col-sm-8">{{ matricula.coren|default:"-" }}</div>
+                    </div>
+                    <hr>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Hospital / Setor:</div>
+                        <div class="col-sm-8">{{ matricula.hospital.nome }} / {{ matricula.setor.nome }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Carga Horária:</div>
+                        <div class="col-sm-8">{{ matricula.carga_horaria_semanal }}h semanais</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Usuário Vinculado:</div>
+                        <div class="col-sm-8">{{ matricula.user.username|default:"Nenhum" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Perfil / Nível:</div>
+                        <div class="col-sm-8">
+                            {% if matricula.perfil %}
+                                <span class="badge bg-info text-dark">{{ matricula.perfil.get_tipo_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Não definido</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold">Status:</div>
+                        <div class="col-sm-8">
+                            {% if matricula.ativo %}
+                                <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inativo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-end">
+                    <a href="{% url 'cal:matricula_update' matricula.pk %}" class="btn btn-primary me-2">Editar</a>
+                    <a href="{% url 'cal:matricula_delete' matricula.pk %}" class="btn btn-outline-danger">Excluir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
