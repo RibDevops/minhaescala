@@ -1,0 +1,162 @@
+<!-- templates/tipo_evento/form.html -->
+{% extends 'base.html' %} {% block title %}{{ title }} - Sistema de Escalas{%
+endblock %} {% block page_title %}{{ title }}{% endblock %} {% block actions %}
+<a href="{% url 'cal:tipo_evento_list' %}" class="btn btn-secondary">
+  <i class="bi bi-arrow-left"></i> Voltar
+</a>
+{% endblock %} {% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %} {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %} {{ error }} {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="{{ form.nome.id_for_label }}" class="form-label">
+              {{ form.nome.label }}
+            </label>
+            {{ form.nome }} {% if form.nome.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.nome.errors %} {{ error }} {% endfor %}
+            </div>
+            {% endif %}
+            <small class="text-muted"
+              >Ex: Plantão Normal, Plantão Extra, Folga</small
+            >
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="{{ form.codigo.id_for_label }}" class="form-label">
+              {{ form.codigo.label }}
+            </label>
+            {{ form.codigo }} {% if form.codigo.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.codigo.errors %} {{ error }} {% endfor %}
+            </div>
+            {% endif %}
+            <small class="text-muted">Ex: PLT, FOL, TPD</small>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="{{ form.periodo.id_for_label }}" class="form-label">
+              {{ form.periodo.label }}
+            </label>
+            {{ form.periodo }} {% if form.periodo.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.periodo.errors %} {{ error }} {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="{{ form.horas.id_for_label }}" class="form-label">
+              {{ form.horas.label }}
+            </label>
+            {{ form.horas }} {% if form.horas.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.horas.errors %} {{ error }} {% endfor %}
+            </div>
+            {% endif %}
+            <small class="text-muted">De 0 a 24 horas</small>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="{{ form.cor.id_for_label }}" class="form-label">
+              {{ form.cor.label }}
+            </label>
+            <div class="input-group">
+              {{ form.cor }}
+              <span
+                class="input-group-text"
+                style="background-color: {% if form.instance.cor %}{{ form.instance.cor }}{% else %}#3498db{% endif %}; width: 40px;"
+              ></span>
+            </div>
+            {% if form.cor.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.cor.errors %} {{ error }} {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="mb-3">
+            <div class="form-check form-switch mt-4">
+              {{ form.contabiliza_carga_horaria }}
+              <label
+                for="{{ form.contabiliza_carga_horaria.id_for_label }}"
+                class="form-check-label"
+              >
+                {{ form.contabiliza_carga_horaria.label }}
+              </label>
+            </div>
+            <small class="text-muted"
+              >Desmarque para TPD (não conta nas horas semanais)</small
+            >
+            {% if form.contabiliza_carga_horaria.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.contabiliza_carga_horaria.errors %} {{ error
+              }} {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-circle"></i> {{ action }}
+        </button>
+        <a href="{% url 'cal:tipo_evento_list' %}" class="btn btn-secondary">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Atualiza visual da cor
+    const colorInput = document.querySelector('input[type="color"]');
+    const colorPreview = document.querySelector(".input-group-text");
+
+    if (colorInput && colorPreview) {
+      colorInput.addEventListener("input", function () {
+        colorPreview.style.backgroundColor = this.value;
+      });
+
+      // Cor inicial
+      if (colorInput.value) {
+        colorPreview.style.backgroundColor = colorInput.value;
+      }
+    }
+
+    // Adiciona classes aos inputs
+    const inputs = document.querySelectorAll(
+      'input:not([type="color"]), select'
+    );
+    inputs.forEach((input) => {
+      if (
+        !input.classList.contains("form-control") &&
+        !input.classList.contains("form-check-input")
+      ) {
+        input.classList.add("form-control");
+      }
+    });
+  });
+</script>
+{% endblock %}
