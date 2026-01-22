@@ -31,16 +31,32 @@ class Especialidade(models.Model):
     def __str__(self):
         return self.nome
 
+
+
+# =========================
+# TIPO (TIPO)
+# =========================
+class Tipo(models.Model):
+    tipo = models.CharField(max_length=10)
+    tipo_descricao = models.CharField(max_length=50)
+    contabiliza = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("tipo", "tipo_descricao")
+
+    def __str__(self):
+        return f"{self.tipo} ({self.tipo_descricao})"
+
 # =========================
 # TIPO DE TURNO (TIPO DE EVENTO)
 # =========================
 class TipoEvento(models.Model):
+    tipo = models.ForeignKey(Tipo, on_delete=models.CASCADE, related_name="tipos_evento")
     codigo = models.CharField(max_length=10)
     descricao = models.CharField(max_length=50)
     horas = models.PositiveIntegerField()
     cor = models.CharField(max_length=20, default="primary")
-    contabiliza = models.BooleanField(default=True)
-
+    
     class Meta:
         unique_together = ("codigo", "descricao")
 
