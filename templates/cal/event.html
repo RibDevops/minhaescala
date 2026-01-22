@@ -18,7 +18,7 @@
                         <select name="enfermeiro" class="form-select form-select-lg" required>
                             <option value="">Selecione o Enfermeiro</option>
                             {% for e in enfermeiros %}
-                            <option value="{{ e.id }}">{{ e.nome_exibicao }} ({{ e.numero }})</option>
+                            <option value="{{ e.id }}">{{ e.nome_guerra }} ({{ e.matricula }})</option>
                             {% endfor %}
                         </select>
                         <div class="form-text">Selecione o profissional uma vez e adicione vários plantões abaixo.</div>
@@ -48,7 +48,7 @@
                                     <select name="tipo_plantao[]" class="form-select" required>
                                         <option value="">Selecione...</option>
                                         {% for t in tipos_plantao %}
-                                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.nome }} ({{ t.horas }}h)</option>
+                                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.descricao }} ({{ t.horas }}h)</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -98,7 +98,7 @@
                     <select name="tipo_plantao[]" class="form-select" required>
                         <option value="">Selecione...</option>
                         {% for t in tipos_plantao %}
-                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.nome }} ({{ t.horas }}h)</option>
+                        <option value="{{ t.id }}">{{ t.codigo }} - {{ t.descricao }} ({{ t.horas }}h)</option>
                         {% endfor %}
                     </select>
                 </div>
