@@ -53,7 +53,14 @@
                                     <li><a class="dropdown-item" href="{% url 'cal:listar_usuarios' %}">Gerenciar Usuários</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'cal:logout' %}">Sair</a></li>
+                                <li>
+                                    <form id="logout-form" action="{% url 'cal:logout' %}" method="post" style="display: none;">
+                                        {% csrf_token %}
+                                    </form>
+                                    <a class="dropdown-item" href="#" onclick="document.getElementById('logout-form').submit(); return false;">
+                                        <i class="bi bi-box-arrow-right"></i> Sair
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     {% else %}
