@@ -144,12 +144,23 @@ class UserForm(forms.ModelForm):
         }
 
 class MatriculaForm(forms.ModelForm):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        label="Usuário",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    perfil = forms.ModelChoiceField(
+        queryset=PerfilUsuario.objects.all(),
+        required=False,
+        label="Perfil",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Matricula
         fields = ['user', 'perfil', 'matricula', 'nome_completo', 'nome_guerra', 'coren', 'carga_horaria_semanal', 'hospital', 'setor', 'ativo']
         widgets = {
-            'user': forms.Select(attrs={'class': 'form-control'}),
-            'perfil': forms.Select(attrs={'class': 'form-control'}),
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_guerra': forms.TextInput(attrs={'class': 'form-control'}),
