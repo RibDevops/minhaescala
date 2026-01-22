@@ -1,17 +1,14 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views, especialidade_views, perfil_views, matricula_views
+from .views import views_cal, views_dashboard, views_user, geral_views
+
 app_name = 'cal'
 
 urlpatterns = [
     path('', views_user.home, name='home'),
     path('calendar/', views_cal.CalendarioView.as_view(), name='calendar'),
-    path('perfis/', perfil_views.perfil_list, name='perfil_list'),
-    path('perfis/novo/', perfil_views.perfil_create, name='perfil_create'),
-    path('perfis/<int:pk>/editar/', perfil_views.perfil_update, name='perfil_update'),
-    path('perfis/<int:pk>/excluir/', perfil_views.perfil_delete, name='perfil_delete'),
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
+    path('login/', views_user.login_view, name='login'),
+    path('logout/', views_user.logout_view, name='logout'),
+    path('register/', views_user.register_view, name='register'),
     path('perfil/', views_user.perfil_usuario, name='perfil'),
     path('usuarios/', views_user.listar_usuarios, name='listar_usuarios'),
     path('usuarios/adicionar/', views_user.adicionar_usuario, name='adicionar_usuario'),
@@ -26,6 +23,18 @@ urlpatterns = [
     path('eventos/', views_cal.MeusPlantoesListView.as_view(), name='listar_eventos'),
     path('eventos/excluir/<int:event_id>/', views_cal.excluir_evento, name='excluir_evento'),
     
+    # Tipos
+    path('tipos/', geral_views.TipoListView.as_view(), name='tipo_list'),
+    path('tipos/novo/', geral_views.TipoCreateView.as_view(), name='tipo_create'),
+    path('tipos/<int:pk>/editar/', geral_views.TipoUpdateView.as_view(), name='tipo_update'),
+    path('tipos/<int:pk>/excluir/', geral_views.TipoDeleteView.as_view(), name='tipo_delete'),
+
+    # Tipos de Evento
+    path('tipos-evento/', geral_views.TipoEventoListView.as_view(), name='tipoevento_list'),
+    path('tipos-evento/novo/', geral_views.TipoEventoCreateView.as_view(), name='tipoevento_create'),
+    path('tipos-evento/<int:pk>/editar/', geral_views.TipoEventoUpdateView.as_view(), name='tipoevento_update'),
+    path('tipos-evento/<int:pk>/excluir/', geral_views.TipoEventoDeleteView.as_view(), name='tipoevento_delete'),
+
     # Hospitais
     path('hospitais/', geral_views.HospitalListView.as_view(), name='hospital_list'),
     path('hospitais/novo/', geral_views.HospitalCreateView.as_view(), name='hospital_create'),
@@ -39,28 +48,8 @@ urlpatterns = [
     path('setores/<int:pk>/excluir/', geral_views.SetorDeleteView.as_view(), name='setor_delete'),
     
     # Matrículas
-    path('matriculas/', matricula_views.matricula_list, name='matricula_list'),
-    path('matriculas/novo/', matricula_views.matricula_create, name='matricula_create'),
-    path('matriculas/<int:pk>/', matricula_views.matricula_detail, name='matricula_detail'),
-    path('matriculas/<int:pk>/editar/', matricula_views.matricula_update, name='matricula_update'),
-    path('matriculas/<int:pk>/excluir/', matricula_views.matricula_delete, name='matricula_delete'),
-    path('matriculas/<int:pk>/toggle-status/', matricula_views.matricula_toggle_status, name='matricula_toggle_status'),
-
-    # Tipos de Evento
-    path('tipo-evento/', geral_views.TipoEventoListView.as_view(), name='tipo_evento_list'),
-    path('tipo-evento/novo/', geral_views.TipoEventoCreateView.as_view(), name='tipo_evento_create'),
-    path('tipo-evento/<int:pk>/editar/', geral_views.TipoEventoUpdateView.as_view(), name='tipo_evento_update'),
-    path('tipo-evento/<int:pk>/excluir/', geral_views.TipoEventoDeleteView.as_view(), name='tipo_evento_delete'),
-
-    # Períodos
-    path('periodos/', periodo_views.periodo_list, name='periodo_list'),
-    path('periodos/novo/', periodo_views.periodo_create, name='periodo_create'),
-    path('periodos/<int:pk>/editar/', periodo_views.periodo_update, name='periodo_update'),
-    path('periodos/<int:pk>/excluir/', periodo_views.periodo_delete, name='periodo_delete'),
-
-    # Especialidades
-    path('especialidades/', especialidade_views.especialidade_list, name='especialidade_list'),
-    path('especialidades/novo/', especialidade_views.especialidade_create, name='especialidade_create'),
-    path('especialidades/<int:pk>/editar/', especialidade_views.especialidade_update, name='especialidade_update'),
-    path('especialidades/<int:pk>/excluir/', especialidade_views.especialidade_delete, name='especialidade_delete'),
+    path('matriculas/', geral_views.MatriculaListView.as_view(), name='matricula_list'),
+    path('matriculas/novo/', geral_views.MatriculaCreateView.as_view(), name='matricula_create'),
+    path('matriculas/<int:pk>/editar/', geral_views.MatriculaUpdateView.as_view(), name='matricula_update'),
+    path('matriculas/<int:pk>/excluir/', geral_views.MatriculaDeleteView.as_view(), name='matricula_delete'),
 ]

@@ -1,0 +1,16 @@
+{% extends 'cal/crud_base_list.html' %}
+
+{% block table_rows %}
+    {% for objeto in objetos %}
+    <tr>
+        <td>{{ objeto.codigo }}</td>
+        <td>{{ objeto.descricao }}</td>
+        <td>{{ objeto.horas }}h</td>
+        <td>{{ objeto.tipo_base }}</td>
+        <td>
+            <a href="{% url update_url objeto.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="{% url delete_url objeto.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+        </td>
+    </tr>
+    {% endfor %}
+{% endblock %}

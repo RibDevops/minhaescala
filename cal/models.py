@@ -37,11 +37,13 @@ class Especialidade(models.Model):
 # TIPO (TIPO)
 # =========================
 class Tipo(models.Model):
-    tipo = models.CharField(max_length=10)
-    tipo_descricao = models.CharField(max_length=50)
-    contabiliza = models.BooleanField(default=True)
+    tipo = models.CharField(max_length=10, verbose_name="Sigla do Tipo")
+    tipo_descricao = models.CharField(max_length=50, verbose_name="Descrição do Tipo")
+    contabiliza = models.BooleanField(default=True, verbose_name="Contabiliza Carga Horária?")
 
     class Meta:
+        verbose_name = "Tipo"
+        verbose_name_plural = "Tipos"
         unique_together = ("tipo", "tipo_descricao")
 
     def __str__(self):
@@ -51,13 +53,15 @@ class Tipo(models.Model):
 # TIPO DE TURNO (TIPO DE EVENTO)
 # =========================
 class TipoEvento(models.Model):
-    tipo = models.ForeignKey(Tipo, on_delete=models.CASCADE, related_name="tipos_evento")
-    codigo = models.CharField(max_length=10)
-    descricao = models.CharField(max_length=50)
-    horas = models.PositiveIntegerField()
-    cor = models.CharField(max_length=20, default="primary")
+    tipo_base = models.ForeignKey(Tipo, on_delete=models.CASCADE, related_name="eventos", verbose_name="Tipo Base")
+    codigo = models.CharField(max_length=10, verbose_name="Código")
+    descricao = models.CharField(max_length=50, verbose_name="Descrição")
+    horas = models.PositiveIntegerField(verbose_name="Carga Horária (Horas)")
+    cor = models.CharField(max_length=20, default="primary", verbose_name="Cor (Bootstrap)")
     
     class Meta:
+        verbose_name = "Tipo de Evento"
+        verbose_name_plural = "Tipos de Evento"
         unique_together = ("codigo", "descricao")
 
     def __str__(self):
