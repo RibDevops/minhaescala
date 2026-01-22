@@ -64,6 +64,12 @@
                         <td>
                             <a href="{% url 'cal:matricula_detail' m.pk %}" class="btn btn-sm btn-outline-info">Ver</a>
                             <a href="{% url 'cal:matricula_update' m.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <form action="{% url 'cal:matricula_toggle_status' m.pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if m.ativo %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                                    {% if m.ativo %}Desativar{% else %}Ativar{% endif %}
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% empty %}

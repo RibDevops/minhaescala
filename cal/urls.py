@@ -44,6 +44,7 @@ urlpatterns = [
     path('matriculas/<int:pk>/', matricula_views.matricula_detail, name='matricula_detail'),
     path('matriculas/<int:pk>/editar/', matricula_views.matricula_update, name='matricula_update'),
     path('matriculas/<int:pk>/excluir/', matricula_views.matricula_delete, name='matricula_delete'),
+    path('matriculas/<int:pk>/toggle-status/', matricula_views.matricula_toggle_status, name='matricula_toggle_status'),
 
     # Tipos de Evento
     path('tipo-evento/', geral_views.TipoEventoListView.as_view(), name='tipo_evento_list'),

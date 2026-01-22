@@ -107,6 +107,16 @@ def matricula_update(request, pk):
     return render(request, 'cal/matricula/form.html', {'form': form, 'title': 'Editar Matrícula'})
 
 @login_required
+def matricula_toggle_status(request, pk):
+    matricula = get_object_or_404(Matricula, pk=pk)
+    if request.method == 'POST':
+        matricula.ativo = not matricula.ativo
+        matricula.save()
+        status = "ativada" if matricula.ativo else "desativada"
+        messages.success(request, f"Matrícula de {matricula.nome_guerra} {status} com sucesso.")
+    return redirect('cal:matricula_list')
+
+@login_required
 def matricula_detail(request, pk):
     matricula = get_object_or_404(Matricula, pk=pk)
     return render(request, 'cal/matricula/detail.html', {'matricula': matricula})
