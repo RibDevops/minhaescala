@@ -78,7 +78,7 @@ class Matricula(models.Model):
     perfil = models.ForeignKey(PerfilUsuario, on_delete=models.SET_NULL, null=True, blank=True, related_name='matriculas_vinculadas')
 
     nome_completo = models.CharField(max_length=200)
-    nome_exibicao = models.CharField(max_length=50, verbose_name="Nome de Exibição")
+    nome_exibicao = models.CharField(max_length=50, verbose_name="Nome de Exibição", default="")
     matricula = models.CharField(max_length=30, unique=True)
     coren = models.CharField(max_length=30, blank=True, null=True)
 
