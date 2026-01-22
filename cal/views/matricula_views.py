@@ -3,13 +3,42 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
-from ..models import Matricula, PerfilUsuario
+from django.core.paginator import Paginator
+from django.db.models import Q
+from ..models import Matricula, PerfilUsuario, Hospital
 from ..forms import MatriculaSimplificadaForm
 
 @login_required
 def matricula_list(request):
-    matriculas = Matricula.objects.all().select_related('user', 'perfil', 'hospital', 'setor')
-    return render(request, 'cal/matricula/list.html', {'matriculas': matriculas})
+    matriculas = Matricula.objects.all().select_related('user', 'perfil', 'hospital', 'setor').order_by('nome_guerra')
+    
+    # Filtros
+    search = request.GET.get('search')
+    hospital_id = request.GET.get('hospital')
+    
+    if search:
+        matriculas = matriculas.filter(
+            Q(matricula__icontains=search) |
+            Q(nome_guerra__icontains=search) |
+            Q(nome_completo__icontains=search)
+        )
+    
+    if hospital_id:
+        matriculas = matriculas.filter(hospital_id=hospital_id)
+    
+    hospitais = Hospital.objects.all()
+    
+    paginator = Paginator(matriculas, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'cal/matricula/list.html', {
+        'page_obj': page_obj,
+        'hospitais': hospitais,
+        'search': search or '',
+        'selected_hospital': hospital_id,
+        'total_count': matriculas.count()
+    })
 
 @login_required
 def matricula_create(request):
