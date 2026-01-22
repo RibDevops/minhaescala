@@ -29,17 +29,17 @@
     </div>
 
     <div class="card shadow-sm border-0">
-        <div class="table-responsive" style="overflow-x: hidden;">
-            <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 10%;">Matrícula</th>
-                        <th style="width: 20%;">Profissional</th>
-                        <th style="width: 15%;">Hospital/Setor</th>
-                        <th style="width: 15%;">Especialidade</th>
-                        <th style="width: 10%;">Perfil</th>
-                        <th style="width: 10%;">Status</th>
-                        <th style="width: 20%;" class="text-end">Ações</th>
+                        <th>Matrícula</th>
+                        <th>Profissional</th>
+                        <th>Hospital / Setor</th>
+                        <th>Especialidade</th>
+                        <th>Perfil</th>
+                        <th>Status</th>
+                        <th class="text-end">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,51 +47,45 @@
                     <tr>
                         <td><span class="fw-bold">{{ m.matricula }}</span></td>
                         <td>
-                            <div>{{ m.nome_guerra }}</div>
-                            <small class="text-muted d-block text-truncate" style="max-width: 150px;">{{ m.nome_completo }}</small>
+                            <div class="fw-bold text-primary">{{ m.nome_guerra }}</div>
+                            <div class="small text-muted">{{ m.nome_completo }}</div>
                         </td>
                         <td>
-                            <div class="text-truncate" title="{{ m.hospital.nome }}">{{ m.hospital.sigla }}</div>
-                            <small class="text-muted">{{ m.setor.nome }}</small>
+                            <div>{{ m.hospital.nome }} ({{ m.hospital.sigla }})</div>
+                            <div class="small text-muted">{{ m.setor.nome }}</div>
                         </td>
                         <td>
                             {% if m.especialidade %}
-                                <span class="text-truncate d-inline-block" style="max-width: 120px;">{{ m.especialidade.nome }}</span>
+                                {{ m.especialidade.nome }}
                             {% else %}
-                                <span class="text-muted small">-</span>
+                                <span class="text-muted small">Não informada</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if m.perfil %}
-                                <span class="badge bg-light text-dark border">{{ m.perfil.get_tipo_display }}</span>
+                                <span class="badge bg-info text-dark">{{ m.perfil.get_tipo_display }}</span>
                             {% else %}
-                                <span class="badge bg-light text-muted border">Sem Perfil</span>
+                                <span class="badge bg-secondary">Sem Perfil</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if m.ativo %}
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">Ativo</span>
+                                <span class="badge bg-success">Ativo</span>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inativo</span>
+                                <span class="badge bg-danger">Inativo</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
                             <div class="btn-group btn-group-sm">
-                                <a href="{% url 'cal:matricula_detail' m.pk %}" class="btn btn-outline-info" title="Ver Detalhes">
-                                    <i class="bi bi-eye"></i> Ver
-                                </a>
-                                <a href="{% url 'cal:matricula_update' m.pk %}" class="btn btn-outline-primary" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                                <a href="{% url 'cal:matricula_detail' m.pk %}" class="btn btn-info text-white" title="Ver Detalhes">Ver</a>
+                                <a href="{% url 'cal:matricula_update' m.pk %}" class="btn btn-primary" title="Editar">Editar</a>
                                 <form action="{% url 'cal:matricula_toggle_status' m.pk %}" method="post" style="display:inline;">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn {% if m.ativo %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="{% if m.ativo %}Desativar{% else %}Ativar{% endif %}">
-                                        <i class="bi {% if m.ativo %}bi-toggle-on{% else %}bi-toggle-off{% endif %}"></i>
+                                    <button type="submit" class="btn {% if m.ativo %}btn-warning{% else %}btn-success{% endif %}" title="{% if m.ativo %}Desativar{% else %}Ativar{% endif %}">
+                                        {% if m.ativo %}Bloquear{% else %}Liberar{% endif %}
                                     </button>
                                 </form>
-                                <a href="{% url 'cal:matricula_delete' m.pk %}" class="btn btn-outline-danger" title="Excluir">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                <a href="{% url 'cal:matricula_delete' m.pk %}" class="btn btn-danger" title="Excluir">Excluir</a>
                             </div>
                         </td>
                     </tr>
