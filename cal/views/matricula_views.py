@@ -1,93 +1,95 @@
-# views/matricula_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib import messages
-from django.core.paginator import Paginator
-from django.db.models import Q
-from ..models import Matricula, Hospital, Setor, Especialidade, PerfilUsuario
-from ..forms import MatriculaForm
+from django.db import transaction
+from ..models import Matricula, PerfilUsuario
+from ..forms import MatriculaSimplificadaForm
 
 @login_required
 def matricula_list(request):
-    matriculas = Matricula.objects.all().order_by('nome_guerra')
-    
-    # Filtros
-    search = request.GET.get('search')
-    hospital_id = request.GET.get('hospital')
-    
-    if search:
-        matriculas = matriculas.filter(
-            Q(matricula__icontains=search) |
-            Q(nome_guerra__icontains=search) |
-            Q(nome_completo__icontains=search)
-        )
-    
-    if hospital_id:
-        matriculas = matriculas.filter(hospital_id=hospital_id)
-    
-    hospitais = Hospital.objects.all()
-    
-    paginator = Paginator(matriculas, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    return render(request, 'cal/matricula/list.html', {
-        'page_obj': page_obj,
-        'hospitais': hospitais,
-        'search': search or '',
-        'selected_hospital': hospital_id,
-        'total_count': matriculas.count()
-    })
+    matriculas = Matricula.objects.all().select_related('user', 'perfil', 'hospital', 'setor')
+    return render(request, 'cal/matricula/list.html', {'matriculas': matriculas})
 
 @login_required
 def matricula_create(request):
     if request.method == 'POST':
-        matricula_form = MatriculaForm(request.POST)
-        if matricula_form.is_valid():
-            matricula = matricula_form.save()
-            messages.success(request, f'Matrícula {matricula.matricula} criada com sucesso!')
-            return redirect('cal:matricula_list')
+        form = MatriculaSimplificadaForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # 1. Criar Usuário
+                    user = User.objects.create_user(
+                        username=form.cleaned_data['username'],
+                        email=form.cleaned_data['email'],
+                        password=form.cleaned_data['password']
+                    )
+                    
+                    # 2. Criar Perfil
+                    perfil = PerfilUsuario.objects.create(
+                        user=user,
+                        tipo=form.cleaned_data['tipo_perfil']
+                    )
+                    
+                    # 3. Criar Matrícula vinculada
+                    matricula = form.save(commit=False)
+                    matricula.user = user
+                    matricula.perfil = perfil
+                    matricula.save()
+                    
+                messages.success(request, f"Matrícula, usuário e perfil de {matricula.nome_guerra} criados com sucesso!")
+                return redirect('cal:matricula_list')
+            except Exception as e:
+                messages.error(request, f"Erro ao criar registro: {str(e)}")
     else:
-        matricula_form = MatriculaForm()
+        form = MatriculaSimplificadaForm()
     
-    return render(request, 'cal/matricula/form.html', {
-        'matricula_form': matricula_form,
-        'title': 'Nova Matrícula',
-        'action': 'Criar'
-    })
-
-@login_required
-def matricula_detail(request, pk):
-    matricula = get_object_or_404(Matricula, pk=pk)
-    return render(request, 'cal/matricula/detail.html', {
-        'matricula': matricula
-    })
+    return render(request, 'cal/matricula/form.html', {'form': form, 'title': 'Nova Matrícula Simplificada'})
 
 @login_required
 def matricula_update(request, pk):
     matricula = get_object_or_404(Matricula, pk=pk)
     if request.method == 'POST':
-        matricula_form = MatriculaForm(request.POST, instance=matricula)
-        if matricula_form.is_valid():
-            matricula = matricula_form.save()
-            messages.success(request, 'Matrícula atualizada com sucesso!')
-            return redirect('cal:matricula_detail', pk=matricula.pk)
+        form = MatriculaSimplificadaForm(request.POST, instance=matricula)
+        # Ajustes para edição
+        if 'username' in form.fields:
+            form.fields['username'].required = False
+            form.fields['password'].required = False
+            
+        if form.is_valid():
+            form.save()
+            if matricula.perfil:
+                matricula.perfil.tipo = form.cleaned_data['tipo_perfil']
+                matricula.perfil.save()
+            
+            messages.success(request, "Dados atualizados com sucesso.")
+            return redirect('cal:matricula_list')
     else:
-        matricula_form = MatriculaForm(instance=matricula)
+        initial = {}
+        if matricula.user:
+            initial['username'] = matricula.user.username
+            initial['email'] = matricula.user.email
+        if matricula.perfil:
+            initial['tipo_perfil'] = matricula.perfil.tipo
+        form = MatriculaSimplificadaForm(instance=matricula, initial=initial)
+        form.fields['username'].disabled = True
+        form.fields['password'].required = False
     
-    return render(request, 'cal/matricula/form.html', {
-        'matricula_form': matricula_form,
-        'title': 'Editar Matrícula',
-        'action': 'Atualizar'
-    })
+    return render(request, 'cal/matricula/form.html', {'form': form, 'title': 'Editar Matrícula'})
+
+@login_required
+def matricula_detail(request, pk):
+    matricula = get_object_or_404(Matricula, pk=pk)
+    return render(request, 'cal/matricula/detail.html', {'matricula': matricula})
 
 @login_required
 def matricula_delete(request, pk):
     matricula = get_object_or_404(Matricula, pk=pk)
     if request.method == 'POST':
+        user = matricula.user
         matricula.delete()
-        messages.success(request, 'Matrícula excluída com sucesso!')
+        if user:
+            user.delete()
+        messages.success(request, "Matrícula e usuário removidos com sucesso.")
         return redirect('cal:matricula_list')
-    return render(request, 'cal/matricula/confirm_delete.html', {
-        'matricula': matricula
-    })
+    return render(request, 'cal/matricula/confirm_delete.html', {'matricula': matricula})

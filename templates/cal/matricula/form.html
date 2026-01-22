@@ -4,45 +4,116 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">{{ title }}</h4>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-4">Selecione o Usuário e Perfil antes de preencher os dados da matrícula.</p>
                     <form method="post">
                         {% csrf_token %}
                         
+                        <h5 class="border-bottom pb-2 mb-3">Informações de Acesso</h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ matricula_form.user.id_for_label }}" class="form-label">{{ matricula_form.user.label }}</label>
-                                {{ matricula_form.user }}
+                                <label class="form-label">Nome de Usuário (Login)</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                <div class="text-danger small">{{ form.username.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="{{ matricula_form.perfil.id_for_label }}" class="form-label">{{ matricula_form.perfil.label }}</label>
-                                {{ matricula_form.perfil }}
+                                <label class="form-label">E-mail</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Senha</label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                <div class="text-danger small">{{ form.password.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tipo de Perfil</label>
+                                {{ form.tipo_perfil }}
+                                {% if form.tipo_perfil.errors %}
+                                <div class="text-danger small">{{ form.tipo_perfil.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
-                        <hr>
-
-                        {% for field in matricula_form %}
-                            {% if field.name != 'user' and field.name != 'perfil' %}
-                            <div class="mb-3">
-                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                {{ field }}
-                                {% if field.errors %}
-                                    <div class="text-danger small">
-                                        {{ field.errors }}
-                                    </div>
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">Dados da Matrícula</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Matrícula</label>
+                                {{ form.matricula }}
+                                {% if form.matricula.errors %}
+                                <div class="text-danger small">{{ form.matricula.errors }}</div>
                                 {% endif %}
                             </div>
-                            {% endif %}
-                        {% endfor %}
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Nome Completo</label>
+                                {{ form.nome_completo }}
+                                {% if form.nome_completo.errors %}
+                                <div class="text-danger small">{{ form.nome_completo.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nome de Guerra</label>
+                                {{ form.nome_guerra }}
+                                {% if form.nome_guerra.errors %}
+                                <div class="text-danger small">{{ form.nome_guerra.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">COREN</label>
+                                {{ form.coren }}
+                                {% if form.coren.errors %}
+                                <div class="text-danger small">{{ form.coren.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Hospital</label>
+                                {{ form.hospital }}
+                                {% if form.hospital.errors %}
+                                <div class="text-danger small">{{ form.hospital.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Setor</label>
+                                {{ form.setor }}
+                                {% if form.setor.errors %}
+                                <div class="text-danger small">{{ form.setor.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Carga Horária Semanal</label>
+                                {{ form.carga_horaria_semanal }}
+                                {% if form.carga_horaria_semanal.errors %}
+                                <div class="text-danger small">{{ form.carga_horaria_semanal.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-center">
+                                <div class="form-check">
+                                    {{ form.ativo }}
+                                    <label class="form-check-label">Ativo</label>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a href="{% url 'cal:matricula_list' %}" class="btn btn-outline-secondary">Cancelar</a>
-                            <button type="submit" class="btn btn-primary">{{ action }}</button>
+                            <a href="{% url 'cal:matricula_list' %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Salvar Registro Completo</button>
                         </div>
                     </form>
                 </div>

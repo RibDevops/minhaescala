@@ -144,38 +144,36 @@ class UserForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
-class MatriculaForm(forms.ModelForm):
-    user = forms.ModelChoiceField(
-        queryset=User.objects.all(),
-        required=False,
-        label="Usuário",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    perfil = forms.ModelChoiceField(
-        queryset=PerfilUsuario.objects.all(),
-        required=False,
-        label="Perfil",
+class MatriculaSimplificadaForm(forms.ModelForm):
+    # Campos de Usuário
+    username = forms.CharField(max_length=150, label="Nome de Usuário (Login)", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label="E-mail", widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label="Senha Inicial", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    
+    # Campo de Perfil
+    tipo_perfil = forms.ChoiceField(
+        choices=PerfilUsuario.TIPO_USUARIO_CHOICES,
+        label="Tipo de Perfil (Acesso)",
+        initial='ENFERMEIRO',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     class Meta:
         model = Matricula
-        fields = ['user', 'perfil', 'matricula', 'nome_completo', 'nome_guerra', 'coren', 'hospital', 'setor', 'carga_horaria_semanal', 'ativo']
+        fields = ['matricula', 'nome_completo', 'nome_guerra', 'coren', 'hospital', 'setor', 'carga_horaria_semanal', 'ativo']
         widgets = {
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_guerra': forms.TextInput(attrs={'class': 'form-control'}),
             'coren': forms.TextInput(attrs={'class': 'form-control'}),
-            'carga_horaria_semanal': forms.NumberInput(attrs={'class': 'form-control'}),
             'hospital': forms.Select(attrs={'class': 'form-control'}),
             'setor': forms.Select(attrs={'class': 'form-control'}),
+            'carga_horaria_semanal': forms.NumberInput(attrs={'class': 'form-control'}),
             'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Garantir que os campos apareçam e tenham a classe bootstrap
-        if 'user' in self.fields:
-            self.fields['user'].widget.attrs.update({'class': 'form-control'})
-        if 'perfil' in self.fields:
-            self.fields['perfil'].widget.attrs.update({'class': 'form-control'})
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Este nome de usuário já está em uso.")
+        return username
