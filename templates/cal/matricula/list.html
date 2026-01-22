@@ -28,54 +28,76 @@
         </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive" style="overflow-x: hidden;">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem;">
                 <thead class="table-light">
                     <tr>
-                        <th>Matrícula</th>
-                        <th>Nome Guerra</th>
-                        <th>Hospital / Setor</th>
-                        <th>Perfil</th>
-                        <th>Status</th>
-                        <th>Ações</th>
+                        <th style="width: 10%;">Matrícula</th>
+                        <th style="width: 20%;">Profissional</th>
+                        <th style="width: 15%;">Hospital/Setor</th>
+                        <th style="width: 15%;">Especialidade</th>
+                        <th style="width: 10%;">Perfil</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 20%;" class="text-end">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for m in page_obj %}
                     <tr>
-                        <td>{{ m.matricula }}</td>
-                        <td>{{ m.nome_guerra }}</td>
-                        <td>{{ m.hospital.sigla }} / {{ m.setor.nome }}</td>
+                        <td><span class="fw-bold">{{ m.matricula }}</span></td>
+                        <td>
+                            <div>{{ m.nome_guerra }}</div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 150px;">{{ m.nome_completo }}</small>
+                        </td>
+                        <td>
+                            <div class="text-truncate" title="{{ m.hospital.nome }}">{{ m.hospital.sigla }}</div>
+                            <small class="text-muted">{{ m.setor.nome }}</small>
+                        </td>
+                        <td>
+                            {% if m.especialidade %}
+                                <span class="text-truncate d-inline-block" style="max-width: 120px;">{{ m.especialidade.nome }}</span>
+                            {% else %}
+                                <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if m.perfil %}
-                                <span class="badge bg-info text-dark">{{ m.perfil.get_tipo_display }}</span>
+                                <span class="badge bg-light text-dark border">{{ m.perfil.get_tipo_display }}</span>
                             {% else %}
-                                <span class="badge bg-secondary">Sem Perfil</span>
+                                <span class="badge bg-light text-muted border">Sem Perfil</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if m.ativo %}
-                                <span class="badge bg-success">Ativo</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Ativo</span>
                             {% else %}
-                                <span class="badge bg-danger">Inativo</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inativo</span>
                             {% endif %}
                         </td>
-                        <td>
-                            <a href="{% url 'cal:matricula_detail' m.pk %}" class="btn btn-sm btn-outline-info">Ver</a>
-                            <a href="{% url 'cal:matricula_update' m.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                            <form action="{% url 'cal:matricula_toggle_status' m.pk %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm {% if m.ativo %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
-                                    {% if m.ativo %}Desativar{% else %}Ativar{% endif %}
-                                </button>
-                            </form>
-                            <a href="{% url 'cal:matricula_delete' m.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'cal:matricula_detail' m.pk %}" class="btn btn-outline-info" title="Ver Detalhes">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <a href="{% url 'cal:matricula_update' m.pk %}" class="btn btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{% url 'cal:matricula_toggle_status' m.pk %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn {% if m.ativo %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="{% if m.ativo %}Desativar{% else %}Ativar{% endif %}">
+                                        <i class="bi {% if m.ativo %}bi-toggle-on{% else %}bi-toggle-off{% endif %}"></i>
+                                    </button>
+                                </form>
+                                <a href="{% url 'cal:matricula_delete' m.pk %}" class="btn btn-outline-danger" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">Nenhuma matrícula encontrada.</td>
+                        <td colspan="7" class="text-center py-4 text-muted">Nenhuma matrícula encontrada.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
