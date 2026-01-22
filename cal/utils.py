@@ -11,7 +11,7 @@ class Calendar(HTMLCalendar):
     def formatday(self, day, weekday):
         plantoes_do_dia = self.plantoes.filter(data__day=day)
         d = ''
-        resumo = {}
+        resumo_especialidade = {}
         
         for plantao in plantoes_do_dia:
             nome = plantao.profissional.nome_guerra
@@ -19,14 +19,15 @@ class Calendar(HTMLCalendar):
             horas = plantao.tipo.horas
             d += f'<li>{nome} ({codigo} - {horas}h)</li>'
             
-            setor = plantao.setor
-            nome_setor = setor.nome if setor else 'Sem Setor'
-            resumo[nome_setor] = resumo.get(nome_setor, 0) + 1
+            # Contagem por especialidade do profissional
+            esp = plantao.profissional.especialidade
+            nome_esp = esp.nome if esp else 'Sem Especialidade'
+            resumo_especialidade[nome_esp] = resumo_especialidade.get(nome_esp, 0) + 1
 
         resumo_html = ''
-        if resumo:
+        if resumo_especialidade:
             resumo_html = '<div class="calendar-summary"><strong>QTD:</strong><br/>'
-            resumo_html += ' '.join([f'<span>{nome}: {qtd}</span><br />' for nome, qtd in resumo.items()])
+            resumo_html += ' '.join([f'<span>{nome}: {qtd}</span><br />' for nome, qtd in resumo_especialidade.items()])
             resumo_html += '</div>'
 
         if day != 0:
