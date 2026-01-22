@@ -70,6 +70,7 @@
                                     {% if m.ativo %}Desativar{% else %}Ativar{% endif %}
                                 </button>
                             </form>
+                            <a href="{% url 'cal:matricula_delete' m.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
                         </td>
                     </tr>
                     {% empty %}
