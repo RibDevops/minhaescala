@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="bi bi-person-circle"></i> Meu Perfil</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="perfil_submit" value="1">
+                    <div class="mb-3">
+                        <label class="form-label">Usuário</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">Nome</label>
+                        <input type="text" name="first_name" id="first_name" class="form-control" value="{{ user.first_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">Sobrenome</label>
+                        <input type="text" name="last_name" id="last_name" class="form-control" value="{{ user.last_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" name="email" id="email" class="form-control" value="{{ user.email }}">
+                    </div>
+                    
+                    {% if matricula %}
+                    <hr>
+                    <h5>Dados de Matrícula</h5>
+                    <p><strong>Matrícula:</strong> {{ matricula.matricula }}</p>
+                    <p><strong>Hospital:</strong> {{ matricula.hospital }}</p>
+                    <p><strong>Setor:</strong> {{ matricula.setor }}</p>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </form>
+                
+                <hr>
+                <h5>Alterar Senha</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="password_submit" value="1">
+                    {% bootstrap_form password_form %}
+                    <button type="submit" class="btn btn-warning">Alterar Senha</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
