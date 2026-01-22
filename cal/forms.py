@@ -147,8 +147,9 @@ class UserForm(forms.ModelForm):
 class MatriculaSimplificadaForm(forms.ModelForm):
     # Campos de Usuário
     username = forms.CharField(max_length=150, label="Nome de Usuário (Login)", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(max_length=150, label="Primeiro Nome", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=150, label="Último Nome", widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(label="E-mail", widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(label="Senha Inicial", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     
     # Campo de Perfil
     tipo_perfil = forms.ChoiceField(
@@ -160,10 +161,9 @@ class MatriculaSimplificadaForm(forms.ModelForm):
 
     class Meta:
         model = Matricula
-        fields = ['matricula', 'nome_completo', 'nome_guerra', 'coren', 'hospital', 'setor', 'especialidade', 'carga_horaria_semanal', 'ativo']
+        fields = ['matricula', 'nome_guerra', 'coren', 'hospital', 'setor', 'especialidade', 'carga_horaria_semanal', 'ativo']
         widgets = {
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
-            'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_guerra': forms.TextInput(attrs={'class': 'form-control'}),
             'coren': forms.TextInput(attrs={'class': 'form-control'}),
             'hospital': forms.Select(attrs={'class': 'form-control'}),

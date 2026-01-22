@@ -46,20 +46,31 @@
                             </div>
                         </div>
 
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">Dados do Usuário</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Primeiro Nome</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="text-danger small">{{ form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Último Nome</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="text-danger small">{{ form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
                         <h5 class="border-bottom pb-2 mb-3 mt-4">Dados da Matrícula</h5>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label">Matrícula</label>
                                 {{ form.matricula }}
                                 {% if form.matricula.errors %}
                                 <div class="text-danger small">{{ form.matricula.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-8 mb-3">
-                                <label class="form-label">Nome Completo</label>
-                                {{ form.nome_completo }}
-                                {% if form.nome_completo.errors %}
-                                <div class="text-danger small">{{ form.nome_completo.errors }}</div>
                                 {% endif %}
                             </div>
                         </div>

@@ -47,19 +47,13 @@ def matricula_create(request):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # Sincroniza o nome completo da matrícula com o first_name/last_name do User
-                    nome_completo = form.cleaned_data['nome_completo'].strip()
-                    partes_nome = nome_completo.split(' ', 1)
-                    first_name = partes_nome[0]
-                    last_name = partes_nome[1][:30] if len(partes_nome) > 1 else ""
-
                     # 1. Criar Usuário
                     user = User.objects.create_user(
                         username=form.cleaned_data['username'],
                         email=form.cleaned_data['email'],
                         password=form.cleaned_data['password'],
-                        first_name=first_name,
-                        last_name=last_name
+                        first_name=form.cleaned_data['first_name'],
+                        last_name=form.cleaned_data['last_name']
                     )
                     
                     # 2. Criar Perfil
@@ -72,6 +66,8 @@ def matricula_create(request):
                     matricula = form.save(commit=False)
                     matricula.user = user
                     matricula.perfil = perfil
+                    # Gera o nome completo a partir dos campos de nome
+                    matricula.nome_completo = f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}".strip()
                     matricula.save()
                     
                 messages.success(request, f"Matrícula, usuário e perfil de {matricula.nome_guerra} criados com sucesso!")
@@ -94,16 +90,14 @@ def matricula_update(request, pk):
             form.fields['password'].required = False
             
         if form.is_valid():
-            # Sincroniza o nome completo com o User
-            nome_completo = form.cleaned_data['nome_completo'].strip()
-            partes_nome = nome_completo.split(' ', 1)
-            
             if matricula.user:
-                matricula.user.first_name = partes_nome[0]
-                matricula.user.last_name = partes_nome[1][:30] if len(partes_nome) > 1 else ""
+                matricula.user.first_name = form.cleaned_data['first_name']
+                matricula.user.last_name = form.cleaned_data['last_name']
                 matricula.user.email = form.cleaned_data['email']
                 matricula.user.save()
 
+            # Atualiza o nome completo da matrícula
+            matricula.nome_completo = f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}".strip()
             form.save()
             if matricula.perfil:
                 matricula.perfil.tipo = form.cleaned_data['tipo_perfil']
@@ -116,6 +110,8 @@ def matricula_update(request, pk):
         if matricula.user:
             initial['username'] = matricula.user.username
             initial['email'] = matricula.user.email
+            initial['first_name'] = matricula.user.first_name
+            initial['last_name'] = matricula.user.last_name
         if matricula.perfil:
             initial['tipo_perfil'] = matricula.perfil.tipo
         form = MatriculaSimplificadaForm(instance=matricula, initial=initial)
