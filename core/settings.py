@@ -154,19 +154,25 @@ X_FRAME_OPTIONS = 'ALLOWALL'
 LOGIN_URL = 'cal:login'
 LOGIN_REDIRECT_URL = 'cal:home'
 LOGOUT_REDIRECT_URL = 'cal:login'
+import os
 
-FORMATTERS = (
-    {
-        "verbose": {
-            "format": "{levelname} {asctime:s} {threadName} {thread:d} {module} {filename} {lineno:d} {name} {funcName} {process:d} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {asctime:s} {module} {filename} {lineno:d} {funcName} {message}",
-            "style": "{",
-        },
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+
+FORMATTERS = {
+    "verbose": {
+        "format": "{levelname} {asctime:s} {threadName} {thread:d} {module} "
+                  "{filename} {lineno:d} {name} {funcName} {process:d} {message}",
+        "style": "{",
     },
-)
+    "simple": {
+        "format": "{levelname} {asctime:s} {module} {filename} {lineno:d} "
+                  "{funcName} {message}",
+        "style": "{",
+    },
+}
+
 
 
 HANDLERS = {
@@ -200,26 +206,24 @@ HANDLERS = {
     # ERROR: Informações descrevendo a ocorrência de um problema grande.
     # CRITICAL: Informações descrevendo a ocorrência de um problema crítico.
 
-LOGGERS = (
-    {
-        "django": {
-            "handlers": ["console_handler", "my_handler_detailed"],
-            "level": "ERROR",
-            "propagate": False,
-        },
-        "django.request": {
-            "handlers": ["my_handler"],
-            "level": "WARNING",
-            "propagate": False,
-        },
+LOGGERS = {
+    "django": {
+        "handlers": ["console_handler", "my_handler_detailed"],
+        "level": "ERROR",
+        "propagate": False,
     },
-)
+    "django.request": {
+        "handlers": ["my_handler"],
+        "level": "WARNING",
+        "propagate": False,
+    },
+}
 
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": FORMATTERS[0],
+    "formatters": FORMATTERS,
     "handlers": HANDLERS,
-    "loggers": LOGGERS[0],
+    "loggers": LOGGERS,
 }
