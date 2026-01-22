@@ -10,6 +10,7 @@ urlpatterns = [
     path('logout/', views_user.logout_view, name='logout'),
     path('register/', views_user.register_view, name='register'),
     path('perfil/', views_user.perfil_usuario, name='perfil'),
+    path('usuarios/', views_user.listar_usuarios, name='listar_usuarios'),
     path('dashboard/', views_dashboard.dashboard, name='dashboard'),
     path('plantao/novo/', views_cal.PlantaoCreateView.as_view(), name='event_new'),
     path('plantao/<int:pk>/editar/', views_cal.PlantaoUpdateView.as_view(), name='event_edit'),
