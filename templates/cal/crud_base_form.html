@@ -16,6 +16,9 @@
                     <div class="mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                         {{ field }}
+                        {% if field.name == 'cor' %}
+                        <div id="color-preview" class="mt-2 rounded" style="height: 30px; width: 100%; border: 1px solid #ced4da; background-color: {{ field.value|default:'#007bff' }};"></div>
+                        {% endif %}
                         {% if field.help_text %}
                         <div class="form-text">{{ field.help_text }}</div>
                         {% endif %}
@@ -51,4 +54,23 @@
         transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     }
 </style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateColorPreview(select) {
+    const preview = document.getElementById('color-preview');
+    if (preview) {
+        preview.style.backgroundColor = select.value;
+    }
+}
+
+// Inicializa a cor se houver um valor selecionado
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.querySelector('select[name="cor"]');
+    if (select) {
+        updateColorPreview(select);
+    }
+});
+</script>
 {% endblock %}

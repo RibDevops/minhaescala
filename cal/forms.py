@@ -122,6 +122,27 @@ class SetorForm(forms.ModelForm):
         }
 
 class TipoEventoForm(forms.ModelForm):
+    COLOR_CHOICES = [
+        ('#007bff', 'Azul (Padrão)'),
+        ('#6610f2', 'Roxo'),
+        ('#6f42c1', 'Índigo'),
+        ('#e83e8c', 'Rosa'),
+        ('#dc3545', 'Vermelho'),
+        ('#fd7e14', 'Laranja'),
+        ('#ffc107', 'Amarelo'),
+        ('#28a745', 'Verde'),
+        ('#20c997', 'Teal'),
+        ('#17a2b8', 'Ciano'),
+        ('#6c757d', 'Cinza'),
+        ('#343a40', 'Preto'),
+    ]
+    
+    cor = forms.ChoiceField(
+        choices=COLOR_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select', 'onchange': 'updateColorPreview(this)'}),
+        label="Cor do Evento"
+    )
+
     class Meta:
         model = TipoEvento
         fields = ['codigo', 'descricao', 'horas', 'cor', 'contabiliza']
@@ -129,7 +150,6 @@ class TipoEventoForm(forms.ModelForm):
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.TextInput(attrs={'class': 'form-control'}),
             'horas': forms.NumberInput(attrs={'class': 'form-control'}),
-            'cor': forms.TextInput(attrs={'class': 'form-control'}),
             'contabiliza': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

@@ -2,6 +2,7 @@ from django.urls import path, reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from cal.models import Matricula, TipoEvento
+from cal.forms import TipoEventoForm
 from core.models import Hospital, Setor
 
 class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -137,7 +138,7 @@ class TipoEventoListView(AdminRequiredMixin, ListView):
 
 class TipoEventoCreateView(AdminRequiredMixin, CreateView):
     model = TipoEvento
-    fields = ['codigo', 'descricao', 'horas', 'cor', 'contabiliza']
+    form_class = TipoEventoForm
     template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:tipo_evento_list')
     def get_context_data(self, **kwargs):
@@ -147,7 +148,7 @@ class TipoEventoCreateView(AdminRequiredMixin, CreateView):
 
 class TipoEventoUpdateView(AdminRequiredMixin, UpdateView):
     model = TipoEvento
-    fields = ['codigo', 'descricao', 'horas', 'cor', 'contabiliza']
+    form_class = TipoEventoForm
     template_name = 'cal/crud_base_form.html'
     success_url = reverse_lazy('cal:tipo_evento_list')
     def get_context_data(self, **kwargs):
