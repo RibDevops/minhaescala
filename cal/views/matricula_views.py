@@ -47,11 +47,19 @@ def matricula_create(request):
         if form.is_valid():
             try:
                 with transaction.atomic():
+                    # Sincroniza o nome completo da matrícula com o first_name/last_name do User
+                    nome_completo = form.cleaned_data['nome_completo'].strip()
+                    partes_nome = nome_completo.split(' ', 1)
+                    first_name = partes_nome[0]
+                    last_name = partes_nome[1][:30] if len(partes_nome) > 1 else ""
+
                     # 1. Criar Usuário
                     user = User.objects.create_user(
                         username=form.cleaned_data['username'],
                         email=form.cleaned_data['email'],
-                        password=form.cleaned_data['password']
+                        password=form.cleaned_data['password'],
+                        first_name=first_name,
+                        last_name=last_name
                     )
                     
                     # 2. Criar Perfil
@@ -86,6 +94,16 @@ def matricula_update(request, pk):
             form.fields['password'].required = False
             
         if form.is_valid():
+            # Sincroniza o nome completo com o User
+            nome_completo = form.cleaned_data['nome_completo'].strip()
+            partes_nome = nome_completo.split(' ', 1)
+            
+            if matricula.user:
+                matricula.user.first_name = partes_nome[0]
+                matricula.user.last_name = partes_nome[1][:30] if len(partes_nome) > 1 else ""
+                matricula.user.email = form.cleaned_data['email']
+                matricula.user.save()
+
             form.save()
             if matricula.perfil:
                 matricula.perfil.tipo = form.cleaned_data['tipo_perfil']
