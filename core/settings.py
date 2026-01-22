@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django_bootstrap5',
     'core',
     'escala',
     'cal.apps.CalConfig',
