@@ -9,10 +9,25 @@
                     <h4 class="mb-0">{{ title }}</h4>
                 </div>
                 <div class="card-body">
+                    <p class="text-muted small mb-4">Selecione o Usuário e Perfil antes de preencher os dados da matrícula.</p>
                     <form method="post">
                         {% csrf_token %}
                         
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ matricula_form.user.id_for_label }}" class="form-label">{{ matricula_form.user.label }}</label>
+                                {{ matricula_form.user }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ matricula_form.perfil.id_for_label }}" class="form-label">{{ matricula_form.perfil.label }}</label>
+                                {{ matricula_form.perfil }}
+                            </div>
+                        </div>
+
+                        <hr>
+
                         {% for field in matricula_form %}
+                            {% if field.name != 'user' and field.name != 'perfil' %}
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                                 {{ field }}
@@ -21,10 +36,8 @@
                                         {{ field.errors }}
                                     </div>
                                 {% endif %}
-                                {% if field.help_text %}
-                                    <div class="form-text small">{{ field.help_text }}</div>
-                                {% endif %}
                             </div>
+                            {% endif %}
                         {% endfor %}
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">

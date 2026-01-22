@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views, especialidade_views, perfil_views
+from .views import views_cal, views_dashboard, views_user, geral_views, periodo_views, especialidade_views, perfil_views, matricula_views
 app_name = 'cal'
 
 urlpatterns = [
@@ -36,10 +36,11 @@ urlpatterns = [
     path('setores/<int:pk>/excluir/', geral_views.SetorDeleteView.as_view(), name='setor_delete'),
     
     # Matrículas
-    path('matriculas/', geral_views.MatriculaListView.as_view(), name='matricula_list'),
-    path('matriculas/novo/', geral_views.MatriculaCreateView.as_view(), name='matricula_create'),
-    path('matriculas/<int:pk>/editar/', geral_views.MatriculaUpdateView.as_view(), name='matricula_update'),
-    path('matriculas/<int:pk>/excluir/', geral_views.MatriculaDeleteView.as_view(), name='matricula_delete'),
+    path('matriculas/', matricula_views.matricula_list, name='matricula_list'),
+    path('matriculas/novo/', matricula_views.matricula_create, name='matricula_create'),
+    path('matriculas/<int:pk>/', matricula_views.matricula_detail, name='matricula_detail'),
+    path('matriculas/<int:pk>/editar/', matricula_views.matricula_update, name='matricula_update'),
+    path('matriculas/<int:pk>/excluir/', matricula_views.matricula_delete, name='matricula_delete'),
 
     # Tipos de Evento
     path('tipo-evento/', geral_views.TipoEventoListView.as_view(), name='tipo_evento_list'),

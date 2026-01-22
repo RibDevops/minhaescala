@@ -159,7 +159,7 @@ class MatriculaForm(forms.ModelForm):
 
     class Meta:
         model = Matricula
-        fields = ['user', 'perfil', 'matricula', 'nome_completo', 'nome_guerra', 'coren', 'carga_horaria_semanal', 'hospital', 'setor', 'ativo']
+        fields = ['user', 'perfil', 'matricula', 'nome_completo', 'nome_guerra', 'coren', 'hospital', 'setor', 'carga_horaria_semanal', 'ativo']
         widgets = {
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
@@ -170,3 +170,11 @@ class MatriculaForm(forms.ModelForm):
             'setor': forms.Select(attrs={'class': 'form-control'}),
             'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Garantir que os campos apareçam e tenham a classe bootstrap
+        if 'user' in self.fields:
+            self.fields['user'].widget.attrs.update({'class': 'form-control'})
+        if 'perfil' in self.fields:
+            self.fields['perfil'].widget.attrs.update({'class': 'form-control'})
