@@ -9,3 +9,4 @@ django-bootstrap5
 django
 django-bootstrap5
 python-dateutil
+django-bootstrap5
