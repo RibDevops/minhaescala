@@ -5,3 +5,4 @@ python-dateutil
 django
 django-bootstrap5
 pillow
+django-bootstrap5
