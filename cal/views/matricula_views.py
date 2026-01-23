@@ -51,7 +51,7 @@ def matricula_create(request):
                     user = User.objects.create_user(
                         username=form.cleaned_data['username'],
                         email=form.cleaned_data['email'],
-                        password=form.cleaned_data['password'],
+                        password=form.cleaned_data.get('password', '123456'),
                         first_name=form.cleaned_data['first_name'],
                         last_name=form.cleaned_data['last_name']
                     )
@@ -87,6 +87,7 @@ def matricula_update(request, pk):
         # Ajustes para edição
         if 'username' in form.fields:
             form.fields['username'].required = False
+        if 'password' in form.fields:
             form.fields['password'].required = False
             
         if form.is_valid():
