@@ -126,21 +126,6 @@ class TipoForm(forms.ModelForm):
         }
 
 class TipoEventoForm(forms.ModelForm):
-    COLOR_CHOICES = [
-        ('#007bff', 'Azul (Padrão)'),
-        ('#6610f2', 'Roxo'),
-        ('#6f42c1', 'Índigo'),
-        ('#e83e8c', 'Rosa'),
-        ('#dc3545', 'Vermelho'),
-        ('#fd7e14', 'Laranja'),
-        ('#ffc107', 'Amarelo'),
-        ('#28a745', 'Verde'),
-        ('#20c997', 'Teal'),
-        ('#17a2b8', 'Ciano'),
-        ('#6c757d', 'Cinza'),
-        ('#343a40', 'Preto'),
-    ]
-    cor = forms.ChoiceField(choices=COLOR_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}), label="Cor do Evento")
     class Meta:
         model = TipoEvento
         fields = ['tipo_base', 'codigo', 'descricao', 'horas', 'cor']
@@ -149,6 +134,7 @@ class TipoEventoForm(forms.ModelForm):
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.TextInput(attrs={'class': 'form-control'}),
             'horas': forms.NumberInput(attrs={'class': 'form-control'}),
+            'cor': forms.TextInput(attrs={'type': 'color', 'class': 'form-control form-control-color', 'style': 'width: 100%'}),
         }
 
 class UserForm(forms.ModelForm):
