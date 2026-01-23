@@ -2,7 +2,7 @@
 {% extends 'base.html' %} {% block title %}Tipos de Evento - Sistema de
 Escalas{% endblock %} {% block page_title %}Tipos de Evento ({{ total_count
 }}){% endblock %} {% block actions %}
-<a href="{% url 'cal:tipo_evento_create' %}" class="btn btn-primary">
+<a href="{% url 'cal:tipoevento_create' %}" class="btn btn-primary">
   <i class="bi bi-plus-circle"></i> Novo Tipo
 </a>
 {% endblock %} {% block content %}
@@ -55,13 +55,13 @@ Escalas{% endblock %} {% block page_title %}Tipos de Evento ({{ total_count
           </td>
           <td class="table-actions text-end">
             <a
-              href="{% url 'cal:tipo_evento_update' tipo.pk %}"
+              href="{% url 'cal:tipoevento_update' tipo.pk %}"
               class="btn btn-sm btn-warning"
             >
               <i class="bi bi-pencil"></i>
             </a>
             <a
-              href="{% url 'cal:tipo_evento_delete' tipo.pk %}"
+              href="{% url 'cal:tipoevento_delete' tipo.pk %}"
               class="btn btn-sm btn-danger"
             >
               <i class="bi bi-trash"></i>
