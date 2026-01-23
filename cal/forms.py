@@ -134,7 +134,7 @@ class TipoEventoForm(forms.ModelForm):
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.TextInput(attrs={'class': 'form-control'}),
             'horas': forms.NumberInput(attrs={'class': 'form-control'}),
-            'cor': forms.TextInput(attrs={'type': 'color', 'class': 'form-control form-control-color', 'style': 'width: 100%'}),
+            'cor': forms.TextInput(attrs={'type': 'color', 'class': 'form-control form-control-color', 'style': 'width: 100%; height: 38px;'}),
         }
 
 class UserForm(forms.ModelForm):

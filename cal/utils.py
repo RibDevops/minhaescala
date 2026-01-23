@@ -17,7 +17,8 @@ class Calendar(HTMLCalendar):
             nome = plantao.profissional.nome_exibicao
             codigo = plantao.tipo.codigo
             horas = plantao.tipo.horas
-            d += f'<li>{nome} ({codigo} - {horas}h)</li>'
+            cor = plantao.tipo.cor
+            d += f'<li style="background-color: {cor}; color: white; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; list-style: none; font-size: 0.85em;">{nome} ({codigo} - {horas}h)</li>'
             
             # Contagem por especialidade do profissional
             esp = plantao.profissional.especialidade
@@ -26,7 +27,7 @@ class Calendar(HTMLCalendar):
 
         resumo_html = ''
         if resumo_especialidade:
-            resumo_html = '<div class="calendar-summary"><strong>QTD:</strong><br/>'
+            resumo_html = '<div class="calendar-summary" style="margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee; font-size: 0.8em;"><strong>QTD:</strong><br/>'
             resumo_html += ' '.join([f'<span>{nome}: {qtd}</span><br />' for nome, qtd in resumo_especialidade.items()])
             resumo_html += '</div>'
 
