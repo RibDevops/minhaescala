@@ -42,6 +42,12 @@ urlpatterns = [
     path('setores/<int:pk>/editar/', geral_views.SetorUpdateView.as_view(), name='setor_update'),
     path('setores/<int:pk>/excluir/', geral_views.SetorDeleteView.as_view(), name='setor_delete'),
     
+    # Especialidades
+    path('especialidades/', geral_views.EspecialidadeListView.as_view(), name='especialidade_list'),
+    path('especialidades/novo/', geral_views.EspecialidadeCreateView.as_view(), name='especialidade_create'),
+    path('especialidades/<int:pk>/editar/', geral_views.EspecialidadeUpdateView.as_view(), name='especialidade_update'),
+    path('especialidades/<int:pk>/excluir/', geral_views.EspecialidadeDeleteView.as_view(), name='especialidade_delete'),
+
     # Matrículas
     path('matriculas/', matricula_views.matricula_list, name='matricula_list'),
     path('matriculas/novo/', matricula_views.matricula_create, name='matricula_create'),
