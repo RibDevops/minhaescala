@@ -37,12 +37,20 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         
         if not user.is_staff and perfil:
             if perfil.tipo == 'ESCALANTE':
-                if hasattr(user, 'matricula'):
-                    plantoes = plantoes.filter(hospital=user.matricula.hospital, setor=user.matricula.setor)
-            elif perfil.tipo == 'ENFERMEIRO':
-                if hasattr(user, 'matricula'):
+                if hasattr(user, 'matricula') and user.matricula:
+                    # Escalante vê tudo do seu setor, exceto o que foi criado por usuários 'ENFERMEIRO' (registros privados)
                     plantoes = plantoes.filter(
-                        Q(profissional=user.matricula) | Q(setor=user.matricula.setor)
+                        hospital=user.matricula.hospital, 
+                        setor=user.matricula.setor
+                    ).exclude(
+                        criado_por__cal_perfil__tipo='ENFERMEIRO'
+                    )
+            elif perfil.tipo == 'ENFERMEIRO':
+                if hasattr(user, 'matricula') and user.matricula:
+                    # Enfermeiro vê o que ele mesmo criou (pessoal) E o que foi criado por ESCALANTE/ADMIN para o setor dele (oficial)
+                    plantoes = plantoes.filter(
+                        Q(profissional=user.matricula) | 
+                        (Q(setor=user.matricula.setor) & (Q(criado_por__cal_perfil__tipo='ESCALANTE') | Q(criado_por__is_staff=True)))
                     )
         
         cal = Calendar(d.year, d.month, plantoes)
