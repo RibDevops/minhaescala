@@ -49,11 +49,19 @@ class TipoDeleteView(AdminRequiredMixin, DeleteView):
 # TipoEvento
 class TipoEventoListView(AdminRequiredMixin, ListView):
     model = TipoEvento
-    template_name = 'cal/tipo_evento/list.html'
+    template_name = 'cal/tipo_evento_list.html'
     context_object_name = 'objetos'
+    def get_queryset(self):
+        return TipoEvento.objects.all()
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({'titulo': 'Tipos de Evento', 'labels': ['Código', 'Descrição', 'Horas', 'Tipo Base'], 'create_url': 'cal:tipoevento_create', 'update_url': 'cal:tipoevento_update', 'delete_url': 'cal:tipoevento_delete'})
+        context.update({
+            'titulo': 'Tipos de Evento',
+            'labels': ['Cor', 'Código', 'Descrição', 'Horas'],
+            'create_url': 'cal:tipo_evento_create',
+            'update_url': 'cal:tipo_evento_update',
+            'delete_url': 'cal:tipo_evento_delete'
+        })
         return context
 
 class TipoEventoCreateView(AdminRequiredMixin, CreateView):
@@ -88,8 +96,10 @@ class TipoEventoDeleteView(AdminRequiredMixin, DeleteView):
 # Hospital
 class HospitalListView(AdminRequiredMixin, ListView):
     model = Hospital
-    template_name = 'cal/hospital/list.html'
+    template_name = 'cal/hospital_list.html'
     context_object_name = 'objetos'
+    def get_queryset(self):
+        return Hospital.objects.all()
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({'titulo': 'Hospitais', 'labels': ['Nome', 'Sigla'], 'create_url': 'cal:hospital_create', 'update_url': 'cal:hospital_update', 'delete_url': 'cal:hospital_delete'})
@@ -127,8 +137,10 @@ class HospitalDeleteView(AdminRequiredMixin, DeleteView):
 # Setor
 class SetorListView(AdminRequiredMixin, ListView):
     model = Setor
-    template_name = 'cal/setor/list.html'
+    template_name = 'cal/setor_list.html'
     context_object_name = 'objetos'
+    def get_queryset(self):
+        return Setor.objects.all()
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({'titulo': 'Setores', 'labels': ['Nome', 'Hospital'], 'create_url': 'cal:setor_create', 'update_url': 'cal:setor_update', 'delete_url': 'cal:setor_delete'})

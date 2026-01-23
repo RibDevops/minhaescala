@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import views_cal, views_dashboard, views_user, geral_views
+from .views import views_cal, views_dashboard, views_user, geral_views, matricula_views
 
 app_name = 'cal'
 
@@ -43,8 +43,9 @@ urlpatterns = [
     path('setores/<int:pk>/excluir/', geral_views.SetorDeleteView.as_view(), name='setor_delete'),
     
     # Matrículas
-    path('matriculas/', geral_views.MatriculaListView.as_view(), name='matricula_list'),
-    path('matriculas/novo/', geral_views.MatriculaCreateView.as_view(), name='matricula_create'),
-    path('matriculas/<int:pk>/editar/', geral_views.MatriculaUpdateView.as_view(), name='matricula_update'),
-    path('matriculas/<int:pk>/excluir/', geral_views.MatriculaDeleteView.as_view(), name='matricula_delete'),
+    path('matriculas/', matricula_views.matricula_list, name='matricula_list'),
+    path('matriculas/novo/', matricula_views.matricula_create, name='matricula_create'),
+    path('matriculas/<int:pk>/editar/', matricula_views.matricula_update, name='matricula_update'),
+    path('matriculas/<int:pk>/excluir/', matricula_views.matricula_delete, name='matricula_delete'),
+    path('matriculas/<int:pk>/toggle-status/', matricula_views.matricula_toggle_status, name='matricula_toggle_status'),
 ]
