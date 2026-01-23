@@ -9,10 +9,10 @@
 {% endblock %}
 
 {% block extra_actions %}
-<a href="{% url 'cal:tipo_evento_update' obj.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
+<a href="{% url 'cal:tipoevento_update' obj.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
     <i class="bi bi-pencil"></i> Editar
 </a>
-<a href="{% url 'cal:tipo_evento_delete' obj.id %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+<a href="{% url 'cal:tipoevento_delete' obj.id %}" class="btn btn-sm btn-outline-danger" title="Excluir">
     <i class="bi bi-trash"></i> Excluir
 </a>
 {% endblock %}
