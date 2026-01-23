@@ -57,7 +57,7 @@ class TipoEvento(models.Model):
     codigo = models.CharField(max_length=10, verbose_name="Código")
     descricao = models.CharField(max_length=50, verbose_name="Descrição")
     horas = models.PositiveIntegerField(verbose_name="Carga Horária (Horas)")
-    cor = models.CharField(max_length=20, default="primary", verbose_name="Cor (Bootstrap)")
+    cor = models.CharField(max_length=20, default="primary", verbose_name="Cor")
     
     class Meta:
         verbose_name = "Tipo de Evento"
