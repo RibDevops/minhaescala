@@ -45,6 +45,7 @@ urlpatterns = [
     # Matrículas
     path('matriculas/', matricula_views.matricula_list, name='matricula_list'),
     path('matriculas/novo/', matricula_views.matricula_create, name='matricula_create'),
+    path('matriculas/<int:pk>/', matricula_views.matricula_detail, name='matricula_detail'),
     path('matriculas/<int:pk>/editar/', matricula_views.matricula_update, name='matricula_update'),
     path('matriculas/<int:pk>/excluir/', matricula_views.matricula_delete, name='matricula_delete'),
     path('matriculas/<int:pk>/toggle-status/', matricula_views.matricula_toggle_status, name='matricula_toggle_status'),
