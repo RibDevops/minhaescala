@@ -58,9 +58,9 @@ class TipoEventoListView(AdminRequiredMixin, ListView):
         context.update({
             'titulo': 'Tipos de Evento',
             'labels': ['Cor', 'Código', 'Descrição', 'Horas'],
-            'create_url': 'cal:tipo_evento_create',
-            'update_url': 'cal:tipo_evento_update',
-            'delete_url': 'cal:tipo_evento_delete'
+            'create_url': 'cal:tipoevento_create',
+            'update_url': 'cal:tipoevento_update',
+            'delete_url': 'cal:tipoevento_delete'
         })
         return context
 

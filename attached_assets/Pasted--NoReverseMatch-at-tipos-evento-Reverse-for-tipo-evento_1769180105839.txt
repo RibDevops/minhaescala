@@ -1,0 +1,44 @@
+
+NoReverseMatch at /tipos-evento/
+
+Reverse for 'tipo_evento_create' not found. 'tipo_evento_create' is not a valid view function or pattern name.
+
+Request Method: 	GET
+Request URL: 	http://0c525bd6-c3a6-4ece-a4b2-6a02978a4672-00-swvw5jo6ei0y.worf.replit.dev/tipos-evento/
+Django Version: 	5.2.10
+Exception Type: 	NoReverseMatch
+Exception Value: 	
+
+Reverse for 'tipo_evento_create' not found. 'tipo_evento_create' is not a valid view function or pattern name.
+
+Exception Location: 	/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/urls/resolvers.py, line 831, in _reverse_with_prefix
+Raised during: 	cal.views.geral_views.TipoEventoListView
+Python Executable: 	/home/runner/workspace/.pythonlibs/bin/python
+Python Version: 	3.11.14
+Python Path: 	
+
+['/home/runner/workspace',
+ '/nix/store/y50fwh2sha400s38m12psfxpvk2c8w39-sitecustomize/lib/python/site-packages',
+ '/nix/store/sqs1z4grvym0nv6r3ksdc990m8sr5wgx-python3.11-pip-25.0.1/lib/python3.11/site-packages',
+ '/nix/store/6334pjf6w2q623rgvwi499qaiym1p6yv-python3-3.11.14/lib/python311.zip',
+ '/nix/store/6334pjf6w2q623rgvwi499qaiym1p6yv-python3-3.11.14/lib/python3.11',
+ '/nix/store/6334pjf6w2q623rgvwi499qaiym1p6yv-python3-3.11.14/lib/python3.11/lib-dynload',
+ '/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages',
+ '/nix/store/6334pjf6w2q623rgvwi499qaiym1p6yv-python3-3.11.14/lib/python3.11/site-packages',
+ '/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages',
+ '/nix/store/lxnbcmx15m3yascasf4c9qh7zk19pd2b-python3.11-setuptools-80.9.0/lib/python3.11/site-packages']
+
+Server time: 	Fri, 23 Jan 2026 11:54:57 -0300
+Error during template rendering
+
+In template /home/runner/workspace/templates/cal/crud_base_list.html, error at line 8
+Reverse for 'tipo_evento_create' not found. 'tipo_evento_create' is not a valid view function or pattern name.
+1 	{% extends 'base.html' %}
+2 	
+3 	{% block title %}{{ titulo|default:"Gerenciamento" }}{% endblock %}
+4 	
+5 	{% block content %}
+6 	<div class="d-flex justify-content-between align-items-center mb-4">
+7 	    <h1>{{ titulo }}</h1>
+8 	    <a href="{% url create_url %}" class="btn btn-primary">
+9 	
