@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import views_cal, views_dashboard, views_user, geral_views, matricula_views
+from .views import views_cal, views_dashboard, views_user, geral_views, matricula_views, tpd_views
 
 app_name = 'cal'
 
@@ -55,4 +55,10 @@ urlpatterns = [
     path('matriculas/<int:pk>/editar/', matricula_views.matricula_update, name='matricula_update'),
     path('matriculas/<int:pk>/excluir/', matricula_views.matricula_delete, name='matricula_delete'),
     path('matriculas/<int:pk>/toggle-status/', matricula_views.matricula_toggle_status, name='matricula_toggle_status'),
+
+    # path('', tpd_views.home, name='home'),
+    path('novo/', tpd_views.novo_tpd, name='novo_tpd'),
+    path('listar/', tpd_views.listar_tpd, name='listar_tpd'),
+    path('dashboard/', tpd_views.dashboard, name='dashboard'),
+    path('relatorio/', tpd_views.relatorio_mensal, name='relatorio'),
 ]

@@ -163,7 +163,18 @@ class UserForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
-class MatriculaSimplificadaForm(forms.ModelForm):
+class TPDForm(forms.ModelForm):
+    class Meta:
+        model = TPD
+        fields = ['profissional', 'data', 'hora_inicio', 'hora_fim', 'hospital', 'setor']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'profissional': forms.Select(attrs={'class': 'form-select'}),
+            'hospital': forms.Select(attrs={'class': 'form-select'}),
+            'setor': forms.Select(attrs={'class': 'form-select'}),
+        }
     username = forms.CharField(max_length=150, label="Nome de Usuário (Login)", widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label="Senha", widget=forms.PasswordInput(attrs={'class': 'form-control'}), required=False)
     first_name = forms.CharField(max_length=150, label="Primeiro Nome", widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -188,3 +199,25 @@ class MatriculaSimplificadaForm(forms.ModelForm):
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("Este nome de usuário já está em uso.")
         return username
+
+
+# forms.py
+from django import forms
+from .models import TPD, Profissional
+
+class TPDForm(forms.ModelForm):
+    class Meta:
+        model = TPD
+        fields = ['profissional', 'data', 'hora_inicio', 'hora_fim', 'motivo']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'motivo': forms.TextInput(attrs={'class': 'form-control'}),
+            'profissional': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ordena profissionais por nome
+        self.fields['profissional'].queryset = Profissional.objects.order_by('nome')

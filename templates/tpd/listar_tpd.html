@@ -1,0 +1,83 @@
+<!-- listar_tpd.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>📋 Todos os TPDs</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Total Registros</h5>
+                <h2>{{ total_tpd }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5>Com Problemas</h5>
+                <h2>{{ tpd_com_problema }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5>Horas no Mês</h5>
+                <h2>{{ horas_mes|floatformat:1 }}h</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Profissional</th>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Horas</th>
+            <th>Noturnas</th>
+            <th>Adicional</th>
+            <th>Motivo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tpd in tpd_list %}
+        <tr class="{% if tpd.violacao_regra %}table-warning{% endif %}">
+            <td>
+                {% if tpd.violacao_regra %}
+                    <span class="badge bg-danger">⚠️</span>
+                {% else %}
+                    <span class="badge bg-success">✅</span>
+                {% endif %}
+            </td>
+            <td>{{ tpd.profissional.nome }}</td>
+            <td>{{ tpd.data|date:"d/m/Y" }}</td>
+            <td>{{ tpd.hora_inicio|time:"H:i" }} - {{ tpd.hora_fim|time:"H:i" }}</td>
+            <td><strong>{{ tpd.horas_trabalhadas }}h</strong></td>
+            <td>{{ tpd.horas_noturnas }}h</td>
+            <td>R$ {{ tpd.adicional_tpd|add:tpd.adicional_noturno|floatformat:2 }}</td>
+            <td>{{ tpd.motivo }}</td>
+        </tr>
+        {% if tpd.violacao_regra %}
+        <tr class="table-danger">
+            <td colspan="8">
+                <strong>⚠️ ALERTA:</strong> {{ tpd.mensagem_erro }}
+            </td>
+        </tr>
+        {% endif %}
+        {% empty %}
+        <tr>
+            <td colspan="8" class="text-center">Nenhum TPD registrado ainda.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="/novo/" class="btn btn-success">
+    + Novo TPD
+</a>
+{% endblock %}
