@@ -64,9 +64,14 @@ class TipoEventoListView(AdminRequiredMixin, ListView):
         })
         return context
 
+from cal.forms import (
+    HospitalForm, SetorForm, MatriculaSimplificadaForm, 
+    TipoEventoForm, TipoForm, EspecialidadeForm
+)
+
 class TipoEventoCreateView(AdminRequiredMixin, CreateView):
     model = TipoEvento
-    fields = ['tipo_base', 'codigo', 'descricao', 'horas', 'cor']
+    form_class = TipoEventoForm
     template_name = 'cal/tipo_evento/form.html'
     success_url = reverse_lazy('cal:tipoevento_list')
     def get_context_data(self, **kwargs):
@@ -76,7 +81,7 @@ class TipoEventoCreateView(AdminRequiredMixin, CreateView):
 
 class TipoEventoUpdateView(AdminRequiredMixin, UpdateView):
     model = TipoEvento
-    fields = ['tipo_base', 'codigo', 'descricao', 'horas', 'cor']
+    form_class = TipoEventoForm
     template_name = 'cal/tipo_evento/form.html'
     success_url = reverse_lazy('cal:tipoevento_list')
     def get_context_data(self, **kwargs):
