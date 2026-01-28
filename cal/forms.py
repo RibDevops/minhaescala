@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade, PerfilUsuario, Tipo
+from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade, PerfilUsuario, Tipo, TPD
 from core.models import Hospital, Setor
 
 class PerfilUsuarioForm(forms.ModelForm):
@@ -126,22 +126,6 @@ class TipoForm(forms.ModelForm):
         }
 
 class TipoEventoForm(forms.ModelForm):
-    COLOR_CHOICES = [
-        ('#0d6efd', 'Azul (Primary)'),
-        ('#6c757d', 'Cinza (Secondary)'),
-        ('#198754', 'Verde (Success)'),
-        ('#dc3545', 'Vermelho (Danger)'),
-        ('#ffc107', 'Amarelo (Warning)'),
-        ('#0dcaf0', 'Ciano (Info)'),
-        ('#6610f2', 'Índigo'),
-        ('#6f42c1', 'Roxo'),
-        ('#d63384', 'Rosa'),
-        ('#fd7e14', 'Laranja'),
-        ('#20c997', 'Teal'),
-    ]
-    
-    cor = forms.ChoiceField(choices=COLOR_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}), label="Cor")
-
     class Meta:
         model = TipoEvento
         fields = ['tipo_base', 'codigo', 'descricao', 'horas', 'cor']
@@ -150,6 +134,7 @@ class TipoEventoForm(forms.ModelForm):
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.TextInput(attrs={'class': 'form-control'}),
             'horas': forms.NumberInput(attrs={'class': 'form-control'}),
+            'cor': forms.Select(attrs={'class': 'form-select'}),
         }
 
 class UserForm(forms.ModelForm):
@@ -163,18 +148,7 @@ class UserForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
-class TPDForm(forms.ModelForm):
-    class Meta:
-        model = TPD
-        fields = ['profissional', 'data', 'hora_inicio', 'hora_fim', 'hospital', 'setor']
-        widgets = {
-            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'profissional': forms.Select(attrs={'class': 'form-select'}),
-            'hospital': forms.Select(attrs={'class': 'form-select'}),
-            'setor': forms.Select(attrs={'class': 'form-select'}),
-        }
+class MatriculaSimplificadaForm(forms.ModelForm):
     username = forms.CharField(max_length=150, label="Nome de Usuário (Login)", widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label="Senha", widget=forms.PasswordInput(attrs={'class': 'form-control'}), required=False)
     first_name = forms.CharField(max_length=150, label="Primeiro Nome", widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -200,24 +174,15 @@ class TPDForm(forms.ModelForm):
             raise forms.ValidationError("Este nome de usuário já está em uso.")
         return username
 
-
-# forms.py
-from django import forms
-from .models import TPD, Profissional
-
 class TPDForm(forms.ModelForm):
     class Meta:
         model = TPD
-        fields = ['profissional', 'data', 'hora_inicio', 'hora_fim', 'motivo']
+        fields = ['profissional', 'data', 'hora_inicio', 'hora_fim', 'hospital', 'setor']
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'motivo': forms.TextInput(attrs={'class': 'form-control'}),
-            'profissional': forms.Select(attrs={'class': 'form-control'}),
+            'profissional': forms.Select(attrs={'class': 'form-select'}),
+            'hospital': forms.Select(attrs={'class': 'form-select'}),
+            'setor': forms.Select(attrs={'class': 'form-select'}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Ordena profissionais por nome
-        self.fields['profissional'].queryset = Profissional.objects.order_by('nome')

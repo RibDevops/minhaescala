@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo
+from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo, TPD, LegislacaoTPD
 from core.models import Hospital, Setor
 
 @admin.register(PerfilUsuario)
@@ -12,7 +12,7 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
 class EventoEscalaAdmin(admin.ModelAdmin):
     list_display = ('data', 'get_profissional', 'tipo', 'setor', 'hospital')
     list_filter = ('hospital', 'setor', 'tipo', 'data')
-    search_fields = ('profissional__nome_guerra', 'profissional__matricula')
+    search_fields = ('profissional__nome_exibicao', 'profissional__matricula')
     date_hierarchy = 'data'
     
     def get_profissional(self, obj):
@@ -48,24 +48,15 @@ class TipoEventoAdmin(admin.ModelAdmin):
     list_filter = ('tipo_base',)
     search_fields = ('descricao', 'codigo')
 
-# admin.py
-from django.contrib import admin
-from .models import TPD, Profissional, LegislaçãoTPD
-
-@admin.register(Profissional)
-class ProfissionalAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'matricula', 'carga_horaria_semanal']
-
 @admin.register(TPD)
 class TPDAdmin(admin.ModelAdmin):
     list_display = ['profissional', 'data', 'horas_trabalhadas', 'violacao_regra']
     list_filter = ['violacao_regra', 'data']
-    search_fields = ['profissional__nome', 'motivo']
+    search_fields = ['profissional__nome_exibicao']
 
     def get_queryset(self, request):
-        # Ordena por data mais recente
         return super().get_queryset(request).order_by('-data')
 
-@admin.register(LegislaçãoTPD)
-class LegislaçãoTPDAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'limite_diario', 'limite_mensal']
+@admin.register(LegislacaoTPD)
+class LegislacaoTPDAdmin(admin.ModelAdmin):
+    list_display = ['nome']
