@@ -197,18 +197,52 @@ def lista_escalas(request):
 def detalhes_escala(request, escala_id):
     escala = get_object_or_404(EscalaMensal, id=escala_id)
     dias = DiaEscala.objects.filter(escala=escala).order_by('data', 'profissional')
+    
+    # Lista de abreviações dos dias da semana
+    dias_semana_abrev = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB']
+    
     profissionais = {}
     for dia in dias:
         if dia.profissional.id not in profissionais:
-            profissionais[dia.profissional.id] = {'profissional': dia.profissional, 'dias': [], 'total_horas': 0}
+            profissionais[dia.profissional.id] = {
+                'profissional': dia.profissional, 
+                'dias': [], 
+                'total_horas': 0,
+                'total_tpd_horas': 0
+            }
+        
+        # Simular processamento de turnos para exibição estilizada
+        turnos_list = []
+        for t in str(dia.turnos).replace(',', ' ').split():
+            sigla = t.strip().upper()
+            classe = 'turno-' + sigla.lower()
+            if 'TPD' in sigla: classe = 'turno-tpd'
+            turnos_list.append({'sigla': sigla, 'classe_css': classe})
+        
+        dia.turnos_list = turnos_list
         profissionais[dia.profissional.id]['dias'].append(dia)
         profissionais[dia.profissional.id]['total_horas'] += float(dia.horas_dia)
+        if dia.e_tpd:
+            profissionais[dia.profissional.id]['total_tpd_horas'] += float(dia.horas_dia)
+
     controles = ControleSemanal.objects.filter(escala=escala).order_by('profissional', 'semana_numero')
+    
+    num_dias = monthrange(escala.ano, escala.mes)[1]
+    # Gerar os dias da semana para o cabeçalho
+    cabecalho_dias_semana = []
+    for d in range(1, num_dias + 1):
+        dt = date(escala.ano, escala.mes, d)
+        cabecalho_dias_semana.append(dias_semana_abrev[dt.weekday() if dt.weekday() < 6 else 0]) # Ajuste simples se necessário
+
     context = {
-        'escala': escala, 'profissionais_list': profissionais.values(), 'controles': controles,
-        'total_dias': dias.count(), 'total_horas': dias.aggregate(total=Sum('horas_dia'))['total'] or 0,
-        'total_tpd': dias.filter(e_tpd=True).count(), 'dias_mes': monthrange(escala.ano, escala.mes)[1],
-        'dias_semana': ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+        'escala': escala, 
+        'profissionais_list': profissionais.values(), 
+        'controles': controles,
+        'total_horas': dias.aggregate(total=Sum('horas_dia'))['total'] or 0,
+        'total_tpd': dias.filter(e_tpd=True).count(), 
+        'dias_mes': num_dias,
+        'dias_semana_abrev': cabecalho_dias_semana,
+        'current_day': date.today().day if date.today().month == escala.mes else 0
     }
     return render(request, 'escala/detalhes.html', context)
 
