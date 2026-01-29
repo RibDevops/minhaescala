@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo, TPD, LegislacaoTPD
+from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo, TPD, LegislacaoTPD, EscalaMensal, DiaEscala, ControleSemanal, MapeamentoTurno
 from core.models import Hospital, Setor
 
 @admin.register(PerfilUsuario)
@@ -60,3 +60,22 @@ class TPDAdmin(admin.ModelAdmin):
 @admin.register(LegislacaoTPD)
 class LegislacaoTPDAdmin(admin.ModelAdmin):
     list_display = ['nome']
+
+@admin.register(EscalaMensal)
+class EscalaMensalAdmin(admin.ModelAdmin):
+    list_display = ('get_mes_display', 'ano', 'hospital', 'setor', 'criado_em')
+    list_filter = ('ano', 'mes', 'hospital', 'setor')
+
+@admin.register(DiaEscala)
+class DiaEscalaAdmin(admin.ModelAdmin):
+    list_display = ('data', 'profissional', 'turnos', 'horas_dia')
+    list_filter = ('data', 'escala')
+
+@admin.register(ControleSemanal)
+class ControleSemanalAdmin(admin.ModelAdmin):
+    list_display = ('profissional', 'semana_numero', 'horas_realizadas', 'saldo_semanal')
+    list_filter = ('escala', 'semana_numero')
+
+@admin.register(MapeamentoTurno)
+class MapeamentoTurnoAdmin(admin.ModelAdmin):
+    list_display = ('sigla_excel', 'tipo_evento')

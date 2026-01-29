@@ -1,0 +1,173 @@
+<!-- templates/escala/relatorio_semanal.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Cabeçalho -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3>📊 Relatório Semanal</h3>
+                    <h5>Escala {{ escala.get_mes_display }}/{{ escala.ano }}</h5>
+                    <p class="text-muted">{{ semana_titulo }}</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="btn-group w-100">
+                        {% for semana_num in semanas %}
+                        <a href="?semana={{ semana_num }}" 
+                           class="btn btn-outline-primary {% if request.GET.semana == semana_num|stringformat:'s' %}active{% endif %}">
+                            S{{ semana_num }}
+                        </a>
+                        {% endfor %}
+                        <a href="{% url 'relatorio_semanal' escala.id %}" 
+                           class="btn btn-outline-secondary">
+                            Todas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Gerais -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h6>Horas Realizadas</h6>
+                    <h3>{{ total_horas_realizadas|floatformat:0 }}h</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h6>Carga Semanal</h6>
+                    <h3>{{ total_carga_semanal|floatformat:0 }}h</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card {% if total_saldo >= 0 %}bg-info{% else %}bg-danger{% endif %} text-white">
+                <div class="card-body text-center">
+                    <h6>Saldo Total</h6>
+                    <h3>{{ total_saldo|floatformat:1 }}h</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h6>Profissionais</h6>
+                    <h3>{{ controles|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Controles -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="table-dark">
+                            <th>Profissional</th>
+                            <th>Matrícula</th>
+                            <th>Semana</th>
+                            <th>Carga Semanal</th>
+                            <th>Carga Anterior</th>
+                            <th>Horas Realizadas</th>
+                            <th>Saldo Semanal</th>
+                            <th>TPD</th>
+                            <th>TPD Noturno</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for controle in controles %}
+                        <tr>
+                            <td>
+                                <strong>{{ controle.profissional.nome_completo }}</strong>
+                                <br>
+                                <small class="text-muted">{{ controle.profissional.coren }}</small>
+                            </td>
+                            <td>{{ controle.profissional.matricula }}</td>
+                            <td>
+                                <span class="badge bg-primary">S{{ controle.semana_numero }}</span>
+                            </td>
+                            <td>{{ controle.carga_semanal }}h</td>
+                            <td>
+                                <span class="badge {% if controle.carga_anterior >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ controle.carga_anterior|floatformat:1 }}h
+                                </span>
+                            </td>
+                            <td>
+                                <strong>{{ controle.horas_realizadas }}h</strong>
+                            </td>
+                            <td>
+                                <span class="badge {% if controle.saldo_semanal >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ controle.saldo_semanal|floatformat:1 }}h
+                                </span>
+                            </td>
+                            <td>{{ controle.horas_tpd }}h</td>
+                            <td>{{ controle.horas_tpd_noturno }}h</td>
+                            <td>
+                                {% if controle.saldo_semanal >= 0 %}
+                                <span class="badge bg-success">✅ Dentro</span>
+                                {% else %}
+                                <span class="badge bg-danger">⚠️ Excedido</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-4">
+                                <div class="alert alert-info">
+                                    📭 Nenhum controle encontrado para esta semana.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico (placeholder) -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>📈 Visualização Gráfica</h5>
+        </div>
+        <div class="card-body">
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                <p>Gráfico de distribuição de horas por profissional</p>
+                <small>Implementar com Chart.js ou similar</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="mt-4">
+        <a href="{% url 'escala_detalhes' escala.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para Escala
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print"></i> Imprimir Relatório
+        </button>
+        <a href="#" class="btn btn-success" onclick="exportarExcel()">
+            <i class="fas fa-file-excel"></i> Exportar Excel
+        </a>
+    </div>
+</div>
+
+<script>
+function exportarExcel() {
+    alert('Exportando para Excel...');
+    // Implementar exportação real
+}
+</script>
+{% endblock %}

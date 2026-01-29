@@ -1,0 +1,201 @@
+<!-- templates/escala/detalhes.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Cabeçalho da Escala -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3>📅 Escala {{ escala.get_mes_display }}/{{ escala.ano }}</h3>
+                    <h5>{{ escala.hospital.nome }} - {{ escala.setor.nome }}</h5>
+                    <p class="text-muted">
+                        Criada por {{ escala.criado_por.username }} em 
+                        {{ escala.criado_em|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <a href="{% url 'relatorio_semanal' escala.id %}" 
+                           class="btn btn-success">
+                            <i class="fas fa-chart-bar"></i> Relatório Semanal
+                        </a>
+                        <a href="{% url 'exportar_escala' escala.id %}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-download"></i> Exportar Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards de Estatísticas -->
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h6>Profissionais</h6>
+                            <h3>{{ profissionais_list|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h6>Total Horas</h6>
+                            <h3>{{ total_horas|floatformat:0 }}h</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h6>TPDs</h6>
+                            <h3>{{ total_tpd }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-secondary text-white">
+                        <div class="card-body text-center">
+                            <h6>Dias Registrados</h6>
+                            <h3>{{ total_dias }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegação por Profissional -->
+    <ul class="nav nav-tabs mb-4" id="profissionaisTab" role="tablist">
+        {% for prof_data in profissionais_list %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if forloop.first %}active{% endif %}" 
+                    id="prof-{{ prof_data.profissional.id }}-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#prof-{{ prof_data.profissional.id }}"
+                    type="button">
+                {{ prof_data.profissional.nome_exibicao }}
+                <span class="badge bg-primary ms-1">{{ prof_data.total_horas|floatformat:0 }}h</span>
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Conteúdo dos Tabs -->
+    <div class="tab-content" id="profissionaisTabContent">
+        {% for prof_data in profissionais_list %}
+        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+             id="prof-{{ prof_data.profissional.id }}">
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ prof_data.profissional.nome_completo }}</h5>
+                    <p class="mb-0">
+                        Matrícula: {{ prof_data.profissional.matricula }} | 
+                        Carga Semanal: {{ prof_data.profissional.carga_horaria_semanal }}h
+                    </p>
+                </div>
+                <div class="card-body">
+                    <!-- Calendário do mês -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="table-dark">
+                                    {% for dia_semana in dias_semana %}
+                                    <th class="text-center">{{ dia_semana }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for semana in prof_data.dias|slice:":5" %}
+                                <tr>
+                                    {% for dia in semana %}
+                                    <td class="text-center {% if dia.e_tpd %}bg-warning{% elif dia.e_folga %}bg-light{% endif %}">
+                                        {% if dia %}
+                                        <strong>{{ dia.data.day }}</strong><br>
+                                        <small>{{ dia.turnos }}</small><br>
+                                        <span class="badge bg-info">{{ dia.horas_dia }}h</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Resumo -->
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>📊 Resumo Mensal</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>Total Horas:</td>
+                                            <td class="text-end">
+                                                <strong>{{ prof_data.total_horas|floatformat:1 }}h</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Carga Semanal:</td>
+                                            <td class="text-end">{{ prof_data.profissional.carga_horaria_semanal }}h</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Saldo:</td>
+                                            <td class="text-end">
+                                                <span class="badge {% if prof_data.total_horas >= prof_data.profissional.carga_horaria_semanal %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {{ prof_data.total_horas|floatformat:1|add:prof_data.profissional.carga_horaria_semanal }}h
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>📈 Controles Semanais</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% for controle in controles %}
+                                        {% if controle.profissional.id == prof_data.profissional.id %}
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Semana {{ controle.semana_numero }}:</span>
+                                            <span>
+                                                {{ controle.horas_realizadas }}h /
+                                                {{ controle.carga_semanal }}h
+                                                <span class="badge {% if controle.saldo_semanal >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {{ controle.saldo_semanal|floatformat:1 }}
+                                                </span>
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="mt-4">
+        <a href="{% url 'lista_escalas' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print"></i> Imprimir
+        </button>
+    </div>
+</div>
+{% endblock %}

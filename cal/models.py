@@ -32,7 +32,7 @@ class Especialidade(models.Model):
         return self.nome
 
 # =========================
-# TIPO (TIPO)
+# TIPO (Geral)
 # =========================
 class Tipo(models.Model):
     tipo = models.CharField(max_length=10, verbose_name="Sigla do Tipo")
@@ -48,7 +48,7 @@ class Tipo(models.Model):
         return f"{self.tipo} ({self.tipo_descricao})"
 
 # =========================
-# TIPO DE TURNO (TIPO DE EVENTO)
+# TIPO DE EVENTO (Turno)
 # =========================
 class TipoEvento(models.Model):
     CORES_CHOICES = [
@@ -198,6 +198,67 @@ class EventoEscala(models.Model):
         return f"{self.profissional} - {self.tipo} - {self.data}"
 
 # =========================
+# ESCALA MENSAL (EXCEL IMPORT)
+# =========================
+class EscalaMensal(models.Model):
+    MES_CHOICES = [
+        (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'),
+        (5, 'Maio'), (6, 'Junho'), (7, 'Julho'), (8, 'Agosto'),
+        (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro'),
+    ]
+    mes = models.IntegerField(choices=MES_CHOICES)
+    ano = models.IntegerField()
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
+    setor = models.ForeignKey(Setor, on_delete=models.CASCADE)
+    arquivo_excel = models.FileField(upload_to='escalas/%Y/%m/', null=True, blank=True)
+    criado_por = models.ForeignKey(User, on_delete=models.PROTECT)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Escala Mensal"
+        verbose_name_plural = "Escalas Mensais"
+        unique_together = ('mes', 'ano', 'hospital', 'setor')
+
+    def __str__(self):
+        return f"Escala {self.get_mes_display()}/{self.ano} - {self.hospital} ({self.setor})"
+
+class DiaEscala(models.Model):
+    escala = models.ForeignKey(EscalaMensal, on_delete=models.CASCADE, related_name='dias')
+    profissional = models.ForeignKey(Matricula, on_delete=models.CASCADE)
+    data = models.DateField()
+    turnos = models.CharField(max_length=50, blank=True)
+    horas_dia = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    e_tpd = models.BooleanField(default=False)
+    e_folga = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.profissional} - {self.data} - {self.turnos}"
+
+class ControleSemanal(models.Model):
+    escala = models.ForeignKey(EscalaMensal, on_delete=models.CASCADE, related_name='controles')
+    profissional = models.ForeignKey(Matricula, on_delete=models.CASCADE)
+    semana_numero = models.IntegerField()
+    carga_semanal = models.IntegerField(default=40)
+    carga_anterior = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    horas_realizadas = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    horas_tpd = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    horas_tpd_noturno = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    @property
+    def saldo_semanal(self):
+        return self.horas_realizadas - self.carga_semanal + self.carga_anterior
+
+    def __str__(self):
+        return f"Semana {self.semana_numero} - {self.profissional}"
+
+class MapeamentoTurno(models.Model):
+    sigla_excel = models.CharField(max_length=20, unique=True)
+    tipo_evento = models.ForeignKey(TipoEvento, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.sigla_excel} -> {self.tipo_evento}"
+
+# =========================
 # MÓDULO TPD
 # =========================
 class TPD(models.Model):
@@ -219,6 +280,7 @@ class TPD(models.Model):
         return f"TPD {self.profissional} - {self.data}"
 
     def save(self, *args, **kwargs):
+        from datetime import datetime, combine
         dt_start = datetime.combine(self.data, self.hora_inicio)
         dt_end = datetime.combine(self.data, self.hora_fim)
         delta = dt_end - dt_start
