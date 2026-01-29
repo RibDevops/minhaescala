@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Escala: {{ escala.get_mes_display }}/{{ escala.ano }} - {{ escala.hospital.sigla }} ({{ escala.setor.nome }})</h2>
+            <div>
+                <a href="{% url 'cal:exportar_escala' escala.id %}" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel"></i> Exportar
+                </a>
+                <a href="{% url 'cal:lista_escalas' %}" class="btn btn-secondary btn-sm">Voltar</a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm mb-0" style="font-size: 0.8rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="sticky-column" style="width: 200px;">Profissional</th>
+                            {% for d in "x"|ljust:dias_mes %}
+                                <th class="text-center">{{ forloop.counter }}</th>
+                            {% endfor %}
+                            <th class="text-center">Total Horas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in profissionais_list %}
+                        <tr>
+                            <td class="sticky-column font-weight-bold">{{ item.profissional.nome_exibicao }}</td>
+                            {% for d_num in "x"|ljust:dias_mes %}
+                                <td class="text-center">
+                                    {% with d_atual=forloop.counter %}
+                                        {% for dia in item.dias %}
+                                            {% if dia.data.day == d_atual %}
+                                                <span class="badge {% if dia.e_tpd %}bg-warning text-dark{% elif dia.e_folga %}bg-light text-muted{% else %}bg-primary{% endif %}" title="{{ dia.turnos }}">
+                                                    {{ dia.turnos|truncatechars:4 }}
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+                            <td class="text-center bg-light"><strong>{{ item.total_horas }}h</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">Resumo da Escala</div>
+                <div class="card-body">
+                    <p><strong>Total de Horas:</strong> {{ total_horas }}h</p>
+                    <p><strong>Total de Plantões TPD:</strong> {{ total_tpd }}</p>
+                    <p><strong>Profissionais na Escala:</strong> {{ profissionais_list|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sticky-column {
+        position: sticky;
+        left: 0;
+        background-color: white;
+        z-index: 10;
+        border-right: 2px solid #dee2e6;
+    }
+</style>
+{% endblock %}

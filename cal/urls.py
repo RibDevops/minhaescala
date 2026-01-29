@@ -66,11 +66,11 @@ urlpatterns = [
     
 
 
-        # Escalas
+    # Escalas
     path('escalas/', escala_views.lista_escalas, name='lista_escalas'),
     path('escalas/importar/', escala_views.importar_escala, name='importar_escala'),
     path('escalas/<int:escala_id>/', escala_views.detalhes_escala, name='escala_detalhes'),
-    path('escalas/<int:escala_id>/relatorio/', escala_views.relatorio_semanal, name='relatorio_semanal'),
+    path('escalas/<int:escala_id>/relatorio/', escala_views.relatorio_semanal, name='escala_relatorio_semanal'),
     path('escalas/<int:escala_id>/exportar/', escala_views.exportar_escala, name='exportar_escala'),
     path('escalas/dashboard/', escala_views.dashboard_escala, name='dashboard_escala'),
 

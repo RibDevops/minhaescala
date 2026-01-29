@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Importar Escala Mensal (Excel)</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-4">
+                        O arquivo deve seguir o formato padrão exportado pelo sistema ou compatível com a Tabela 1 e Planilha2.
+                    </p>
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mês</label>
+                                <select name="mes" class="form-select" required>
+                                    {% for val, label in meses %}
+                                    <option value="{{ val }}" {% if val == current_month %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ano</label>
+                                <input type="number" name="ano" class="form-control" value="{{ ano_atual }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Hospital</label>
+                                <select name="hospital" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    {% for h in hospitais %}
+                                    <option value="{{ h.id }}">{{ h.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Setor</label>
+                                <select name="setor" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    {% for s in setores %}
+                                    <option value="{{ s.id }}">{{ s.nome }} ({{ s.hospital.sigla }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Arquivo Excel (.xlsx)</label>
+                            <input type="file" name="arquivo_excel" class="form-control" accept=".xlsx" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-upload"></i> Processar e Importar
+                            </button>
+                            <a href="{% url 'cal:lista_escalas' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
