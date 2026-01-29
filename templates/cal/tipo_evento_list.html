@@ -1,7 +1,11 @@
 {% extends 'cal/crud_base_list.html' %}
 {% block table_rows %}
 <td>
+    {% if obj.cor %}
     <div class="rounded-circle" style="width: 25px; height: 25px; background-color: {{ obj.cor }}; border: 1px solid #dee2e6;" title="{{ obj.cor }}"></div>
+    {% else %}
+    <div class="rounded-circle" style="width: 25px; height: 25px; background-color: #3b71ca; border: 1px solid #dee2e6;" title="Padrão"></div>
+    {% endif %}
 </td>
 <td class="fw-bold">{{ obj.codigo }}</td>
 <td>{{ obj.descricao|default:"-" }}</td>

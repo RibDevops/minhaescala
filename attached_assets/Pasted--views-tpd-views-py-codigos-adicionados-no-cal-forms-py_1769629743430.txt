@@ -1,0 +1,674 @@
+
+views/tpd_views.py
+
+codigos adicionados no cal/forms.py
+codigos adicionados no cal/model.py
+
+ templates/       # Templates que eu gerei
+│       ├── base.html
+│       ├── listar_tpd.html
+│       ├── relatorio_mensal.html
+│       ├── novo_tpd.html
+│       └── dashboard.html
+
+adicionar link, no navbar, já criei os arquivos olhar se estar tudo certo
+usar o maximo sem sair do modo free, são para registro e controle de tpd,
+
+***Abaixo a explicação das regras e codigos
+
+
+EXPLICAÇÃO DAS REGRAS LEGAIS DO TPD
+⚖️ BASE LEGAL APLICÁVEL
+1. LEI Nº 8.112/1990 (Regime Jurídico dos Servidores)
+
+    Art. 61: Limite de 8h diárias e 44h semanais
+
+    Art. 62: Intervalo mínimo de 11h entre jornadas
+
+    Art. 78: Adicional de 50% para horas extras
+
+2. PORTARIA SES-DF Nº 77/2020
+
+    Art. 3º: Define TPD como trabalho realizado em dias de folga
+
+    Art. 5º: Limite máximo de 44h mensais de TPD
+
+    Art. 7º: Exige autorização prévia por escrito
+
+3. INSTRUÇÃO NORMATIVA SEGES Nº 15/2021
+
+    Art. 4º: Registro obrigatório em sistema eletrônico
+
+    Art. 6º: Controle de banco de horas
+
+    Art. 8º: Prazo máximo de 6 meses para compensação
+
+4. LEI COMPLEMENTAR DF Nº 840/2011
+
+    Art. 45: Adicional noturno de 20% (22h às 6h)
+
+    Art. 46: Proibição de TPD consecutivo
+
+    Art. 47: Direito a folga compensatória
+
+🔍 REGRAS IMPLEMENTADAS NO CÓDIGO
+REGRAS VALIDADAS AUTOMATICAMENTE:
+1. INTERVALO MÍNIMO (11 horas)
+python
+
+def verificar_intervalo_minimo(self):
+    """
+    Conforme Art. 62 da Lei 8.112/90:
+    "Entre 2 (duas) jornadas de trabalho haverá um período mínimo de 11 horas"
+    """
+    tpd_anterior = TPD.objects.filter(
+        profissional=self.profissional,
+        data=self.data
+    ).exclude(id=self.id).order_by('-hora_fim').first()
+    
+    if tpd_anterior:
+        intervalo = self.tempo_entre_jornadas(tpd_anterior)
+        if intervalo < 11:  # ← REGRA
+            return f"Intervalo mínimo violado: {intervalo}h (mínimo 11h)"
+    return None
+
+2. LIMITE DIÁRIO (8 horas)
+python
+
+def verificar_limite_diario(self):
+    """
+    Conforme Art. 61 da Lei 8.112/90:
+    "A duração normal do trabalho é de 8 horas diárias"
+    """
+    horas_hoje = self.horas_do_dia()
+    if horas_hoje > 8:  # ← REGRA
+        return f"Limite diário excedido: {horas_hoje}h (máximo 8h)"
+    return None
+
+3. LIMITE MENSAL (44 horas)
+python
+
+def verificar_limite_mensal(self):
+    """
+    Conforme Portaria SES-DF nº 77/2020, Art. 5º:
+    "O limite máximo de TPD é de 44 horas mensais"
+    """
+    horas_mes = self.horas_do_mes()
+    if horas_mes > 44:  # ← REGRA
+        return f"Limite mensal excedido: {horas_mes}h (máximo 44h)"
+    return None
+
+4. CÁLCULO DE ADICIONAIS
+
+Adicional de TPD (50%):
+python
+
+def calcular_adicional_tpd(self):
+    """
+    Conforme Art. 78 da Lei 8.112/90:
+    "As horas extras terão adicional de 50%"
+    """
+    valor_base = self.horas_trabalhadas * valor_hora
+    adicional_tpd = valor_base * 0.50  # ← 50%
+    return adicional_tpd
+
+Adicional Noturno (20%):
+python
+
+def calcular_horas_noturnas(self):
+    """
+    Conforme Lei Complementar DF 840/2011, Art. 45:
+    "Adicional de 20% para trabalho entre 22h e 6h"
+    """
+    # Verifica se horário está entre 22h e 6h
+    if hora_inicio >= 22 or hora_inicio < 6:
+        horas_noturnas = calcular_sobreposicao()
+        adicional = horas_noturnas * valor_hora * 0.20  # ← 20%
+    return adicional
+
+5. REGRAS ADICIONAIS (não implementadas mas importantes)
+
+Regra da Folga Compensatória:
+
+    A cada TPD realizado → direito a 1 dia de folga
+
+    Folga deve ser usada em até 30 dias
+
+    Não pode acumular mais de 5 folgas
+
+Regra do Descanso Semanal:
+
+    Mínimo de 24h consecutivas por semana
+
+    Preferencialmente no domingo
+
+Regra do Intervalo Intrajornada:
+
+    Acima de 6h → intervalo de 1h
+
+    Entre 4h e 6h → intervalo de 15min
+
+👮‍♂️ PENALIDADES POR DESCUMPRIMENTO
+Para o Servidor:
+
+    Advertência verbal → 1ª ocorrência
+
+    Advertência escrita → 2ª ocorrência
+
+    Suspensão → 3ª ocorrência (até 30 dias)
+
+    Processo administrativo → reincidência
+
+Para o Gestor:
+
+    Responsabilidade solidária por autorizar TPD irregular
+
+    Multa administrativa de 10% do valor irregular
+
+    Processo por improbidade em casos graves
+
+🔍 EXPLICAÇÃO DETALHADA DAS VIEWS
+🏠 VIEW: home
+
+Rota: /tpd/ ou /
+python
+
+def home(request):
+    """Página inicial do sistema de TPD"""
+    # Contagens básicas para dashboard
+    total_tpds = TPD.objects.count()
+    total_profissionais = Profissional.objects.count()
+    
+    # Últimos registros para visualização rápida
+    ultimos_tpd = TPD.objects.order_by('-data')[:5]
+    
+    # Alertas recentes para atenção imediata
+    alertas_recentes = TPD.objects.filter(
+        violacao_regra=True
+    ).order_by('-data')[:3]
+    
+    context = {
+        'total_tpds': total_tpds,
+        'total_profissionais': total_profissionais,
+        'ultimos_tpd': ultimos_tpd,
+        'alertas_recentes': alertas_recentes,
+    }
+    
+    return render(request, 'home.html', context)
+
+Fluxo:
+
+    Coleta estatísticas para cards informativos
+
+    Pega últimos TPDs para tabela recente
+
+    Busca alertas para destacar problemas
+
+    Renderiza template com contexto
+
+Uso no Template:
+html
+
+<!-- Mostra estatísticas -->
+<div class="card">
+    <div class="card-body">
+        <h5>Total TPDs: {{ total_tpds }}</h5>
+        <h5>Profissionais: {{ total_profissionais }}</h5>
+    </div>
+</div>
+
+<!-- Lista últimos TPDs -->
+{% for tpd in ultimos_tpd %}
+    {{ tpd.profissional }} - {{ tpd.horas_trabalhadas }}h
+{% endfor %}
+
+➕ VIEW: novo_tpd
+
+Rota: /tpd/novo/
+python
+
+def novo_tpd(request):
+    """
+    Cria novo registro de TPD com validação automática
+    """
+    if request.method == 'POST':
+        # 1. Recebe dados do formulário
+        form = TPDForm(request.POST)
+        
+        if form.is_valid():
+            # 2. Salva o TPD (que automaticamente valida regras)
+            tpd = form.save()
+            
+            # 3. Verifica resultado da validação
+            if tpd.violacao_regra:
+                # 4. Se houver problema: mostra ALERTA
+                messages.warning(request, 
+                    f"TPD registrado com ALERTA: {tpd.mensagem_erro}")
+            else:
+                # 5. Se tudo ok: mostra SUCESSO
+                messages.success(request, 
+                    f"TPD registrado com sucesso! Total: {tpd.horas_trabalhadas}h")
+            
+            # 6. Redireciona para lista
+            return redirect('controle_tpd:listar_tpd')
+    else:
+        # GET: mostra formulário vazio
+        form = TPDForm()
+    
+    # Renderiza formulário
+    return render(request, 'novo_tpd.html', {'form': form})
+
+Fluxo POST (salvamento):
+text
+
+Usuário preenche form → Django valida → save() é chamado
+                                      ↓
+Model.save() → calcula_horas() → verificar_regras()
+                                      ↓
+Se violar: violacao_regra=True, mensagem_erro=descrição
+                                      ↓
+View verifica violacao_regra → mostra alerta ou sucesso
+
+Validações Automáticas (no save() do model):
+
+    calcular_horas() → Total de horas trabalhadas
+
+    calcular_horas_noturnas() → Horas entre 22h-6h
+
+    verificar_regras() → Verifica 3 regras principais
+
+    calcular_adicional() → Calcula 50% + 20%
+
+📋 VIEW: listar_tpd
+
+Rota: /tpd/listar/
+python
+
+def listar_tpd(request):
+    """
+    Lista todos os TPDs com sistema de filtros
+    """
+    # 1. Pega parâmetros de filtro da URL
+    mes_filtro = request.GET.get('mes', '')
+    profissional_filtro = request.GET.get('profissional', '')
+    status_filtro = request.GET.get('status', '')
+    
+    # 2. Query inicial (todos os TPDs)
+    tpd_list = TPD.objects.all()
+    
+    # 3. Aplica filtros se existirem
+    if mes_filtro:
+        tpd_list = tpd_list.filter(data__month=mes_filtro)
+    
+    if profissional_filtro:
+        tpd_list = tpd_list.filter(profissional_id=profissional_filtro)
+    
+    if status_filtro == 'com_problema':
+        tpd_list = tpd_list.filter(violacao_regra=True)
+    elif status_filtro == 'sem_problema':
+        tpd_list = tpd_list.filter(violacao_regra=False)
+    
+    # 4. Configura paginação (20 itens por página)
+    paginator = Paginator(tpd_list.order_by('-data'), 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # 5. Calcula estatísticas
+    total_tpd = tpd_list.count()
+    tpd_com_problema = tpd_list.filter(violacao_regra=True).count()
+    
+    # 6. Prepara contexto para template
+    context = {
+        'tpd_list': page_obj,  # Página atual
+        'total_tpd': total_tpd,
+        'tpd_com_problema': tpd_com_problema,
+        'mes_filtro': mes_filtro,
+        'profissionais': Profissional.objects.all(),
+        'meses': [
+            (1, 'Janeiro'), (2, 'Fevereiro'), 
+            # ... todos os meses
+        ],
+    }
+    
+    return render(request, 'listar_tpd.html', context)
+
+Sistema de Filtros:
+text
+
+URL exemplo: /tpd/listar/?mes=3&profissional=5&status=com_problema
+                ↓           ↓          ↓              ↓
+          View base  Filtra por  Filtra por     Filtra por
+                     março       profissional   status
+
+Paginação:
+
+    20 registros por página
+
+    Paginator divide a lista
+
+    page_obj tem métodos:
+
+        .has_previous() → Tem página anterior?
+
+        .has_next() → Tem próxima página?
+
+        .number → Número da página atual
+
+        .paginator.num_pages → Total de páginas
+
+📊 VIEW: relatorio_mensal
+
+Rota: /tpd/relatorio/
+python
+
+def relatorio_mensal(request):
+    """
+    Gera relatório detalhado por mês com estatísticas
+    """
+    # 1. Pega mês do parâmetro (padrão: mês atual)
+    mes = request.GET.get('mes', datetime.now().month)
+    profissional_filtro = request.GET.get('profissional', '')
+    
+    # 2. Filtra TPDs do mês
+    tpd_mes = TPD.objects.filter(data__month=mes)
+    
+    if profissional_filtro:
+        tpd_mes = tpd_mes.filter(profissional_id=profissional_filtro)
+    
+    # 3. CÁLCULOS PRINCIPAIS
+    # Contagem
+    total_tpds = tpd_mes.count()
+    
+    # Horas
+    total_horas = sum(t.horas_trabalhadas for t in tpd_mes)
+    total_noturnas = sum(t.horas_noturnas for t in tpd_mes)
+    
+    # Valores financeiros
+    total_adicional_tpd = sum(t.adicional_tpd for t in tpd_mes)
+    total_adicional_noturno = sum(t.adicional_noturno for t in tpd_mes)
+    total_geral = total_adicional_tpd + total_adicional_noturno
+    
+    # Violações
+    violacoes = tpd_mes.filter(violacao_regra=True).count()
+    
+    # 4. Cálculo por profissional
+    horas_por_profissional = []
+    for prof in Profissional.objects.all():
+        horas_prof = tpd_mes.filter(profissional=prof).aggregate(
+            total=models.Sum('horas_trabalhadas')
+        )['total'] or 0
+        
+        if horas_prof > 0:
+            percentual = (horas_prof / total_horas * 100) if total_horas > 0 else 0
+            horas_por_profissional.append({
+                'nome': prof.nome,
+                'matricula': prof.matricula,
+                'total_horas': horas_prof,
+                'percentual': percentual,
+            })
+    
+    # 5. Ordena por horas (maior primeiro)
+    horas_por_profissional.sort(key=lambda x: x['total_horas'], reverse=True)
+    
+    # 6. Prepara contexto
+    context = {
+        'tpd_mes': tpd_mes.order_by('data'),
+        'total_tpds': total_tpds,
+        'total_horas': total_horas,
+        'total_noturnas': total_noturnas,
+        'violacoes': violacoes,
+        'mes': mes,
+        'total_geral': total_geral,
+        'horas_por_profissional': horas_por_profissional,
+    }
+    
+    return render(request, 'relatorio_mensal.html', context)
+
+Cálculos do Relatório:
+1. Agregação com aggregate():
+python
+
+# Soma todas as horas de um profissional
+horas_prof = tpd_mes.filter(profissional=prof).aggregate(
+    total=models.Sum('horas_trabalhadas')
+)['total'] or 0
+
+Retorna: {'total': 152.5} → 152.5
+2. Cálculo de Percentuais:
+python
+
+# Percentual de horas noturnas
+if total_horas > 0:
+    percentual_noturno = (total_noturnas / total_horas) * 100
+else:
+    percentual_noturno = 0
+
+3. Ordenação Personalizada:
+python
+
+# Ordena lista de dicionários por total_horas (decrescente)
+horas_por_profissional.sort(key=lambda x: x['total_horas'], reverse=True)
+
+📈 VIEW: dashboard
+
+Rota: /tpd/dashboard/
+python
+
+def dashboard(request):
+    """
+    Dashboard com visualização gráfica dos dados
+    """
+    # 1. Últimos registros
+    ultimos_tpd = TPD.objects.all().order_by('-data')[:10]
+    
+    # 2. Dados por profissional (mês atual)
+    profissionais = Profissional.objects.all()
+    dados_profissionais = []
+    
+    for prof in profissionais:
+        # Agrega horas do mês atual
+        horas_mes = TPD.objects.filter(
+            profissional=prof,
+            data__month=datetime.now().month
+        ).aggregate(total=models.Sum('horas_trabalhadas'))['total'] or 0
+        
+        if horas_mes:
+            # Classifica por status
+            status = '⚠️' if horas_mes > 44 else '✅'
+            
+            dados_profissionais.append({
+                'nome': prof.nome,
+                'horas': horas_mes,
+                'status': status
+            })
+    
+    # 3. Ordena por horas (maior primeiro)
+    dados_profissionais.sort(key=lambda x: x['horas'], reverse=True)
+    
+    # 4. Legislação vigente
+    legislacao = LegislaçãoTPD.objects.first()
+    
+    context = {
+        'ultimos_tpd': ultimos_tpd,
+        'dados_profissionais': dados_profissionais,
+        'legislacao': legislacao,
+    }
+    
+    return render(request, 'dashboard.html', context)
+
+Funcionalidades do Dashboard:
+1. Monitoramento em Tempo Real:
+
+    Top 10 últimos TPDs registrados
+
+    Status colorido (✅ ok, ⚠️ problema)
+
+2. Ranking de Profissionais:
+python
+
+# Exemplo de saída:
+[
+    {'nome': 'Maria Silva', 'horas': 52, 'status': '⚠️'},
+    {'nome': 'João Santos', 'horas': 38, 'status': '✅'},
+    {'nome': 'Ana Oliveira', 'horas': 22, 'status': '✅'},
+]
+
+3. Visualização Gráfica:
+html
+
+<!-- Barra de progresso no template -->
+<div class="progress">
+    <div class="progress-bar" 
+         style="width: {{ percentual }}%">
+        {{ horas }}h
+    </div>
+</div>
+
+🔧 VIEW AUXILIAR: verificar_limites (API)
+
+Rota: /tpd/api/verificar-limites/<int:profissional_id>/
+python
+
+def verificar_limites(request, profissional_id):
+    """
+    API para verificar limites em tempo real (usada por AJAX)
+    """
+    try:
+        profissional = Profissional.objects.get(id=profissional_id)
+        
+        # Calcula horas do mês
+        hoje = datetime.now()
+        tpd_mes = TPD.objects.filter(
+            profissional=profissional,
+            data__month=hoje.month
+        )
+        
+        horas_mes = sum(t.horas_trabalhadas for t in tpd_mes)
+        
+        # Retorna JSON
+        return JsonResponse({
+            'profissional': profissional.nome,
+            'horas_mes': horas_mes,
+            'limite_mensal': 44,
+            'disponivel': max(0, 44 - horas_mes),
+            'status': 'excedido' if horas_mes > 44 else 'ok'
+        })
+    
+    except Profissional.DoesNotExist:
+        return JsonResponse({'error': 'Profissional não encontrado'}, status=404)
+
+Uso com JavaScript:
+javascript
+
+// Verifica limites antes de enviar formulário
+fetch(`/tpd/api/verificar-limites/${profissionalId}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'excedido') {
+            alert(`Limite excedido! Já tem ${data.horas_mes}h este mês.`);
+        }
+    });
+
+🎯 RESUMO DAS VIEWS
+View	Método	Função	Template
+home	GET	Página inicial	home.html
+novo_tpd	GET/POST	Criar TPD	novo_tpd.html
+listar_tpd	GET	Listar com filtros	listar_tpd.html
+relatorio_mensal	GET	Relatório detalhado	relatorio_mensal.html
+dashboard	GET	Dashboard gráfico	dashboard.html
+verificar_limites	GET	API para AJAX	(JSON)
+⚡ DICAS DE OTIMIZAÇÃO
+1. Cache de Consultas:
+python
+
+from django.core.cache import cache
+
+def dashboard(request):
+    cache_key = f'dashboard_data_{datetime.now().month}'
+    dados = cache.get(cache_key)
+    
+    if not dados:
+        dados = calcular_dados_pesados()
+        cache.set(cache_key, dados, timeout=300)  # 5 minutos
+
+2. Querysets Eficientes:
+python
+
+# Ruim (N+1 queries):
+for tpd in TPD.objects.all():
+    print(tpd.profissional.nome)  # Query para cada profissional
+
+# Bom (1 query):
+tpd_list = TPD.objects.select_related('profissional')
+for tpd in tpd_list:
+    print(tpd.profissional.nome)  # Já está em memória
+
+3. Paginação Inteligente:
+python
+
+# Só conta total quando necessário
+paginator = Paginator(tpd_list, 20)
+page_obj = paginator.get_page(page_number)
+
+# Template só mostra total se for poucas páginas
+{% if page_obj.paginator.num_pages < 50 %}
+    Mostrar total: {{ page_obj.paginator.count }}
+{% endif %}
+
+🔐 SEGURANÇA NAS VIEWS
+Proteção Básica:
+python
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def novo_tpd(request):
+    # Só usuários logados podem acessar
+    pass
+
+Permissões por Perfil:
+python
+
+def listar_tpd(request):
+    if request.user.perfil.tipo == 'ENFERMEIRO':
+        # Só vê seus próprios TPDs
+        tpd_list = TPD.objects.filter(profissional__user=request.user)
+    elif request.user.perfil.tipo == 'ESCALANTE':
+        # Vê todos do seu hospital
+        tpd_list = TPD.objects.filter(
+            setor__hospital=request.user.perfil.hospital
+        )
+    else:
+        # Admin vê tudo
+        tpd_list = TPD.objects.all()
+
+📋 RESUMO DAS REGRAS LEGAIS IMPLEMENTADAS
+✅ REGRAS OBRIGATÓRIAS:
+
+    Intervalo mínimo: 11h entre jornadas
+
+    Limite diário: 8h de trabalho
+
+    Limite mensal: 44h de TPD
+
+    Adicional TPD: 50% sobre hora normal
+
+    Adicional noturno: 20% (22h às 6h)
+
+⚠️ REGRAS DE ALERTA:
+
+    Excedeu limite diário → ALERTA IMEDIATO
+
+    Excedeu limite mensal → BLOQUEIO AUTOMÁTICO
+
+    Intervalo insuficiente → NÃO PERMITE SALVAR
+
+💰 CÁLCULOS AUTOMÁTICOS:
+text
+
+Valor Total = (Horas Normais × Valor Hora × 1.5) + 
+              (Horas Noturnas × Valor Hora × 1.7)
+              
+Onde:
+- 1.5 = 100% (normal) + 50% (TPD)
+- 1.7 = 100% (normal) + 50% (TPD) + 20% (noturno)

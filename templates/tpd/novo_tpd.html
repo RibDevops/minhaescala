@@ -1,0 +1,59 @@
+<!-- novo_tpd.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>📝 Registrar Novo TPD</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Profissional:</label>
+                        {{ form.profissional }}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Data:</label>
+                            {{ form.data }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Início:</label>
+                            {{ form.hora_inicio }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fim:</label>
+                            {{ form.hora_fim }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Motivo:</label>
+                        {{ form.motivo }}
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6>⚠️ Regras Legais:</h6>
+                        <ul class="mb-0">
+                            <li>Limite diário: 8 horas</li>
+                            <li>Limite mensal: 44 horas</li>
+                            <li>Intervalo mínimo: 11 horas entre jornadas</li>
+                            <li>Adicional TPD: 50% sobre hora normal</li>
+                            <li>Adicional noturno: 20% (22h às 6h)</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        Salvar TPD
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade, PerfilUsuario, Tipo
+from .models import EventoEscala, Matricula, TipoEvento, Periodo, Especialidade, PerfilUsuario, Tipo, TPD
 from core.models import Hospital, Setor
 
 class PerfilUsuarioForm(forms.ModelForm):
@@ -134,7 +134,7 @@ class TipoEventoForm(forms.ModelForm):
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.TextInput(attrs={'class': 'form-control'}),
             'horas': forms.NumberInput(attrs={'class': 'form-control'}),
-            'cor': forms.TextInput(attrs={'type': 'color', 'class': 'form-control form-control-color', 'style': 'width: 100%; height: 38px;'}),
+            'cor': forms.Select(attrs={'class': 'form-select'}),
         }
 
 class UserForm(forms.ModelForm):
@@ -173,3 +173,16 @@ class MatriculaSimplificadaForm(forms.ModelForm):
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("Este nome de usuário já está em uso.")
         return username
+
+class TPDForm(forms.ModelForm):
+    class Meta:
+        model = TPD
+        fields = ['profissional', 'data', 'hora_inicio', 'hora_fim', 'hospital', 'setor']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'profissional': forms.Select(attrs={'class': 'form-select'}),
+            'hospital': forms.Select(attrs={'class': 'form-select'}),
+            'setor': forms.Select(attrs={'class': 'form-select'}),
+        }

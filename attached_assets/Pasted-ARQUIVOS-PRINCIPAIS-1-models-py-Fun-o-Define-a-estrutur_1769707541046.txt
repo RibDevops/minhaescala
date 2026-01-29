@@ -1,0 +1,217 @@
+ARQUIVOS PRINCIPAIS
+1. models.py
+
+Função: Define a estrutura do banco de dados
+O que contém:
+
+    EscalaMensal: Cabeçalho da escala (mês, ano, hospital, setor)
+
+    DiaEscala: Dias trabalhados por profissional
+
+    ControleSemanal: Cálculos semanais (CG ANT, CG SM, saldo)
+
+    MapeamentoTurno: Mapeia siglas do Excel para tipos de evento
+
+    TPD: Trabalho em Período de Descanso
+
+    LegislacaoTPD: Regras legais aplicáveis
+
+2. escala_views.py
+
+Função: Controla a lógica do sistema de escalas
+Views principais:
+
+    importar_escala(): Importa Excel e processa dados
+
+    lista_escalas(): Lista todas escalas com filtros
+
+    detalhes_escala(): Mostra escala detalhada por profissional
+
+    relatorio_semanal(): Relatórios semanais com cálculos
+
+    exportar_escala(): Exporta para Excel formatado
+
+    dashboard_escala(): Dashboard com estatísticas
+
+3. urls.py (adicional)
+
+Função: Define as rotas/URLs do sistema
+Endpoints:
+
+    /escalas/: Lista escalas
+
+    /escalas/importar/: Formulário de importação
+
+    /escalas/<id>/: Detalhes da escala
+
+    /escalas/<id>/relatorio/: Relatório semanal
+
+    /api/saldo-semanal/: API para consulta de saldo
+
+🎨 TEMPLATES (HTML)
+4. templates/escala/importar.html
+
+Função: Formulário para upload do arquivo Excel
+Controles:
+
+    Seleção de mês/ano
+
+    Seleção de hospital/setor
+
+    Upload de arquivo (.xlsx, .xls)
+
+    Informações sobre estrutura esperada
+
+5. templates/escala/lista.html
+
+Função: Lista todas escalas com filtros
+Funcionalidades:
+
+    Filtros por mês, ano, hospital, setor
+
+    Tabela com estatísticas de cada escala
+
+    Botões de ação (ver, relatório, exportar, excluir)
+
+    Paginação
+
+6. templates/escala/detalhes.html
+
+Função: Detalhes completos de uma escala
+Contém:
+
+    Calendário visual do mês por profissional
+
+    Abas para navegar entre profissionais
+
+    Cartões com estatísticas
+
+    Controles semanais com saldo
+
+    Botões de impressão e exportação
+
+7. templates/escala/relatorio_semanal.html
+
+Função: Relatórios semanais detalhados
+Mostra:
+
+    Tabela com todos controles semanais
+
+    Estatísticas gerais
+
+    Navegação por semana (S1, S2, S3, S4)
+
+    Status de saldo (positivo/negativo)
+
+🔧 ARQUIVOS DE SUPORTE
+8. forms.py (se necessário)
+
+Função: Formulários Django para validação
+Possíveis forms:
+
+    Formulário de importação
+
+    Formulário de edição de escala
+
+    Formulário de configurações
+
+9. admin.py
+
+Função: Configuração do painel admin Django
+Registra:
+
+    Todos os models para administração
+
+    Filtros e buscas
+
+    Ações em lote
+
+10. utils.py (opcional)
+
+Função: Funções auxiliares
+Poderia conter:
+
+    processar_excel(): Processamento do arquivo Excel
+
+    calcular_horas_por_turnos(): Cálculo de horas
+
+    gerar_calendario(): Geração de calendário HTML
+
+11. apps.py
+
+Função: Configuração do app Django
+Define:
+
+    Nome do app
+
+    Configurações específicas
+
+    Sinais (signals)
+
+📊 ARQUIVOS DE DADOS
+12. migrations/ (pasta)
+
+Função: Controle de versão do banco de dados
+Contém:
+
+    Arquivos de migração numerados
+
+    Histórico de alterações no banco
+
+13. fixtures/ (pasta - opcional)
+
+Função: Dados iniciais para testes
+Poderia conter:
+
+    turnos.json: Mapeamento de siglas
+
+    profissionais.json: Profissionais de exemplo
+
+    escalas.json: Escalas de exemplo
+
+14. static/escala/ (pasta - opcional)
+
+Função: Arquivos estáticos específicos
+Poderia conter:
+
+    css/escala.css: Estilos específicos
+
+    js/escala.js: JavaScript para interações
+
+    img/: Imagens e ícones
+
+15. media/escalas/ (pasta - automática)
+
+Função: Armazenamento de arquivos enviados
+Contém:
+
+    Arquivos Excel importados
+
+    Exportações geradas
+
+    Relatórios em PDF
+
+⚙️ ARQUIVOS DE CONFIGURAÇÃO
+16. settings.py (no projeto principal)
+
+Função: Configurações do Django
+Adições necessárias:
+
+    App 'escala' no INSTALLED_APPS
+
+    Configuração de arquivos estáticos/media
+
+    Configuração de templates
+
+17. requirements.txt
+
+Função: Dependências do projeto
+Bibliotecas necessárias:
+
+    Django
+
+    openpyxl (para Excel)
+
+    pandas (para processamento)
+
+    whitenoise (para arquivos estáticos)

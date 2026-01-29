@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo
+from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo, TPD, LegislacaoTPD, EscalaMensal, DiaEscala, ControleSemanal, MapeamentoTurno
 from core.models import Hospital, Setor
 
 @admin.register(PerfilUsuario)
@@ -12,7 +12,7 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
 class EventoEscalaAdmin(admin.ModelAdmin):
     list_display = ('data', 'get_profissional', 'tipo', 'setor', 'hospital')
     list_filter = ('hospital', 'setor', 'tipo', 'data')
-    search_fields = ('profissional__nome_guerra', 'profissional__matricula')
+    search_fields = ('profissional__nome_exibicao', 'profissional__matricula')
     date_hierarchy = 'data'
     
     def get_profissional(self, obj):
@@ -47,3 +47,35 @@ class TipoEventoAdmin(admin.ModelAdmin):
     list_display = ('codigo', 'descricao', 'horas', 'tipo_base')
     list_filter = ('tipo_base',)
     search_fields = ('descricao', 'codigo')
+
+@admin.register(TPD)
+class TPDAdmin(admin.ModelAdmin):
+    list_display = ['profissional', 'data', 'horas_trabalhadas', 'violacao_regra']
+    list_filter = ['violacao_regra', 'data']
+    search_fields = ['profissional__nome_exibicao']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('-data')
+
+@admin.register(LegislacaoTPD)
+class LegislacaoTPDAdmin(admin.ModelAdmin):
+    list_display = ['nome']
+
+@admin.register(EscalaMensal)
+class EscalaMensalAdmin(admin.ModelAdmin):
+    list_display = ('get_mes_display', 'ano', 'hospital', 'setor', 'criado_em')
+    list_filter = ('ano', 'mes', 'hospital', 'setor')
+
+@admin.register(DiaEscala)
+class DiaEscalaAdmin(admin.ModelAdmin):
+    list_display = ('data', 'profissional', 'turnos', 'horas_dia')
+    list_filter = ('data', 'escala')
+
+@admin.register(ControleSemanal)
+class ControleSemanalAdmin(admin.ModelAdmin):
+    list_display = ('profissional', 'semana_numero', 'horas_realizadas', 'saldo_semanal')
+    list_filter = ('escala', 'semana_numero')
+
+@admin.register(MapeamentoTurno)
+class MapeamentoTurnoAdmin(admin.ModelAdmin):
+    list_display = ('sigla_excel', 'tipo_evento')

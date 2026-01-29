@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 h4">📅 {{ escala.get_mes_display|upper }} / {{ escala.ano }}</h2>
+                    <p class="mb-0 small opacity-75">{{ escala.hospital.nome }} - {{ escala.setor.nome }}</p>
+                </div>
+                <div class="d-print-none">
+                    <button onclick="window.print()" class="btn btn-light btn-sm shadow-sm">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <a href="{% url 'cal:lista_escalas' %}" class="btn btn-outline-light btn-sm ms-2">Voltar</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive overflow-auto" style="max-height: 80vh;">
+                <table class="table table-sm table-bordered mb-0 scale-table">
+                    <thead class="bg-light sticky-top" style="z-index: 100;">
+                        <tr>
+                            <th class="sticky-left bg-light border-end" style="min-width: 250px;">
+                                <div class="px-2 py-1">PROFISSIONAL / MATRÍCULA</div>
+                            </th>
+                            {% for d in "x"|ljust:dias_mes %}
+                                <th class="text-center p-0 border-end day-header {% if forloop.counter == current_day %}bg-warning-subtle{% endif %}" style="min-width: 35px;">
+                                    <div class="small fw-bold border-bottom py-1">{{ forloop.counter }}</div>
+                                    <div class="extra-small py-1 text-muted">{{ dias_semana_abrev|get_item:forloop.counter0 }}</div>
+                                </th>
+                            {% endfor %}
+                            <th class="text-center bg-light border-start px-2" style="min-width: 80px;">TPD</th>
+                            <th class="text-center bg-light border-start px-2" style="min-width: 80px;">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in profissionais_list %}
+                        <tr class="profissional-row">
+                            <td class="sticky-left bg-white border-end px-2 py-2">
+                                <div class="fw-bold text-truncate" title="{{ item.profissional.nome_completo }}">
+                                    {{ item.profissional.nome_exibicao|default:item.profissional.nome_completo|upper }}
+                                </div>
+                                <div class="text-muted extra-small d-flex justify-content-between">
+                                    <span>{{ item.profissional.matricula }}</span>
+                                    <span>{{ item.profissional.carga_horaria_semanal }}h</span>
+                                </div>
+                            </td>
+                            {% for d_num in "x"|ljust:dias_mes %}
+                                <td class="p-0 text-center border-end align-middle day-cell" style="height: 50px;">
+                                    {% with d_atual=forloop.counter %}
+                                        {% for dia in item.dias %}
+                                            {% if dia.data.day == d_atual %}
+                                                <div class="turno-container d-flex flex-column justify-content-center h-100">
+                                                    {% for turno in dia.turnos_list %}
+                                                        <div class="turno-label {{ turno.classe_css }}" title="{{ turno.sigla }}">
+                                                            {{ turno.sigla }}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+                            <td class="text-center align-middle bg-light border-start fw-bold text-primary">
+                                {{ item.total_tpd_horas|default:0 }}h
+                            </td>
+                            <td class="text-center align-middle bg-light border-start fw-bold">
+                                {{ item.total_horas|floatformat:0 }}h
+                            </td>
+                        </tr>
+                        <tr class="observacao-row bg-light-subtle">
+                            <td colspan="{{ dias_mes|add:3 }}" class="extra-small px-3 py-1 border-bottom">
+                                <span class="text-muted fw-bold">OBS:</span> {{ item.profissional.observacao|default:"-" }} | COREN: {{ item.profissional.coren|default:"N/A" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .scale-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: fixed;
+    }
+    .extra-small { font-size: 0.65rem; }
+    .sticky-left {
+        position: sticky;
+        left: 0;
+        z-index: 50;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+    .day-header { font-size: 0.75rem; }
+    .turno-label {
+        font-size: 0.6rem;
+        font-weight: 800;
+        padding: 1px 0;
+        line-height: 1;
+        margin-bottom: 1px;
+    }
+    .turno-sm6 { color: #0056b3; }
+    .turno-st6 { color: #28a745; }
+    .turno-sn12 { color: #6f42c1; }
+    .turno-tpd { background-color: #fff3cd; color: #856404; border-radius: 2px; }
+    .turno-folga { color: #adb5bd; }
+    
+    @media print {
+        .d-print-none { display: none !important; }
+        body { padding: 0; background: white; }
+        .container-fluid { width: 100% !important; max-width: none !important; padding: 0 !important; }
+        .card { border: none !important; box-shadow: none !important; }
+        .table-responsive { overflow: visible !important; max-height: none !important; }
+        .sticky-left, .sticky-top { position: static !important; }
+        @page { size: landscape; margin: 0.5cm; }
+        .scale-table { font-size: 8pt !important; width: 100% !important; }
+        .profissional-row { page-break-inside: avoid; }
+    }
+    
+    .profissional-row:hover { background-color: #f8f9fa; }
+    .day-cell:hover { background-color: #e9ecef; }
+</style>
+{% endblock %}

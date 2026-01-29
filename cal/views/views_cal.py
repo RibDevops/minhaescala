@@ -11,6 +11,15 @@ from core.models import Hospital, Setor
 from ..forms import PlantaoForm
 from ..utils import Calendar
 
+from django.template.defaulttags import register
+
+@register.filter
+def get_item(dictionary, key):
+    try:
+        return dictionary[key]
+    except (IndexError, KeyError, TypeError):
+        return ""
+
 class CalendarioView(LoginRequiredMixin, TemplateView):
     template_name = 'cal/calendar.html'
     
