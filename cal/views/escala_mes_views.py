@@ -117,15 +117,22 @@ def escala_mes_view(request, mes=None, ano=None):
         # Organizar por dia do mês
         dias_dict = {}
         for dia_obj in dias_escala:
-            dia_num = dia_obj.data.day
-            if hasattr(dia_obj, 'turnos'):
-                turnos = dia_obj.turnos
-            else:
+            if isinstance(dia_obj, dict):
+                data_obj = dia_obj['data']
                 turnos = dia_obj.get('turnos', '')
+                horas = float(dia_obj.get('horas_dia', 0))
+                e_tpd = dia_obj.get('e_tpd', False)
+            else:
+                data_obj = dia_obj.data
+                turnos = dia_obj.turnos
+                horas = float(dia_obj.horas_dia)
+                e_tpd = dia_obj.e_tpd
+
+            dia_num = data_obj.day
             dias_dict[dia_num] = {
                 'turnos': turnos,
-                'horas': float(dia_obj.horas_dia) if hasattr(dia_obj, 'horas_dia') else dia_obj.get('horas', 0),
-                'e_tpd': dia_obj.e_tpd if hasattr(dia_obj, 'e_tpd') else False
+                'horas': horas,
+                'e_tpd': e_tpd
             }
 
         # Calcular totais semanais (5 semanas conforme sua tabela)
