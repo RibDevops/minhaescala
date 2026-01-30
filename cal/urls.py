@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import views_cal, views_dashboard, views_user, geral_views, matricula_views, tpd_views, escala_views
+from .views import views_cal, views_dashboard, views_user, geral_views, matricula_views, tpd_views, escala_views, escala_mes_views
 
 app_name = 'cal'
 
@@ -78,4 +78,14 @@ urlpatterns = [
     path('api/saldo-semanal/<int:profissional_id>/<int:mes>/<int:ano>/', 
              escala_views.api_saldo_semanal, name='api_saldo_semanal'),
 
+    # Escala Mensal
+    path('escala-mensal/', escala_mes_views.escala_mes_view, name='escala_mensal'),
+    path('escala-mensal/<int:mes>/<int:ano>/', 
+         escala_mes_views.escala_mes_view, name='escala_mensal_mes_ano'),
+    path('escala-mensal/importar/', 
+         escala_mes_views.importar_escala_excel, name='importar_escala_excel'),
+    path('escala-mensal/exportar-pdf/<int:mes>/<int:ano>/', 
+         escala_mes_views.exportar_escala_pdf, name='exportar_escala_pdf'),
+    path('escala-mensal/toggle-dia/<int:escala_id>/<int:profissional_id>/<int:dia>/', 
+         escala_mes_views.toggle_dia_escala, name='toggle_dia_escala'),
 ]

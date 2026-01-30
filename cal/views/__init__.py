@@ -3,3 +3,7 @@ from .views_login import *
 from .views_dashboard import *
 from .views_user import *
 from .geral_views import *
+from .matricula_views import *  
+from .tpd_views import *
+from .escala_views import *
+from .escala_mes_views import *
