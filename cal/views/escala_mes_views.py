@@ -449,16 +449,18 @@ def calcular_controles_semanais(escala):
                     horas_tpd=horas_tpd,
                     horas_tpd_noturno=0  # Ajustar conforme necessário
                 )
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from calendar import monthrange
+import io
+
 
 @login_required
 def exportar_escala_pdf(request, mes, ano):
-    from django.http import HttpResponse
-    from reportlab.lib.pagesizes import A4, landscape
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.lib import colors
-    from calendar import monthrange
-    import io
+    
 
     # 1. Tentar capturar a escala ou avisar que não existe
     # Nota: Idealmente, você deve passar o ID da escala ou hospital/setor via GET

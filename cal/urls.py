@@ -62,10 +62,6 @@ urlpatterns = [
     path('dashboard/', tpd_views.dashboard, name='dashboard'),
     path('relatorio/', tpd_views.relatorio_mensal, name='relatorio'),
 
-
-    
-
-
     # Escalas
     path('escalas/', escala_views.lista_escalas, name='lista_escalas'),
     path('escalas/importar/', escala_views.importar_escala, name='importar_escala'),
@@ -80,12 +76,8 @@ urlpatterns = [
 
     # Escala Mensal
     path('escala-mensal/', escala_mes_views.escala_mes_view, name='escala_mensal'),
-    path('escala-mensal/<int:mes>/<int:ano>/', 
-         escala_mes_views.escala_mes_view, name='escala_mensal_mes_ano'),
-    path('escala-mensal/importar/', 
-         escala_mes_views.importar_escala_excel, name='importar_escala_excel'),
-    path('escala-mensal/exportar-pdf/<int:mes>/<int:ano>/', 
-         escala_mes_views.exportar_escala_pdf, name='exportar_escala_pdf'),
-    path('escala-mensal/toggle-dia/<int:escala_id>/<int:profissional_id>/<int:dia>/', 
-         escala_mes_views.toggle_dia_escala, name='toggle_dia_escala'),
+    path('escala-mensal/<int:mes>/<int:ano>/', escala_mes_views.escala_mes_view, name='escala_mensal_mes_ano'),
+    path('escala-mensal/importar/', escala_mes_views.importar_escala_excel, name='importar_escala_excel'),
+    path('escala-mensal/exportar-pdf/<int:mes>/<int:ano>/', escala_mes_views.exportar_escala_pdf, name='exportar_escala_pdf'),
+    path('escala-mensal/toggle-dia/<int:escala_id>/<int:profissional_id>/<int:dia>/', escala_mes_views.toggle_dia_escala, name='toggle_dia_escala'),
 ]
