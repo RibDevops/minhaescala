@@ -24,3 +24,4 @@ python-dateutil==2.9.0.post0
 reportlab==4.4.9
 six==1.17.0
 sqlparse==0.5.5
+openpyxl
