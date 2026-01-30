@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Gerar Nova Escala</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Mês</label>
+                        <select name="mes" class="form-select">
+                            {% for m_id, m_nome in meses %}
+                            <option value="{{ m_id }}" {% if m_id == mes_atual %}selected{% endif %}>{{ m_nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ano</label>
+                        <select name="ano" class="form-select">
+                            {% for a in anos %}
+                            <option value="{{ a }}" {% if a == ano_atual %}selected{% endif %}>{{ a }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Hospital</label>
+                        <select name="hospital" class="form-select">
+                            {% for h in hospitais %}
+                            <option value="{{ h.id }}">{{ h.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Setor</label>
+                        <select name="setor" class="form-select">
+                            {% for s in setores %}
+                            <option value="{{ s.id }}">{{ s.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Criar Escala</button>
+                    <a href="{% url 'cal:escala_mensal' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

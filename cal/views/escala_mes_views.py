@@ -459,6 +459,41 @@ import io
 
 
 @login_required
+def escala_create(request):
+    if request.method == 'POST':
+        mes = int(request.POST.get('mes'))
+        ano = int(request.POST.get('ano'))
+        hospital_id = request.POST.get('hospital')
+        setor_id = request.POST.get('setor')
+        
+        hospital = get_object_or_404(Hospital, id=hospital_id)
+        setor = get_object_or_404(Setor, id=setor_id)
+        
+        escala, created = EscalaMensal.objects.get_or_create(
+            mes=mes,
+            ano=ano,
+            hospital=hospital,
+            setor=setor,
+            defaults={'criado_por': request.user}
+        )
+        
+        if created:
+            messages.success(request, f"Escala para {mes}/{ano} criada com sucesso!")
+        else:
+            messages.info(request, f"A escala para {mes}/{ano} já existe.")
+            
+        return redirect('cal:escala_mensal_mes_ano', mes=mes, ano=ano)
+    
+    context = {
+        'hospitais': Hospital.objects.all(),
+        'setores': Setor.objects.all(),
+        'meses': [(i, month_name[i]) for i in range(1, 13)],
+        'ano_atual': datetime.now().year,
+        'anos': range(datetime.now().year - 1, datetime.now().year + 2)
+    }
+    return render(request, 'escala/form_nova_escala.html', context)
+
+@login_required
 def exportar_escala_pdf(request, mes, ano):
     
 
@@ -487,7 +522,13 @@ def exportar_escala_pdf(request, mes, ano):
     styles = getSampleStyleSheet()
     
     # Cabeçalho do PDF
-    titulo = f"Escala Mensal - {escala.hospital.nome} - {escala.setor.nome} ({mes}/{ano})"
+    try:
+        h_nome = escala.hospital.nome if (escala and escala.hospital) else "Hospital"
+        s_nome = escala.setor.nome if (escala and escala.setor) else "Setor"
+    except Exception:
+        h_nome = "Hospital"
+        s_nome = "Setor"
+    titulo = f"Escala Mensal - {h_nome} - {s_nome} ({mes}/{ano})"
     elements.append(Paragraph(titulo, styles['Title']))
     elements.append(Spacer(1, 12))
 
