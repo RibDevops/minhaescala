@@ -295,7 +295,7 @@ def importar_escala_excel(request):
             processar_excel_escala(escala, arquivo)
 
             messages.success(request, f"Escala {mes}/{ano} importada com sucesso!")
-            return redirect('escala_mes_view', mes=mes, ano=ano)
+            return redirect('cal:escala_mensal_mes_ano', mes=mes, ano=ano)
 
         except Exception as e:
             messages.error(request, f"Erro ao importar: {str(e)}")
@@ -452,50 +452,85 @@ def calcular_controles_semanais(escala):
 
 @login_required
 def exportar_escala_pdf(request, mes, ano):
-    """
-    Exporta escala para PDF
-    """
     from django.http import HttpResponse
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
     from reportlab.lib.styles import getSampleStyleSheet
     from reportlab.lib import colors
+    from calendar import monthrange
     import io
 
+    # 1. Tentar capturar a escala ou avisar que não existe
+    # Nota: Idealmente, você deve passar o ID da escala ou hospital/setor via GET
+    hospital_id = request.GET.get('hospital')
+    setor_id = request.GET.get('setor')
+    
+    filtros = Q(mes=int(mes), ano=int(ano))
+    if hospital_id: filtros &= Q(hospital_id=hospital_id)
+    if setor_id: filtros &= Q(setor_id=setor_id)
+
+    escala = EscalaMensal.objects.filter(filtros).first()
+
+    if not escala:
+        # Se não achar a escala, redireciona com mensagem de erro em vez de dar 404
+        from django.contrib import messages
+        messages.error(request, f"Não existe escala gerada para {mes}/{ano}.")
+        return redirect('cal:escala_mensal_mes_ano', mes=mes, ano=ano)
+
+    # --- Início da Geração do PDF ---
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=20, leftMargin=20, topMargin=20, bottomMargin=20)
+    # Usamos landscape (paisagem) porque 31 dias não cabem em pé
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20)
     elements = []
     styles = getSampleStyleSheet()
     
-    # Português meses
-    meses_pt = {
-        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
-        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
-        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
-    }
-
-    # Título
-    elements.append(Paragraph(f"Escala Mensal - {meses_pt[int(mes)]} / {ano}", styles['Title']))
+    # Cabeçalho do PDF
+    titulo = f"Escala Mensal - {escala.hospital.nome} - {escala.setor.nome} ({mes}/{ano})"
+    elements.append(Paragraph(titulo, styles['Title']))
     elements.append(Spacer(1, 12))
 
-    # Obter dados via view (simulado)
-    # Para simplificar, vamos apenas gerar uma mensagem de sucesso por enquanto ou estruturar a tabela básica
-    # visto que a PIL error foi corrigida, o reportlab deve funcionar.
-    
-    data = [['Nome', 'Matrícula', 'Total Horas']]
-    # Exemplo de dados
-    data.append(['Exemplo Profissional', '12345', '160h'])
-    
-    t = Table(data)
+    # 2. Montar os dados da Tabela (Cabeçalho de dias)
+    num_dias = monthrange(int(ano), int(mes))[1]
+    header = ['Profissional'] + [str(d) for d in range(1, num_dias + 1)] + ['Total']
+    table_data = [header]
+
+    # 3. Buscar profissionais vinculados a esta escala
+    profissionais_ids = DiaEscala.objects.filter(escala=escala).values_list('profissional', flat=True).distinct()
+    profissionais = Matricula.objects.filter(id__in=profissionais_ids)
+
+    for prof in profissionais:
+        linha = [prof.nome[:15]] # Nome curto para caber
+        total_horas = 0
+        
+        # Buscar dias do profissional nesta escala
+        dias = DiaEscala.objects.filter(escala=escala, profissional=prof).order_by('data')
+        dias_dict = {d.data.day: d.turnos for d in dias}
+        horas_dict = {d.data.day: d.horas_dia for d in dias}
+
+        for d in range(1, num_dias + 1):
+            turno = dias_dict.get(d, '-')
+            linha.append(turno)
+            total_horas += float(horas_dict.get(d, 0))
+        
+        linha.append(f"{int(total_horas)}h")
+        table_data.append(linha)
+
+    # 4. Estilização da Tabela para caber na página
+    # Fonte 6 ou 7 é necessária para 31 colunas caberem no A4
+    t = Table(table_data, repeatRows=1)
     t.setStyle(TableStyle([
+        ('FONTSIZE', (0, 0), (-1, -1), 6),
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('LEFTPADDING', (0, 0), (-1, -1), 1),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 1),
     ]))
+    
     elements.append(t)
-
     doc.build(elements)
+    
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename=escala_{mes}_{ano}.pdf'

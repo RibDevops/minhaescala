@@ -1,477 +1,203 @@
-        <!-- templates/escala/escala_mes.html -->
-        {% extends 'base.html' %}
-        {% load static %}
-        {% load cal_extras %}
+{% extends 'base.html' %}
+{% load static %}
+{% load cal_extras %}
 
-        {% block content %}
-        <!-- Adicionar no topo do conteúdo da página escala_mes.html -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'cal:calendar' %}">Calendário</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{% url 'cal:listar_eventos' %}">Plantões</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    Escala {{ mes_nome }} de {{ ano_atual }}
-                </li>
-            </ol>
-        </nav>
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4 d-print-none">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'cal:calendar' %}">Calendário</a></li>
+        <li class="breadcrumb-item active">Escala {{ mes_nome }} de {{ ano_atual }}</li>
+    </ol>
+</nav>
 
-        <!-- Adicionar depois do título principal -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <a href="{% url 'cal:escala_mensal_mes_ano' mes_anterior.mes mes_anterior.ano %}" 
-                   class="btn btn-outline-primary">
-                    <i class="fas fa-chevron-left"></i> {{ mes_anterior.nome }}
-                </a>
-            </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="{% url 'cal:escala_mensal_mes_ano' mes_anterior.mes mes_anterior.ano %}" class="btn btn-outline-primary d-print-none">
+            <i class="fas fa-chevron-left"></i> {{ mes_anterior.nome }}
+        </a>
+    </div>
 
-            <div class="text-center">
-                <h2 class="mb-0">Escala {{ mes_nome }} de {{ ano_atual }}</h2>
-                <small class="text-muted">{{ escala.hospital.nome|default:"Hospital" }} - {{ escala.setor.nome|default:"Setor" }}</small>
-            </div>
+    <div class="text-center">
+        <h2 class="mb-0">Escala {{ mes_nome }} de {{ ano_atual }}</h2>
+        <small class="text-muted">{{ escala.hospital.nome|default:"Hospital" }} - {{ escala.setor.nome|default:"Setor" }}</small>
+    </div>
 
-            <div>
-                <a href="{% url 'cal:escala_mensal_mes_ano' mes_proximo.mes mes_proximo.ano %}" 
-                   class="btn btn-outline-primary">
-                    {{ mes_proximo.nome }} <i class="fas fa-chevron-right"></i>
-                </a>
-            </div>
-        </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'cal:exportar_escala_pdf' mes_atual ano_atual %}" class="btn btn-danger d-print-none">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+        </a>
+        <a href="{% url 'cal:escala_mensal_mes_ano' mes_proximo.mes mes_proximo.ano %}" class="btn btn-outline-primary d-print-none">
+            {{ mes_proximo.nome }} <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+</div>
 
-
-        <div class="container-fluid py-4">
-            <!-- Controles e Filtros -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <form method="get" class="row g-2">
-                                <div class="col-6">
-                                    <select name="mes" class="form-select" onchange="this.form.submit()">
-                                        {% for mes_num, mes_nome in meses %}
-                                        <option value="{{ mes_num }}" {% if mes_atual == mes_num %}selected{% endif %}>
-                                            {{ mes_nome }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-6">
-                                    <select name="ano" class="form-select" onchange="this.form.submit()">
-                                        {% for ano_op in anos %}
-                                        <option value="{{ ano_op }}" {% if ano_atual == ano_op %}selected{% endif %}>
-                                            {{ ano_op }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="col-md-3">
-                            <select name="hospital" class="form-select" onchange="filtrarEscala()">
-                                <option value="">Todos Hospitais</option>
-                                {% for hospital in hospitais %}
-                                <option value="{{ hospital.id }}" {% if hospital_filtro == hospital.id %}selected{% endif %}>
-                                    {{ hospital.nome }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select name="setor" class="form-select" onchange="filtrarEscala()">
-                                <option value="">Todos Setores</option>
-                                {% for setor in setores %}
-                                <option value="{{ setor.id }}" {% if setor_filtro == setor.id %}selected{% endif %}>
-                                    {{ setor.nome }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3 text-end">
-                            <div class="btn-group">
-                                <a href="{% url 'cal:importar_escala_excel' %}" class="btn btn-success btn-sm">
-                                    <i class="fas fa-upload"></i> Importar Excel
-                                </a>
-                                <button onclick="window.print()" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-print"></i> Imprimir
-                                </button>
-                                <a href="{% url 'cal:exportar_escala_pdf' mes_atual ano_atual %}" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-file-pdf"></i> PDF
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabela da Escala -->
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        Escala {{ mes_nome }} de {{ ano_atual }}
-                        {% if escala %}
-                        - {{ escala.hospital.nome }} ({{ escala.setor.nome }})
-                        {% endif %}
-                    </h4>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered mb-0 escala-table">
-                            <!-- Cabeçalho com semanas -->
-                            <thead>
-                                <tr class="table-dark">
-                                    <th rowspan="2" class="align-middle text-center" style="width: 120px;">Nome</th>
-                                    <th rowspan="2" class="align-middle text-center" style="width: 100px;">Matrícula</th>
-                                    <th rowspan="2" class="align-middle text-center" style="width: 80px;">CG ANT</th>
-                                    <th rowspan="2" class="align-middle text-center" style="width: 80px;">CG SM</th>
-
-                                    <!-- Dias Reais do Mês -->
-                                    <th colspan="{{ datas_cabecalho|length }}" class="text-center">DIAS DO MÊS</th>
-
-                                    <!-- Totais -->
-                                    <th colspan="{{ num_semanas|length }}" class="text-center">CH SEMANAL</th>
-                                    <th colspan="3" class="text-center">TPD / AL DE</th>
-                                    <th rowspan="2" class="align-middle text-center" style="width: 100px;">Total Mês</th>
-                                </tr>
-
-                                <!-- Números dos dias e dias da semana -->
-                                <tr class="table-light">
-                                    {% for data in datas_cabecalho %}
-                                    <th class="text-center p-1" style="min-width: 35px; {% if data.weekday_idx == 6 %}background-color: #ffe5e5;{% endif %}">
-                                        <small>{{ data.dia_semana }}</small><br>
-                                        <strong>{{ data.dia }}</strong>
-                                    </th>
-                                    {% endfor %}
-
-                                    <!-- Totais semanais -->
-                                    {% for semana in num_semanas %}
-                                    <th class="text-center align-middle" style="min-width: 45px;">S{{ semana }}</th>
-                                    {% endfor %}
-
-                                    <!-- TPD -->
-                                    <th class="text-center align-middle" style="min-width: 45px;">TPD</th>
-                                    <th class="text-center align-middle" style="min-width: 45px;">TPD N</th>
-                                    <th class="text-center align-middle" style="min-width: 45px;">AL DE</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {% for dados in dados_profissionais %}
-                                {% with prof=dados.profissional %}
-                                <tr class="profissional-row" data-prof-id="{{ prof.id }}">
-                                    <!-- Dados do Profissional -->
-                                    <td class="align-middle">
-                                        <strong>{{ prof.nome_completo }}</strong>
-                                        {% if prof.especialidade %}
-                                        <br><small class="text-muted">{{ prof.especialidade.nome }}</small>
-                                        {% endif %}
-                                    </td>
-                                    <td class="align-middle text-center">{{ prof.numero|default:prof.matricula }}</td>
-                                    <td class="align-middle text-center">
-                                        <span class="badge {% if dados.carga_anterior >= 0 %}bg-success{% else %}bg-danger{% endif %}">
-                                            {{ dados.carga_anterior|floatformat:0 }}
-                                        </span>
-                                    </td>
-                                    <td class="align-middle text-center">{{ prof.carga_horaria_semanal }}</td>
-
-                                    <!-- Dias do mês -->
-                                    {% for data_head in datas_cabecalho %}
-                                    {% with dia=data_head.dia %}
-                                    <td class="text-center p-0 dia-celula" style="{% if data_head.weekday_idx == 6 %}background-color: #fff0f0;{% endif %}">
-                                        {% for dia_num, dia_info in dados.dias.items %}
-                                            {% if dia_num == dia %}
-                                                <div class="h-100 w-100 p-1 d-flex flex-column justify-content-center cursor-pointer {% if dia_info.e_tpd %}bg-warning{% elif dia_info.horas > 0 %}bg-primary text-white{% endif %}"
-                                                     onclick="editarDia({{ dia }}, {{ prof.id }})" style="min-height: 40px; font-size: 0.8rem;">
-                                                    <div>{{ dia_info.turnos }}</div>
-                                                    <div style="font-size: 0.7rem;">{{ dia_info.horas|floatformat:0 }}h</div>
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    {% endwith %}
-                                    {% endfor %}
-
-                                    <!-- Totais semanais -->
-                                    {% for semana in num_semanas %}
-                                    <td class="text-center align-middle fw-bold">
-                                        {% for sem_num, sem_total in dados.semanas_totais.items %}
-                                            {% if sem_num == semana %}
-                                                {{ sem_total|floatformat:0 }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    {% endfor %}
-
-                                    <!-- TPD e Adicionais -->
-                                    <td class="text-center bg-warning">{{ dados.tpd_total }}</td>
-                                    <td class="text-center bg-dark text-white">{{ dados.tpd_noturno_total }}</td>
-                                    <td class="text-center bg-secondary text-white">
-                                        {{ dados.tpd_total|add:dados.tpd_noturno_total }}
-                                    </td>
-
-                                    <!-- Total do mês -->
-                                    <td class="text-center align-middle {% if dados.total_mes > prof.carga_horaria_semanal|multiply:4 %}bg-danger text-white{% else %}bg-success text-white{% endif %}">
-                                        <strong>{{ dados.total_mes|floatformat:0 }}</strong>
-                                    </td>
-                                </tr>
-
-                                <!-- Linha de função/observação -->
-                                <tr class="table-light">
-                                    <td colspan="4">
-                                        <small class="text-muted">Função: {{ prof.get_funcao_display|default:"Enfermeiro" }}</small>
-                                        {% if prof.coren %}
-                                        <br><small class="text-muted">COREN: {{ prof.coren }}</small>
-                                        {% endif %}
-                                    </td>
-
-                                    {% for data_head in datas_cabecalho %}
-                                    {% with dia=data_head.dia %}
-                                    <td class="text-center p-0" style="{% if data_head.weekday_idx == 6 %}background-color: #fff0f0;{% endif %}">
-                                        {% for dia_num, dia_info in dados.dias.items %}
-                                            {% if dia_num == dia and dia_info.e_tpd %}
-                                                <small class="badge bg-warning" style="font-size: 0.6rem;">TPD</small>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    {% endwith %}
-                                    {% endfor %}
-
-                                    <td colspan="{{ num_semanas|length|add:3 }}"></td>
-                                    <td class="bg-light"></td>
-                                </tr>
-                                {% endwith %}
-                                {% empty %}
-                                <tr>
-                                    <td colspan="50" class="text-center py-4">
-                                        <div class="alert alert-info">
-                                            Nenhum profissional encontrado para esta escala.
-                                            <br>
-                                            <a href="{% url 'cal:importar_escala_excel' %}" class="btn btn-primary mt-2">
-                                                Importar Escala do Excel
-                                            </a>
+<div class="container-fluid py-2">
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 escala-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr class="table-dark text-center">
+                            <th rowspan="2" class="align-middle" style="min-width: 150px;">Profissional</th>
+                            <th rowspan="2" class="align-middle">Matrícula</th>
+                            <th colspan="{{ datas_cabecalho|length }}">DIAS DO MÊS</th>
+                            <th colspan="{{ num_semanas|length }}">CH SEMANAL</th>
+                            <th rowspan="2" class="align-middle">Total</th>
+                        </tr>
+                        <tr class="table-light">
+                            {% for data in datas_cabecalho %}
+                            <th class="text-center p-1 {% if data.weekday_idx == 6 %}bg-danger-subtle{% endif %}" style="min-width: 35px;">
+                                <small class="d-block text-uppercase" style="font-size: 0.65rem;">{{ data.dia_semana }}</small>
+                                <strong>{{ data.dia }}</strong>
+                            </th>
+                            {% endfor %}
+                            {% for semana in num_semanas %}
+                            <th class="text-center align-middle bg-secondary-subtle">S{{ semana }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dados in dados_profissionais %}
+                        {% with prof=dados.profissional %}
+                        <tr>
+                            <td class="align-middle fw-bold">{{ prof.nome_completo }}</td>
+                            <td class="align-middle text-center text-muted">{{ prof.numero|default:prof.matricula }}</td>
+                            
+                            {% for data_head in datas_cabecalho %}
+                            {% with dia_idx=data_head.dia %}
+                            <td class="p-0 text-center align-middle dia-celula" 
+                                data-dia="{{ dia_idx }}" 
+                                data-prof="{{ prof.id }}"
+                                style="height: 45px; {% if data_head.weekday_idx == 6 %}background-color: #fff5f5;{% endif %}">
+                                
+                                {% for dia_num, dia_info in dados.dias.items %}
+                                    {% if dia_num == dia_idx %}
+                                        <div class="h-100 w-100 d-flex flex-column justify-content-center cursor-pointer 
+                                            {% if dia_info.e_tpd %}bg-warning text-dark{% elif dia_info.horas > 0 %}bg-primary text-white{% endif %}"
+                                            onclick="editarDia({{ dia_idx }}, {{ prof.id }}, '{{ dia_info.turnos }}', {{ dia_info.horas }}, {{ dia_info.e_tpd|yesno:'true,false' }})">
+                                            <div class="fw-bold">{{ dia_info.turnos }}</div>
+                                            <div style="font-size: 0.7rem;">{{ dia_info.horas|floatformat:0 }}h</div>
                                         </div>
-                                    </td>
-                                </tr>
+                                    {% endif %}
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                            </td>
+                            {% endwith %}
+                            {% endfor %}
 
-            <!-- Legenda -->
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h6>Legenda:</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-info text-white">Turno Normal</span>
-                        <span class="badge bg-warning text-dark">TPD</span>
-                        <span class="badge bg-danger text-white">Horas Excedidas</span>
-                        <span class="badge bg-success text-white">Dentro do Limite</span>
-                        <span class="badge bg-light text-dark border">Folga</span>
-                        <span class="badge bg-dark text-white">Noturno</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+                            {% for semana in num_semanas %}
+                            <td class="text-center align-middle fw-semibold bg-light">
+                                {% for sem_num, sem_total in dados.semanas_totais.items %}
+                                    {% if sem_num == semana %}{{ sem_total|floatformat:0 }}{% endif %}
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
 
-        <!-- Modal para editar dia -->
-        <div class="modal fade" id="modalEditarDia" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Editar Dia</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="formEditarDia">
-                            {% csrf_token %}
-                            <input type="hidden" id="editProfId">
-                            <input type="hidden" id="editDiaNum">
-
-                            <div class="mb-3">
-                                <label class="form-label">Turno:</label>
-                                <select id="editTurno" class="form-select">
-                                    <option value="">FOLGA</option>
-                                    <option value="SM6">SM6 (6h)</option>
-                                    <option value="ST6">ST6 (6h)</option>
-                                    <option value="SN12">SN12 (12h)</option>
-                                    <option value="TPD">TPD (8h)</option>
-                                    <option value="TPD_N">TPD Noturno (8h)</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Horas:</label>
-                                <input type="number" id="editHoras" class="form-control" min="0" max="24" step="0.5" value="0">
-                            </div>
-
-                            <div class="form-check mb-3">
-                                <input type="checkbox" id="editTpd" class="form-check-input">
-                                <label class="form-check-label">É TPD?</label>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-danger" onclick="marcarFolga()">Folga</button>
-                        <button type="button" class="btn btn-primary" onclick="salvarDia()">Salvar</button>
-                    </div>
-                </div>
+                            <td class="text-center align-middle fw-bold {% if dados.total_mes > 160 %}text-danger{% else %}text-success{% endif %}">
+                                {{ dados.total_mes|floatformat:0 }}h
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-        {% endblock %}
+    </div>
+</div>
 
-        {% block scripts %}
-        <script>
-        // Filtro por hospital/setor
-        function filtrarEscala() {
-            const hospital = document.querySelector('select[name="hospital"]').value;
-            const setor = document.querySelector('select[name="setor"]').value;
-            const mes = {{ mes_atual }};
-            const ano = {{ ano_atual }};
+<div class="modal fade" id="modalEditarDia" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Plantão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarDia">
+                    {% csrf_token %}
+                    <input type="hidden" id="editProfId">
+                    <input type="hidden" id="editDiaNum">
+                    <div class="mb-3">
+                        <label class="form-label">Turno</label>
+                        <input type="text" id="editTurno" class="form-control" placeholder="Ex: SM6, SN12">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Horas</label>
+                        <input type="number" id="editHoras" class="form-control" step="0.5">
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="editTpd">
+                        <label class="form-check-label">Marcar como TPD</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="marcarFolga()">Folga</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="salvarDia()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-            let url = `{% url 'cal:escala_mensal_mes_ano' mes_atual ano_atual %}?`;
-            if (hospital) url += `hospital=${hospital}&`;
-            if (setor) url += `setor=${setor}`;
+{% block scripts %}
+<script>
+    const modalEl = document.getElementById('modalEditarDia');
+    const bsModal = new bootstrap.Modal(modalEl);
 
-            window.location.href = url;
-        }
+    function editarDia(dia, profId, turno, horas, eTpd) {
+        document.getElementById('editProfId').value = profId;
+        document.getElementById('editDiaNum').value = dia;
+        document.getElementById('editTurno').value = turno || '';
+        document.getElementById('editHoras').value = horas || 0;
+        document.getElementById('editTpd').checked = eTpd;
+        bsModal.show();
+    }
 
-        // Editar dia
-        let diaEditando = null;
-        let profEditando = null;
+    function marcarFolga() {
+        document.getElementById('editTurno').value = '';
+        document.getElementById('editHoras').value = 0;
+        document.getElementById('editTpd').checked = false;
+        salvarDia();
+    }
 
-        function editarDia(dia, profId) {
-            diaEditando = dia;
-            profEditando = profId;
+    function salvarDia() {
+        const profId = document.getElementById('editProfId').value;
+        const dia = document.getElementById('editDiaNum').value;
+        const payload = {
+            turno: document.getElementById('editTurno').value,
+            horas: document.getElementById('editHoras').value,
+            e_tpd: document.getElementById('editTpd').checked
+        };
 
-            // Preencher modal com dados existentes
-            const celula = document.querySelector(`[data-dia="${dia}"][data-prof="${profId}"]`);
-
-            document.getElementById('editProfId').value = profId;
-            document.getElementById('editDiaNum').value = dia;
-
-            // Obter dados da célula (simplificado)
-            const texto = celula.textContent.trim();
-            if (texto === '-') {
-                document.getElementById('editTurno').value = '';
-                document.getElementById('editHoras').value = 0;
-                document.getElementById('editTpd').checked = false;
+        fetch(`{% url 'cal:toggle_dia_escala' 0 0 0 %}`.replace('0/0/0/', `${profId}/${dia}/`), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
             } else {
-                // Tentar extrair turno e horas do texto
-                const partes = texto.split('\n');
-                if (partes.length > 0) {
-                    const turno = partes[0].trim();
-                    document.getElementById('editTurno').value = turno;
-                }
-                if (partes.length > 1) {
-                    const horasMatch = partes[1].match(/(\d+(\.\d+)?)h/);
-                    if (horasMatch) {
-                        document.getElementById('editHoras').value = horasMatch[1];
-                    }
-                }
-
-                // Verificar se é TPD
-                document.getElementById('editTpd').checked = texto.includes('TPD') || 
-                                                            celula.classList.contains('bg-warning');
+                alert('Erro ao salvar: ' + (data.error || 'Erro desconhecido'));
             }
-
-            // Mostrar modal
-            const modal = new bootstrap.Modal(document.getElementById('modalEditarDia'));
-            modal.show();
-        }
-
-        function marcarFolga() {
-            document.getElementById('editTurno').value = '';
-            document.getElementById('editHoras').value = 0;
-            document.getElementById('editTpd').checked = false;
-
-            // Salvar automaticamente como folga
-            salvarDia();
-        }
-
-        function salvarDia() {
-            const profId = document.getElementById('editProfId').value;
-            const dia = document.getElementById('editDiaNum').value;
-            const turno = document.getElementById('editTurno').value;
-            const horas = document.getElementById('editHoras').value;
-            const eTpd = document.getElementById('editTpd').checked;
-
-            // Fazer requisição AJAX para salvar
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            fetch(`{% url 'cal:toggle_dia_escala' 0 0 0 %}`.replace('0/0/0/', `${profId}/${dia}/`), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    turno: turno,
-                    horas: horas,
-                    e_tpd: eTpd
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Atualizar célula na tabela
-                    const celula = document.querySelector(`[data-dia="${dia}"][data-prof="${profId}"]`);
-                    if (celula) {
-                        if (turno === '' || horas == 0) {
-                            celula.innerHTML = '<span class="text-muted">-</span>';
-                            celula.className = 'text-center dia-celula bg-light';
-                        } else {
-                            celula.innerHTML = `
-                                <div class="${eTpd ? 'bg-warning' : 'bg-info text-white'}"
-                                     onclick="editarDia(${dia}, ${profId})">
-                                    ${turno}<br>
-                                    <small>${horas}h</small>
-                                </div>
-                            `;
-                            celula.className = `text-center dia-celula ${eTpd ? 'bg-warning' : 'bg-info text-white'}`;
-                        }
-                    }
-
-                    // Fechar modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarDia'));
-                    modal.hide();
-
-                    // Recarregar dados se necessário
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao salvar alterações.');
-            });
-        }
-
-        // Adicionar ouvintes de evento após carregamento
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tornar todas as células clicáveis
-            document.querySelectorAll('.dia-celula').forEach(celula => {
-                const dia = celula.getAttribute('data-dia');
-                const profId = celula.closest('.profissional-row').getAttribute('data-prof-id');
-
-                if (dia && profId) {
-                    celula.addEventListener('click', function() {
-                        editarDia(dia, profId);
-                    });
-                }
-            });
-
-            // Atualizar filtro de mês/ano
-            document.querySelectorAll('select[name="mes"], select[name="ano"]').forEach(select => {
-                select.addEventListener('change', function() {
-                    this.form.submit();
-                });
-            });
         });
-        </script>
-        {% endblock %}
+    }
+</script>
+
+<style>
+    .escala-table th, .escala-table td { border-color: #dee2e6 !important; }
+    .dia-celula:hover { background-color: #f8f9fa; cursor: pointer; }
+    .cursor-pointer { cursor: pointer; }
+    @media print {
+        .d-print-none { display: none !important; }
+        body { padding: 0; background: white; }
+        .card { border: none !important; box-shadow: none !important; }
+    }
+</style>
+{% endblock %}
