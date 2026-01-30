@@ -80,5 +80,5 @@ urlpatterns = [
     path('escala-mensal/importar/', escala_mes_views.importar_escala_excel, name='importar_escala_excel'),
     path('escala-mensal/nova/', escala_mes_views.escala_create, name='escala_create'),
     path('escala-mensal/exportar-pdf/<int:mes>/<int:ano>/', escala_mes_views.exportar_escala_pdf, name='exportar_escala_pdf'),
-    path('escala-mensal/toggle-dia/<int:escala_id>/<int:profissional_id>/<int:dia>/', escala_mes_views.toggle_dia_escala, name='toggle_dia_escala'),
+    path('escala-mensal/toggle-dia/<int:profissional_id>/<int:dia>/<int:mes>/<int:ano>/', escala_mes_views.toggle_dia_escala, name='toggle_dia_escala'),
 ]

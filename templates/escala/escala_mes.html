@@ -174,7 +174,7 @@
             e_tpd: document.getElementById('editTpd').checked
         };
 
-        fetch(`{% url 'cal:toggle_dia_escala' 0 0 0 %}`.replace('0/0/0/', `${profId}/${dia}/`), {
+        fetch(`{% url 'cal:toggle_dia_escala' 0 0 0 0 %}`.replace('0/0/0/0/', `${profId}/${dia}/${mes_atual}/${ano_atual}/`), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
