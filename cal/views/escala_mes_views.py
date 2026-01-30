@@ -70,25 +70,23 @@ def escala_mes_view(request, mes=None, ano=None):
     primeiro_dia = date(ano, mes, 1)
     ultimo_dia = date(ano, mes, monthrange(ano, mes)[1])
 
-    # Organizar semanas (domingo = 0, sábado = 6)
-    # Sua tabela começa na quinta-feira, então vamos ajustar
-    calendario = calendar.Calendar(firstweekday=6)  # Domingo = 0, Sábado = 6
-    semanas = calendario.monthdatescalendar(ano, mes)
+    # Gerar datas para o cabeçalho baseadas nos dias reais do mês
+    datas_cabecalho = []
+    # Weekday names in Portuguese
+    weekdays_pt = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM']
+    
+    for dia in range(1, ultimo_dia.day + 1):
+        data_dia = date(ano, mes, dia)
+        # weekday() returns 0 for Monday, 6 for Sunday
+        dia_semana_idx = data_dia.weekday()
+        datas_cabecalho.append({
+            'dia': dia,
+            'dia_semana': weekdays_pt[dia_semana_idx],
+            'data_completa': data_dia,
+            'weekday_idx': dia_semana_idx
+        })
 
-    # Para sua tabela específica que começa na quinta-feira
-    # Vamos reorganizar as semanas começando na quinta
-    semanas_quinta = []
-    for semana in semanas:
-        # Reorganizar: quinta, sexta, sábado, domingo, segunda, terça, quarta
-        # Se a semana começa no domingo, quinta é o índice 4
-        # Se a semana começa na segunda (índice 0), quinta é o índice 3
-        # Vamos encontrar a quinta-feira
-        semana_reorganizada = []
-        for dia in range(7):
-            # Encontrar a quinta-feira (weekday() retorna 0=segunda, 3=quinta)
-            # Ajustar para começar na quinta
-            pass
-
+    # Calcular totais semanais baseados na virada de semana (Domingo)
     # Processar cada profissional
     dados_profissionais = []
     for profissional in profissionais:
@@ -99,22 +97,19 @@ def escala_mes_view(request, mes=None, ano=None):
                 profissional=profissional
             ).order_by('data')
         else:
-            # Usar eventos normais se não houver escala
             eventos = EventoEscala.objects.filter(
                 profissional=profissional,
-                data__gte=primeiro_dia,
-                data__lte=ultimo_dia
+                data__range=[primeiro_dia, ultimo_dia]
             ).order_by('data')
             dias_escala = []
             for evento in eventos:
                 dias_escala.append({
                     'data': evento.data,
-                    'turnos': evento.tipo.codigo,
-                    'horas_dia': evento.tipo.horas,
-                    'e_tpd': False  # Ajustar conforme necessidade
+                    'turnos': evento.tipo_evento.codigo if hasattr(evento, 'tipo_evento') else (evento.tipo.codigo if hasattr(evento, 'tipo') else ''),
+                    'horas_dia': evento.tipo_evento.horas if hasattr(evento, 'tipo_evento') else (evento.tipo.horas if hasattr(evento, 'tipo') else 0),
+                    'e_tpd': False
                 })
 
-        # Organizar por dia do mês
         dias_dict = {}
         for dia_obj in dias_escala:
             if isinstance(dia_obj, dict):
@@ -128,34 +123,36 @@ def escala_mes_view(request, mes=None, ano=None):
                 horas = float(dia_obj.horas_dia)
                 e_tpd = dia_obj.e_tpd
 
-            dia_num = data_obj.day
-            dias_dict[dia_num] = {
+            dias_dict[data_obj.day] = {
                 'turnos': turnos,
                 'horas': horas,
                 'e_tpd': e_tpd
             }
 
-        # Calcular totais semanais (5 semanas conforme sua tabela)
-        semanas_totais = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-        for dia_num in range(1, 32):
-            if dia_num in dias_dict:
-                # Determinar semana (1-5)
-                data_dia = date(ano, mes, dia_num)
-                # Calcular semana do mês (aproximado)
-                semana_num = ((dia_num - 1) // 7) + 1
-                if semana_num > 5:
-                    semana_num = 5
+        # Calcular totais semanais reais (quebra no domingo)
+        semanas_totais = {}
+        semana_atual = 1
+        current_week_hours = 0
+        
+        for dia_idx, data_head in enumerate(datas_cabecalho):
+            dia = data_head['dia']
+            if dia in dias_dict:
+                current_week_hours += dias_dict[dia]['horas']
+            
+            # Se for domingo (6) ou último dia do mês, fecha a semana
+            if data_head['weekday_idx'] == 6 or dia_idx == len(datas_cabecalho) - 1:
+                semanas_totais[semana_atual] = current_week_hours
+                semana_atual += 1
+                current_week_hours = 0
+        
+        # Garantir que temos chaves para o template (até 6 semanas possíveis)
+        for i in range(1, 7):
+            if i not in semanas_totais:
+                semanas_totais[i] = 0
 
-                semanas_totais[semana_num] += dias_dict[dia_num]['horas']
-
-        # Calcular carga anterior (CG ANT)
         carga_anterior = calcular_carga_anterior(profissional, mes, ano)
-
-        # Calcular totais TPD (simplificado)
-        tpd_total = sum(1 for dia in dias_dict.values() if dia['e_tpd']) * 8  # 8h por TPD
-        tpd_noturno_total = 0  # Ajustar conforme lógica específica
-
-        # Dados do profissional para template
+        tpd_total = sum(1 for dia in dias_dict.values() if dia['e_tpd']) * 8
+        
         dados_profissionais.append({
             'profissional': profissional,
             'dias': dias_dict,
@@ -163,27 +160,9 @@ def escala_mes_view(request, mes=None, ano=None):
             'carga_anterior': carga_anterior,
             'carga_semanal': profissional.carga_horaria_semanal,
             'tpd_total': tpd_total,
-            'tpd_noturno_total': tpd_noturno_total,
+            'tpd_noturno_total': 0,
             'total_mes': sum(dia['horas'] for dia in dias_dict.values()),
         })
-
-    # Preparar calendário para template
-    dias_no_mes = monthrange(ano, mes)[1]
-    dias_semana = ['QUI', 'SEX', 'SAB', 'DOM', 'SEG', 'TER', 'QUA']
-
-    # Gerar datas para o cabeçalho (31 dias)
-    datas_cabecalho = []
-    for dia in range(1, 32):
-        if dia <= dias_no_mes:
-            data_dia = date(ano, mes, dia)
-            dia_semana = data_dia.strftime('%a').upper()[:3]
-            datas_cabecalho.append({
-                'dia': dia,
-                'dia_semana': dia_semana,
-                'data_completa': data_dia
-            })
-        else:
-            datas_cabecalho.append({'dia': '', 'dia_semana': '', 'data_completa': None})
 
     # Contexto para template
     context = {
@@ -194,7 +173,6 @@ def escala_mes_view(request, mes=None, ano=None):
         'ultimo_dia': ultimo_dia,
         'dados_profissionais': dados_profissionais,
         'datas_cabecalho': datas_cabecalho,
-        'dias_semana': dias_semana,
         'hospitais': hospitais,
         'setores': setores,
         'hospital_filtro': int(hospital_id) if hospital_id else None,
@@ -206,11 +184,10 @@ def escala_mes_view(request, mes=None, ano=None):
             (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro')
         ],
         'anos': range(ano - 5, ano + 3),
-        'range_31': range(1, 32),
-        'range_5': range(1, 6),
+        'num_semanas': range(1, semana_atual),
     }
 
-    # Calcular meses anterior e próximo
+        # Calcular meses anterior e próximo
     if mes == 1:
         mes_ant, ano_ant = 12, ano - 1
     else:
@@ -221,9 +198,17 @@ def escala_mes_view(request, mes=None, ano=None):
     else:
         mes_prox, ano_prox = mes + 1, ano
 
+    # Portuguese Month names
+    meses_pt = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+    }
+
     context.update({
-        'mes_anterior': {'mes': mes_ant, 'ano': ano_ant, 'nome': month_name[mes_ant]},
-        'mes_proximo': {'mes': mes_prox, 'ano': ano_prox, 'nome': month_name[mes_prox]},
+        'mes_anterior': {'mes': mes_ant, 'ano': ano_ant, 'nome': meses_pt[mes_ant]},
+        'mes_proximo': {'mes': mes_prox, 'ano': ano_prox, 'nome': meses_pt[mes_prox]},
+        'mes_nome': meses_pt[mes],
     })
 
     return render(request, 'escala/escala_mes.html', context)

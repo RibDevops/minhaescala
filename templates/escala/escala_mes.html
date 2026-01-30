@@ -122,61 +122,38 @@
                             <!-- Cabeçalho com semanas -->
                             <thead>
                                 <tr class="table-dark">
-                                    <th rowspan="3" class="align-middle text-center" style="width: 120px;">Nome</th>
-                                    <th rowspan="3" class="align-middle text-center" style="width: 100px;">Matrícula</th>
-                                    <th rowspan="3" class="align-middle text-center" style="width: 80px;">CG ANT</th>
-                                    <th rowspan="3" class="align-middle text-center" style="width: 80px;">CG SM</th>
+                                    <th rowspan="2" class="align-middle text-center" style="width: 120px;">Nome</th>
+                                    <th rowspan="2" class="align-middle text-center" style="width: 100px;">Matrícula</th>
+                                    <th rowspan="2" class="align-middle text-center" style="width: 80px;">CG ANT</th>
+                                    <th rowspan="2" class="align-middle text-center" style="width: 80px;">CG SM</th>
 
-                                    <!-- Semanas 1-5 -->
-                                    <th colspan="7" class="text-center">SEMANA 1</th>
-                                    <th colspan="7" class="text-center">SEMANA 2</th>
-                                    <th colspan="7" class="text-center">SEMANA 3</th>
-                                    <th colspan="7" class="text-center">SEMANA 4</th>
-                                    <th colspan="7" class="text-center">SEMANA 5</th>
+                                    <!-- Dias Reais do Mês -->
+                                    <th colspan="{{ datas_cabecalho|length }}" class="text-center">DIAS DO MÊS</th>
 
                                     <!-- Totais -->
-                                    <th colspan="5" class="text-center">CH SEMANAL</th>
+                                    <th colspan="{{ num_semanas|length }}" class="text-center">CH SEMANAL</th>
                                     <th colspan="3" class="text-center">TPD / AL DE</th>
-                                    <th rowspan="3" class="align-middle text-center" style="width: 100px;">Total Mês</th>
+                                    <th rowspan="2" class="align-middle text-center" style="width: 100px;">Total Mês</th>
                                 </tr>
 
-                                <!-- Dias da semana -->
-                                <tr class="table-secondary">
-                                    {% for semana in "12345" %}
-                                        {% for dia_semana in dias_semana %}
-                                        <th class="text-center">{{ dia_semana }}</th>
-                                        {% endfor %}
-                                    {% endfor %}
-
-                                    <!-- Totais semanais -->
-                                    {% for semana in "12345" %}
-                                    <th class="text-center">S{{ semana }}</th>
-                                    {% endfor %}
-
-                                    <!-- TPD -->
-                                    <th class="text-center">TPD</th>
-                                    <th class="text-center">TPD N</th>
-                                    <th class="text-center">AL DE</th>
-                                </tr>
-
-                                <!-- Números dos dias -->
+                                <!-- Números dos dias e dias da semana -->
                                 <tr class="table-light">
                                     {% for data in datas_cabecalho %}
-                                    <th class="text-center">
-                                        {% if data.dia %}
-                                        <small>{{ data.dia }}</small><br>
-                                        <small class="text-muted">{{ data.dia_semana }}</small>
-                                        {% endif %}
+                                    <th class="text-center p-1" style="min-width: 35px; {% if data.weekday_idx == 6 %}background-color: #ffe5e5;{% endif %}">
+                                        <small>{{ data.dia_semana }}</small><br>
+                                        <strong>{{ data.dia }}</strong>
                                     </th>
                                     {% endfor %}
 
-                                    <!-- Espaços vazios para alinhamento -->
-                                    {% for i in "12345" %}
-                                    <th></th>
+                                    <!-- Totais semanais -->
+                                    {% for semana in num_semanas %}
+                                    <th class="text-center align-middle" style="min-width: 45px;">S{{ semana }}</th>
                                     {% endfor %}
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
+
+                                    <!-- TPD -->
+                                    <th class="text-center align-middle" style="min-width: 45px;">TPD</th>
+                                    <th class="text-center align-middle" style="min-width: 45px;">TPD N</th>
+                                    <th class="text-center align-middle" style="min-width: 45px;">AL DE</th>
                                 </tr>
                             </thead>
 
@@ -191,7 +168,7 @@
                                         <br><small class="text-muted">{{ prof.especialidade.nome }}</small>
                                         {% endif %}
                                     </td>
-                                    <td class="align-middle text-center">{{ prof.matricula }}</td>
+                                    <td class="align-middle text-center">{{ prof.numero|default:prof.matricula }}</td>
                                     <td class="align-middle text-center">
                                         <span class="badge {% if dados.carga_anterior >= 0 %}bg-success{% else %}bg-danger{% endif %}">
                                             {{ dados.carga_anterior|floatformat:0 }}
@@ -200,23 +177,25 @@
                                     <td class="align-middle text-center">{{ prof.carga_horaria_semanal }}</td>
 
                                     <!-- Dias do mês -->
-                                    {% for dia in range_31 %}
-                                    <td class="text-center dia-celula">
+                                    {% for data_head in datas_cabecalho %}
+                                    {% with dia=data_head.dia %}
+                                    <td class="text-center p-0 dia-celula" style="{% if data_head.weekday_idx == 6 %}background-color: #fff0f0;{% endif %}">
                                         {% for dia_num, dia_info in dados.dias.items %}
                                             {% if dia_num == dia %}
-                                                <div class="{% if dia_info.e_tpd %}bg-warning{% elif dia_info.horas > 0 %}bg-info text-white{% else %}bg-light{% endif %}"
-                                                     onclick="editarDia({{ dia }}, {{ prof.id }})">
-                                                    {{ dia_info.turnos }}<br>
-                                                    <small>{{ dia_info.horas }}h</small>
+                                                <div class="h-100 w-100 p-1 d-flex flex-column justify-content-center cursor-pointer {% if dia_info.e_tpd %}bg-warning{% elif dia_info.horas > 0 %}bg-primary text-white{% endif %}"
+                                                     onclick="editarDia({{ dia }}, {{ prof.id }})" style="min-height: 40px; font-size: 0.8rem;">
+                                                    <div>{{ dia_info.turnos }}</div>
+                                                    <div style="font-size: 0.7rem;">{{ dia_info.horas|floatformat:0 }}h</div>
                                                 </div>
                                             {% endif %}
                                         {% endfor %}
                                     </td>
+                                    {% endwith %}
                                     {% endfor %}
 
                                     <!-- Totais semanais -->
-                                    {% for semana in range_5 %}
-                                    <td class="text-center">
+                                    {% for semana in num_semanas %}
+                                    <td class="text-center align-middle fw-bold">
                                         {% for sem_num, sem_total in dados.semanas_totais.items %}
                                             {% if sem_num == semana %}
                                                 {{ sem_total|floatformat:0 }}
@@ -233,7 +212,7 @@
                                     </td>
 
                                     <!-- Total do mês -->
-                                    <td class="text-center {% if dados.total_mes > prof.carga_horaria_semanal|multiply:4 %}bg-danger text-white{% else %}bg-success text-white{% endif %}">
+                                    <td class="text-center align-middle {% if dados.total_mes > prof.carga_horaria_semanal|multiply:4 %}bg-danger text-white{% else %}bg-success text-white{% endif %}">
                                         <strong>{{ dados.total_mes|floatformat:0 }}</strong>
                                     </td>
                                 </tr>
@@ -247,17 +226,20 @@
                                         {% endif %}
                                     </td>
 
-                                    {% for dia in range_31 %}
-                                    <td class="text-center">
+                                    {% for data_head in datas_cabecalho %}
+                                    {% with dia=data_head.dia %}
+                                    <td class="text-center p-0" style="{% if data_head.weekday_idx == 6 %}background-color: #fff0f0;{% endif %}">
                                         {% for dia_num, dia_info in dados.dias.items %}
                                             {% if dia_num == dia and dia_info.e_tpd %}
-                                                <small class="badge bg-warning">TPD</small>
+                                                <small class="badge bg-warning" style="font-size: 0.6rem;">TPD</small>
                                             {% endif %}
                                         {% endfor %}
                                     </td>
+                                    {% endwith %}
                                     {% endfor %}
 
-                                    <td colspan="8"></td>
+                                    <td colspan="{{ num_semanas|length|add:3 }}"></td>
+                                    <td class="bg-light"></td>
                                 </tr>
                                 {% endwith %}
                                 {% empty %}
