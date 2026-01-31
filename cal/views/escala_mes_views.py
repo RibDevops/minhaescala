@@ -235,3 +235,11 @@ def escala_create(request):
     mes = request.POST.get('mes')
     ano = request.POST.get('ano')
     return redirect('cal:escala_mensal_mes_ano', mes=mes, ano=ano)
+
+@login_required
+def importar_escala_excel(request):
+    """
+    Função de fallback para importação de excel.
+    """
+    messages.info(request, "Funcionalidade de importação em desenvolvimento.")
+    return redirect('cal:escala_mensal')
