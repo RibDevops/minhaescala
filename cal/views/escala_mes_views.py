@@ -73,18 +73,19 @@ def escala_mes_view(request, mes=None, ano=None):
     semana_atual = 1
     for profissional in profissionais:
         # Busca dinâmica: Eventos reais do calendário
+        # Corrigido select_related: o campo é 'tipo' e não 'tipo_evento'
         eventos = EventoEscala.objects.filter(
             profissional=profissional,
             data__range=[primeiro_dia, ultimo_dia]
-        ).select_related('tipo_evento')
+        ).select_related('tipo')
 
         dias_dict = {}
         for evento in eventos:
             codigo = ""
             horas = 0
-            if evento.tipo_evento:
-                codigo = evento.tipo_evento.codigo
-                horas = float(evento.tipo_evento.horas or 0)
+            if evento.tipo:
+                codigo = evento.tipo.codigo
+                horas = float(evento.tipo.horas or 0)
             
             dias_dict[evento.data.day] = {
                 'turnos': codigo,
@@ -145,10 +146,14 @@ def toggle_dia_escala(request, profissional_id, dia, mes, ano):
             if data.get('turno'):
                 tipo_evento = TipoEvento.objects.filter(codigo=data['turno']).first()
                 if tipo_evento:
+                    # O campo correto no modelo EventoEscala é 'tipo' e não 'tipo_evento'
+                    # Além disso, o modelo exige hospital e setor, que pegamos da matrícula do profissional
                     EventoEscala.objects.create(
                         profissional=profissional,
                         data=data_plantao,
-                        tipo_evento=tipo_evento,
+                        tipo=tipo_evento,
+                        hospital=profissional.hospital,
+                        setor=profissional.setor,
                         criado_por=request.user
                     )
             return JsonResponse({'success': True})
@@ -196,9 +201,10 @@ def exportar_escala_pdf(request, mes, ano):
             nome = prof.nome_guerra or (prof.nome_completo[:15] if prof.nome_completo else "Sem Nome")
             linha = [nome]
             total_horas = 0
-            eventos = EventoEscala.objects.filter(profissional=prof, data__range=[primeiro_dia, ultimo_dia]).select_related('tipo_evento')
-            dias_dict = {e.data.day: (e.tipo_evento.codigo if e.tipo_evento else "") for e in eventos}
-            horas_dict = {e.data.day: (float(e.tipo_evento.horas or 0) if e.tipo_evento else 0) for e in eventos}
+            # Corrigido select_related para 'tipo'
+            eventos = EventoEscala.objects.filter(profissional=prof, data__range=[primeiro_dia, ultimo_dia]).select_related('tipo')
+            dias_dict = {e.data.day: (e.tipo.codigo if e.tipo else "") for e in eventos}
+            horas_dict = {e.data.day: (float(e.tipo.horas or 0) if e.tipo else 0) for e in eventos}
 
             for d in range(1, num_dias + 1):
                 turno = dias_dict.get(d, '-')

@@ -1,0 +1,1 @@
+ERROR 2026-01-30 22:01:20,541 Thread-2 (process_request_thread) 140430599517888 basehttp basehttp.py 213 django.server log_message 1611 "GET /escala-mensal/ HTTP/1.1" 500 213748
