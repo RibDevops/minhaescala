@@ -1,2 +1,62 @@
 ERROR 2026-01-30 22:10:29,933 log log.py 253 log_response Internal Server Error: /escala-mensal/exportar-pdf/1/2026/
 ERROR 2026-01-31 07:04:49,217 log log.py 253 log_response Internal Server Error: /escala-mensal/exportar-pdf/1/2026/
+ERROR 2026-01-31 13:42:30,930 log log.py 253 log_response Internal Server Error: /escala-mensal/exportar-pdf/1/2026/
+WARNING 2026-01-31 13:42:30,980 log log.py 253 log_response Not Found: /favicon.ico
+ERROR 2026-01-31 13:48:46,425 log log.py 253 log_response Internal Server Error: /plantao/novo/
+Traceback (most recent call last):
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\contrib\auth\mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\views\generic\base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\cal\views\views_cal.py", line 133, in post
+    EventoEscala.objects.create(
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\dev\minhaescala\cal\models.py", line 194, in save
+    self.full_clean()
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\db\models\base.py", line 1679, in full_clean
+    raise ValidationError(errors)
+django.core.exceptions.ValidationError: {'__all__': ['Excesso de carga semanal (48h)']}
+ERROR 2026-01-31 13:51:37,616 log log.py 253 log_response Internal Server Error: /plantao/novo/
+Traceback (most recent call last):
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\contrib\auth\mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\views\generic\base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\cal\views\views_cal.py", line 133, in post
+    EventoEscala.objects.create(
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\dev\minhaescala\cal\models.py", line 194, in save
+    self.full_clean()
+  File "C:\dev\minhaescala\venv\Lib\site-packages\django\db\models\base.py", line 1679, in full_clean
+    raise ValidationError(errors)
+django.core.exceptions.ValidationError: {'__all__': ['Excesso de carga semanal (52h)']}

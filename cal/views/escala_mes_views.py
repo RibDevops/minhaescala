@@ -203,7 +203,7 @@ def exportar_escala_pdf(request, mes, ano):
         table_data = [header]
 
         for prof in profissionais:
-            nome = prof.nome_guerra or (prof.nome_completo[:15] if prof.nome_completo else "Sem Nome")
+            nome = prof.nome_exibicao or (prof.nome_completo[:15] if prof.nome_completo else "Sem Nome")
             linha = [nome]
             total_horas = 0
             # Corrigido select_related para 'tipo'
