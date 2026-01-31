@@ -11,12 +11,11 @@ from ..models import (
     ControleSemanal, TipoEvento, Hospital, Setor, PerfilUsuario
 )
 from django.http import HttpResponse, JsonResponse
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
 import io
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def escala_mes_view(request, mes=None, ano=None):
@@ -159,6 +158,15 @@ def toggle_dia_escala(request, profissional_id, dia, mes, ano):
 
 @login_required
 def exportar_escala_pdf(request, mes, ano):
+    try:
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib import colors
+    except ImportError as e:
+        logger.error(f"Erro ao importar ReportLab: {e}")
+        return HttpResponse("Erro técnico: O sistema de geração de PDF não está disponível no momento devido a falhas em bibliotecas do servidor.", status=500)
+
     hospital_id = request.GET.get('hospital')
     setor_id = request.GET.get('setor')
     
@@ -171,49 +179,56 @@ def exportar_escala_pdf(request, mes, ano):
     if setor_id: profissionais = profissionais.filter(setor_id=setor_id)
 
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20)
-    elements = []
-    styles = getSampleStyleSheet()
-    
-    h_nome = Hospital.objects.get(id=hospital_id).nome if hospital_id else "Geral"
-    titulo = f"Escala Mensal - {h_nome} ({mes}/{ano})"
-    elements.append(Paragraph(titulo, styles['Title']))
-    
-    num_dias = monthrange(ano, mes)[1]
-    header = ['Profissional'] + [str(d) for d in range(1, num_dias + 1)] + ['Total']
-    table_data = [header]
-
-    for prof in profissionais:
-        linha = [prof.nome_exibicao or prof.nome_completo[:15]]
-        total_horas = 0
-        eventos = EventoEscala.objects.filter(profissional=prof, data__range=[primeiro_dia, ultimo_dia])
-        dias_dict = {e.data.day: (e.tipo_evento.codigo if e.tipo_evento else "") for e in eventos}
-        horas_dict = {e.data.day: (float(e.tipo_evento.horas or 0) if e.tipo_evento else 0) for e in eventos}
-
-        for d in range(1, num_dias + 1):
-            turno = dias_dict.get(d, '-')
-            linha.append(turno)
-            total_horas += horas_dict.get(d, 0)
+    try:
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20)
+        elements = []
+        styles = getSampleStyleSheet()
         
-        linha.append(f"{int(total_horas)}h")
-        table_data.append(linha)
+        h_nome = Hospital.objects.get(id=hospital_id).nome if hospital_id else "Geral"
+        titulo = f"Escala Mensal - {h_nome} ({mes}/{ano})"
+        elements.append(Paragraph(titulo, styles['Title']))
+        
+        num_dias = monthrange(ano, mes)[1]
+        header = ['Profissional'] + [str(d) for d in range(1, num_dias + 1)] + ['Total']
+        table_data = [header]
 
-    t = Table(table_data, repeatRows=1)
-    t.setStyle(TableStyle([
-        ('FONTSIZE', (0, 0), (-1, -1), 6),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-    ]))
-    elements.append(t)
-    doc.build(elements)
-    
-    pdf_content = buffer.getvalue()
-    buffer.close()
-    
-    response = HttpResponse(pdf_content, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename=escala_{mes}_{ano}.pdf'
-    return response
+        for prof in profissionais:
+            nome = prof.nome_guerra or (prof.nome_completo[:15] if prof.nome_completo else "Sem Nome")
+            linha = [nome]
+            total_horas = 0
+            eventos = EventoEscala.objects.filter(profissional=prof, data__range=[primeiro_dia, ultimo_dia]).select_related('tipo_evento')
+            dias_dict = {e.data.day: (e.tipo_evento.codigo if e.tipo_evento else "") for e in eventos}
+            horas_dict = {e.data.day: (float(e.tipo_evento.horas or 0) if e.tipo_evento else 0) for e in eventos}
+
+            for d in range(1, num_dias + 1):
+                turno = dias_dict.get(d, '-')
+                linha.append(turno)
+                total_horas += horas_dict.get(d, 0)
+            
+            linha.append(f"{int(total_horas)}h")
+            table_data.append(linha)
+
+        t = Table(table_data, repeatRows=1)
+        t.setStyle(TableStyle([
+            ('FONTSIZE', (0, 0), (-1, -1), 6),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ]))
+        elements.append(t)
+        doc.build(elements)
+        
+        pdf_content = buffer.getvalue()
+        buffer.close()
+        
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename=escala_{mes}_{ano}.pdf'
+        return response
+    except Exception as e:
+        logger.exception("Erro durante a geração do PDF")
+        if "PIL" in str(e) or "_imaging" in str(e):
+             return HttpResponse("Erro de compatibilidade: O servidor não consegue processar o PDF agora devido a uma falha na biblioteca de imagens. Tente novamente mais tarde.", status=500)
+        return HttpResponse(f"Erro ao gerar PDF: {str(e)}", status=500)
 
 @login_required
 def escala_create(request):
