@@ -1,1 +1,2 @@
-ERROR 2026-01-30 22:01:20,541 Thread-2 (process_request_thread) 140430599517888 basehttp basehttp.py 213 django.server log_message 1611 "GET /escala-mensal/ HTTP/1.1" 500 213748
+ERROR 2026-01-30 22:10:29,934 Thread-1 (process_request_thread) 139668439955136 basehttp basehttp.py 213 django.server log_message 3379 "GET /escala-mensal/exportar-pdf/1/2026/ HTTP/1.1" 500 122
+ERROR 2026-01-31 07:04:49,217 Thread-1 (process_request_thread) 140571120236224 basehttp basehttp.py 213 django.server log_message 117 "GET /escala-mensal/exportar-pdf/1/2026/ HTTP/1.1" 500 122

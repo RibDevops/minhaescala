@@ -1,4 +1,9 @@
 # escala_mes_views.py
+import os
+os.environ["RL_NO_PIL"] = "1"
+
+
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
