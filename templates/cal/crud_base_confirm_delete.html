@@ -6,7 +6,11 @@
             <h4 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle"></i> {{ titulo }}</h4>
         </div>
         <div class="card-body p-4 text-center">
-            <p class="lead mb-4">Tem certeza que deseja excluir <strong>{{ object }}</strong>?</p>
+            <p class="lead mb-2">Tem certeza que deseja excluir <strong>{{ object }}</strong>?</p>
+            <div class="alert alert-warning border-0 rounded-3 mb-4">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong>Atenção:</strong> Esta ação é irreversível e irá excluir permanentemente todos os lançamentos de plantões associados a este registro.
+            </div>
             <form method="post">
                 {% csrf_token %}
                 <div class="d-flex justify-content-center gap-3">

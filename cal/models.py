@@ -155,7 +155,7 @@ class EventoEscala(models.Model):
     )
     tipo = models.ForeignKey(
         TipoEvento,
-        on_delete=models.PROTECT
+        on_delete=models.CASCADE
     )
     hospital = models.ForeignKey(
         Hospital,
