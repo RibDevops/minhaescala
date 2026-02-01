@@ -3,3 +3,4 @@ ERROR 2026-01-31 07:04:49,217 Thread-1 (process_request_thread) 140571120236224 
 ERROR 2026-01-31 13:42:30,931 Thread-2 (process_request_thread) 132 basehttp basehttp.py 213 django.server log_message 4140 "GET /escala-mensal/exportar-pdf/1/2026/ HTTP/1.1" 500 68
 ERROR 2026-01-31 13:48:46,425 Thread-1 (process_request_thread) 3384 basehttp basehttp.py 213 django.server log_message 1956 "POST /plantao/novo/ HTTP/1.1" 500 107391
 ERROR 2026-01-31 13:51:37,617 Thread-1 (process_request_thread) 3384 basehttp basehttp.py 213 django.server log_message 1956 "POST /plantao/novo/ HTTP/1.1" 500 107456
+ERROR 2026-01-31 21:32:14,763 Thread-2 (process_request_thread) 139911930836672 log log.py 249 django.server log_message 1001 "GET /tipos/3/excluir/ HTTP/1.1" 500 268307
