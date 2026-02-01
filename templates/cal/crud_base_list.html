@@ -26,12 +26,12 @@
                     {% for obj in objetos %}
                     <tr>
                         {% block table_rows %}{% endblock %}
-                        <td class="text-end">
+                        <td class="text-end" style="white-space: nowrap;">
                             {% block extra_actions %}
-                            <a href="{% url update_url obj.pk %}" class="btn btn-sm btn-outline-primary">
+                            <a href="{% url update_url obj.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="{% url delete_url obj.pk %}" class="btn btn-sm btn-outline-danger">
+                            <a href="{% url delete_url obj.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
                                 <i class="bi bi-trash"></i>
                             </a>
                             {% endblock %}

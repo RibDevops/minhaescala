@@ -1,0 +1,7 @@
+{% extends 'cal/crud_base_list.html' %}
+
+{% block table_rows %}
+<td>{{ obj.tipo }}</td>
+<td>{{ obj.tipo_descricao }}</td>
+<td>{{ obj.contabiliza|yesno:"Sim,Não" }}</td>
+{% endblock %}
