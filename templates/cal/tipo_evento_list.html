@@ -10,6 +10,16 @@
 <td class="fw-bold">{{ obj.codigo }}</td>
 <td>{{ obj.descricao|default:"-" }}</td>
 <td>{{ obj.horas }}h</td>
+<td class="text-end">
+    <div class="btn-group">
+        <a href="{% url 'cal:tipoevento_update' obj.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a href="{% url 'cal:tipoevento_delete' obj.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+            <i class="fas fa-trash"></i>
+        </a>
+    </div>
+</td>
 {% endblock %}
 
 {% block extra_actions %}{% endblock %}
