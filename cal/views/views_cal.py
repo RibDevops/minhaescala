@@ -154,6 +154,55 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
         kwargs['user'] = self.request.user
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        perfil = getattr(user, 'cal_perfil', None)
+        
+        if user.is_staff:
+            context['enfermeiros'] = Matricula.objects.filter(ativo=True)
+        elif perfil and perfil.tipo == 'ESCALANTE' and hasattr(user, 'matricula'):
+            context['enfermeiros'] = Matricula.objects.filter(
+                hospital=user.matricula.hospital,
+                setor=user.matricula.setor,
+                ativo=True
+            )
+        elif perfil and perfil.tipo == 'ENFERMEIRO' and hasattr(user, 'matricula'):
+            context['enfermeiros'] = Matricula.objects.filter(id=user.matricula.id)
+        else:
+            context['enfermeiros'] = Matricula.objects.none()
+            
+        context['tipos_plantao'] = TipoEvento.objects.all()
+        context['is_edit'] = True
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        enfermeiro_id = request.POST.get('enfermeiro')
+        datas = request.POST.getlist('data[]')
+        tipos = request.POST.getlist('tipo_plantao[]')
+        obs = request.POST.getlist('observacoes[]')
+
+        if not enfermeiro_id or not datas:
+            messages.error(request, 'Dados inválidos')
+            return self.get(request, *args, **kwargs)
+
+        enfermeiro = get_object_or_404(Matricula, pk=enfermeiro_id)
+        data_dt = datetime.strptime(datas[0], '%Y-%m-%d').date()
+        tipo = get_object_or_404(TipoEvento, pk=tipos[0])
+        
+        # Atualiza o objeto existente
+        self.object.profissional = enfermeiro
+        self.object.data = data_dt
+        self.object.tipo = tipo
+        self.object.observacao = obs[0] if obs else ''
+        self.object.hospital = enfermeiro.hospital
+        self.object.setor = enfermeiro.setor
+        self.object.save()
+            
+        messages.success(request, f'Plantão de {enfermeiro.nome_exibicao} atualizado com sucesso.')
+        return redirect(self.success_url)
+
 class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
     model = EventoEscala
     success_url = reverse_lazy('cal:calendar')
