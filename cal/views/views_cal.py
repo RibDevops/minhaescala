@@ -234,3 +234,39 @@ def excluir_evento(request, event_id):
     p = get_object_or_404(EventoEscala, pk=event_id)
     p.delete()
     return redirect('cal:listar_eventos')
+
+from django.http import JsonResponse
+
+def validar_carga_horaria(request):
+    enfermeiro_id = request.GET.get('enfermeiro')
+    data_str = request.GET.get('data')
+    tipo_id = request.GET.get('tipo')
+    
+    if not all([enfermeiro_id, data_str, tipo_id]):
+        return JsonResponse({'error': 'Parâmetros ausentes'}, status=400)
+    
+    try:
+        enfermeiro = Matricula.objects.get(pk=enfermeiro_id)
+        data_dt = datetime.strptime(data_str, '%Y-%m-%d').date()
+        tipo = TipoEvento.objects.get(pk=tipo_id)
+        
+        # Simula a validação do modelo
+        inicio = data_dt - timedelta(days=7)
+        eventos = EventoEscala.objects.filter(
+            profissional=enfermeiro,
+            data__range=(inicio, data_dt),
+            tipo__tipo_base__contabiliza=True
+        )
+        carga_atual = sum(e.tipo.horas for e in eventos)
+        total = carga_atual + tipo.horas
+        
+        excedeu = total > enfermeiro.carga_horaria_semanal
+        
+        return JsonResponse({
+            'total': total,
+            'limite': enfermeiro.carga_horaria_semanal,
+            'excedeu': excedeu,
+            'mensagem': f"Aviso: Carga semanal atingirá {total}h (Limite: {enfermeiro.carga_horaria_semanal}h)" if excedeu else ""
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

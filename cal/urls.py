@@ -17,6 +17,7 @@ urlpatterns = [
     path('plantao/<int:pk>/excluir/', views_cal.PlantaoDeleteView.as_view(), name='plantao_delete'),
     path('eventos/', views_cal.MeusPlantoesListView.as_view(), name='listar_eventos'),
     path('eventos/excluir/<int:event_id>/', views_cal.excluir_evento, name='excluir_evento'),
+    path('api/validar-carga/', views_cal.validar_carga_horaria, name='validar_carga_horaria'),
     
     # Tipos
     path('tipos/', geral_views.TipoListView.as_view(), name='tipo_list'),
