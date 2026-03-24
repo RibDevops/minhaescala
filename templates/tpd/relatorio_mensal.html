@@ -1,18 +1,10 @@
-<!-- relatorio_mensal.html -->
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>📊 Relatório Mensal de TPD</h2>
-        <div class="btn-group">
-            <button onclick="window.print()" class="btn btn-outline-primary">
-                🖨️ Imprimir
-            </button>
-            <button onclick="exportarParaExcel()" class="btn btn-outline-success">
-                📊 Exportar Excel
-            </button>
-        </div>
+        <h2>Relatório Mensal de TPD</h2>
+        <button onclick="window.print()" class="btn btn-outline-primary">Imprimir</button>
     </div>
 
     <!-- Filtros -->
@@ -23,333 +15,148 @@
                     <label class="form-label">Mês:</label>
                     <select name="mes" class="form-select" onchange="this.form.submit()">
                         {% for mes_num, mes_nome in meses %}
-                            <option value="{{ mes_num }}" {% if mes == mes_num|stringformat:"s" %}selected{% endif %}>
-                                {{ mes_nome }} de {{ ano_atual }}
-                            </option>
+                        <option value="{{ mes_num }}" {% if mes == mes_num|stringformat:"s" %}selected{% endif %}>
+                            {{ mes_nome }} de {{ ano_atual }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
+                {% if profissionais %}
                 <div class="col-md-4">
                     <label class="form-label">Profissional:</label>
                     <select name="profissional" class="form-select" onchange="this.form.submit()">
-                        <option value="">Todos os Profissionais</option>
+                        <option value="">Todos</option>
                         {% for prof in profissionais %}
-                            <option value="{{ prof.id }}" {% if profissional_filtro == prof.id %}selected{% endif %}>
-                                {{ prof.nome }}
-                            </option>
+                        <option value="{{ prof.id }}" {% if profissional_filtro == prof.id %}selected{% endif %}>
+                            {{ prof.nome_exibicao }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        🔍 Gerar Relatório
-                    </button>
-                </div>
+                {% endif %}
             </form>
         </div>
     </div>
 
     <!-- Resumo -->
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card bg-primary text-white">
                 <div class="card-body text-center">
-                    <h6 class="card-title">Total de TPDs</h6>
+                    <h6>Total de TPDs</h6>
                     <h2>{{ total_tpds }}</h2>
-                    <small>{{ mes_nome }} de {{ ano_atual }}</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card bg-success text-white">
                 <div class="card-body text-center">
-                    <h6 class="card-title">Horas Totais</h6>
+                    <h6>Horas Totais</h6>
                     <h2>{{ total_horas|floatformat:1 }}h</h2>
-                    <small>Média: {{ media_horas|floatformat:1 }}h/dia</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-dark text-white">
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
                 <div class="card-body text-center">
-                    <h6 class="card-title">Horas Noturnas</h6>
-                    <h2>{{ total_noturnas|floatformat:1 }}h</h2>
-                    <small>{{ percentual_noturno|floatformat:1 }}% do total</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body text-center">
-                    <h6 class="card-title">Violações</h6>
-                    <h2>{{ violacoes }}</h2>
-                    <small>{{ percentual_violacoes|floatformat:1 }}% dos registros</small>
+                    <h6>Adicional TPD</h6>
+                    <h2>R$ {{ total_adicional_tpd|floatformat:2 }}</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Gráficos -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>📈 Horas por Semana</h5>
-                </div>
-                <div class="card-body">
-                    <div id="graficoHoras" style="height: 300px;">
-                        <!-- Aqui iria um gráfico -->
-                        <div class="text-center text-muted py-5">
-                            <i class="fas fa-chart-bar fa-3x mb-3"></i>
-                            <p>Grafíco de horas por semana</p>
+    <!-- Distribuição por profissional -->
+    {% if horas_por_profissional %}
+    <div class="card mb-4">
+        <div class="card-header"><h5>Horas por Profissional</h5></div>
+        <div class="card-body">
+            <div class="list-group">
+                {% for prof in horas_por_profissional %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ prof.nome }}</strong>
+                            <br><small class="text-muted">{{ prof.matricula }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge {% if prof.excedeu %}bg-danger{% else %}bg-primary{% endif %} fs-6">
+                                {{ prof.total_horas|floatformat:1 }}h
+                            </span>
+                            <br>
+                            <small class="{% if prof.excedeu %}text-danger{% else %}text-muted{% endif %}">
+                                {{ prof.percentual|floatformat:1 }}% do total
+                                {% if prof.excedeu %}— excedeu {{ limite_mensal }}h{% endif %}
+                            </small>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>👥 Distribuição por Profissional</h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        {% for prof in horas_por_profissional %}
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ prof.nome }}</strong>
-                                    <br>
-                                    <small class="text-muted">{{ prof.matricula }}</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge bg-primary fs-6">{{ prof.total_horas }}h</span>
-                                    <br>
-                                    <small class="text-muted">
-                                        {{ prof.percentual|floatformat:1 }}% do total
-                                        {% if prof.total_horas > 44 %}
-                                        <br><span class="text-danger">❌ Excedeu limite</span>
-                                        {% endif %}
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="progress mt-2" style="height: 8px;">
-                                <div class="progress-bar 
-                                    {% if prof.total_horas > 44 %}bg-danger
-                                    {% elif prof.total_horas > 35 %}bg-warning
-                                    {% else %}bg-success{% endif %}" 
-                                    style="width: {{ prof.percentual_grafico }}%">
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar {% if prof.excedeu %}bg-danger{% else %}bg-success{% endif %}"
+                             style="width: {{ prof.percentual_grafico }}%"></div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
+    {% endif %}
 
-    <!-- Tabela Detalhada -->
+    <!-- Tabela detalhada -->
     <div class="card">
-        <div class="card-header">
-            <h5>📋 Detalhamento por Dia</h5>
-        </div>
+        <div class="card-header"><h5>Detalhamento por Dia</h5></div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
-                    <thead>
-                        <tr class="table-dark">
+                    <thead class="table-dark">
+                        <tr>
                             <th>Data</th>
-                            <th>Dia</th>
                             <th>Profissional</th>
+                            <th>Horário</th>
                             <th>Horas</th>
-                            <th>Noturnas</th>
-                            <th>Valor TPD</th>
-                            <th>Valor Noturno</th>
-                            <th>Total</th>
-                            <th>Status</th>
+                            <th>Adicional TPD</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tpd in tpd_mes %}
-                        <tr class="{% if tpd.violacao_regra %}table-warning{% endif %}">
+                        <tr>
                             <td>{{ tpd.data|date:"d/m/Y" }}</td>
                             <td>
-                                <span class="badge 
-                                    {% if tpd.data|date:"N" in '6,7' %}bg-danger
-                                    {% else %}bg-secondary{% endif %}">
-                                    {{ tpd.data|date:"D" }}
-                                </span>
+                                {{ tpd.profissional.nome_exibicao }}
+                                <br><small class="text-muted">{{ tpd.profissional.matricula }}</small>
                             </td>
-                            <td>
-                                {{ tpd.profissional.nome }}
-                                <br>
-                                <small class="text-muted">{{ tpd.profissional.matricula }}</small>
-                            </td>
-                            <td>
-                                <strong>{{ tpd.horas_trabalhadas }}h</strong>
-                                <br>
-                                <small>{{ tpd.hora_inicio|time:"H:i" }}-{{ tpd.hora_fim|time:"H:i" }}</small>
-                            </td>
-                            <td>
-                                {% if tpd.horas_noturnas > 0 %}
-                                <span class="badge bg-dark">{{ tpd.horas_noturnas }}h</span>
-                                {% else %}
-                                <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
+                            <td>{{ tpd.hora_inicio|time:"H:i" }} – {{ tpd.hora_fim|time:"H:i" }}</td>
+                            <td><strong>{{ tpd.horas_trabalhadas|floatformat:1 }}h</strong></td>
                             <td>R$ {{ tpd.adicional_tpd|floatformat:2 }}</td>
-                            <td>
-                                {% if tpd.adicional_noturno > 0 %}
-                                R$ {{ tpd.adicional_noturno|floatformat:2 }}
-                                {% else %}
-                                <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <strong>R$ {{ tpd.adicional_tpd|add:tpd.adicional_noturno|floatformat:2 }}</strong>
-                            </td>
-                            <td>
-                                {% if tpd.violacao_regra %}
-                                <span class="badge bg-danger" title="{{ tpd.mensagem_erro }}">⚠️</span>
-                                {% else %}
-                                <span class="badge bg-success">✅</span>
-                                {% endif %}
-                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="9" class="text-center py-4">
-                                <div class="alert alert-info">
-                                    📭 Nenhum TPD registrado neste mês.
-                                </div>
-                            </td>
+                            <td colspan="5" class="text-center py-4">Nenhum TPD registrado neste mês.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
+                    {% if tpd_mes %}
                     <tfoot class="table-dark">
                         <tr>
-                            <th colspan="3">TOTAIS DO MÊS:</th>
+                            <th colspan="3">TOTAIS:</th>
                             <th>{{ total_horas|floatformat:1 }}h</th>
-                            <th>{{ total_noturnas|floatformat:1 }}h</th>
                             <th>R$ {{ total_adicional_tpd|floatformat:2 }}</th>
-                            <th>R$ {{ total_adicional_noturno|floatformat:2 }}</th>
-                            <th>R$ {{ total_geral|floatformat:2 }}</th>
-                            <th>
-                                {% if violacoes > 0 %}
-                                <span class="badge bg-danger">{{ violacoes }} violações</span>
-                                {% else %}
-                                <span class="badge bg-success">OK</span>
-                                {% endif %}
-                            </th>
                         </tr>
                     </tfoot>
+                    {% endif %}
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Resumo Financeiro -->
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>💰 Resumo Financeiro</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <tr>
-                            <td>Valor Base (R$ 50/hora):</td>
-                            <td class="text-end">R$ {{ valor_base|floatformat:2 }}</td>
-                        </tr>
-                        <tr>
-                            <td>Adicional TPD (50%):</td>
-                            <td class="text-end">R$ {{ total_adicional_tpd|floatformat:2 }}</td>
-                        </tr>
-                        <tr>
-                            <td>Adicional Noturno (20%):</td>
-                            <td class="text-end">R$ {{ total_adicional_noturno|floatformat:2 }}</td>
-                        </tr>
-                        <tr class="table-success">
-                            <td><strong>TOTAL A PAGAR:</strong></td>
-                            <td class="text-end">
-                                <strong>R$ {{ total_geral|floatformat:2 }}</strong>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>⚠️ Violações Detectadas</h5>
-                </div>
-                <div class="card-body">
-                    {% if violacoes > 0 %}
-                    <div class="alert alert-warning">
-                        <h6>{{ violacoes }} violações encontradas:</h6>
-                        <ul class="mb-0">
-                            {% for violacao in lista_violacoes %}
-                            <li>{{ violacao }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% else %}
-                    <div class="alert alert-success">
-                        <h6>✅ Nenhuma violação detectada!</h6>
-                        <p>Todos os TPDs estão dentro dos limites legais.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data de Emissão -->
     <div class="text-center mt-4 text-muted">
-        <p>
-            Relatório emitido em: {% now "d/m/Y H:i" %}
-            <br>
-            Sistema de Controle de TPD - Secretaria de Saúde
-        </p>
+        <small>Relatório emitido em: {% now "d/m/Y H:i" %}</small>
     </div>
 </div>
 
 <style>
 @media print {
-    .btn, nav, .card-header .btn-group {
-        display: none !important;
-    }
-
-    .card {
-        border: 1px solid #000 !important;
-    }
-
-    .table th, .table td {
-        border: 1px solid #000 !important;
-    }
+    .btn, nav { display: none !important; }
+    .card { border: 1px solid #000 !important; }
 }
 </style>
-
-<script>
-function exportarParaExcel() {
-    alert('Exportando relatório para Excel...');
-    // Implementar exportação real
-    window.location.href = '?export=excel&mes={{ mes }}';
-}
-
-function exportarParaPDF() {
-    alert('Exportando relatório para PDF...');
-    window.print();
-}
-
-// Ordenação da tabela
-document.querySelectorAll('th[data-sort]').forEach(th => {
-    th.addEventListener('click', function() {
-        const sortField = this.getAttribute('data-sort');
-        window.location.href = `?sort=${sortField}&mes={{ mes }}`;
-    });
-});
-</script>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo, TPD, LegislacaoTPD, EscalaMensal, DiaEscala, ControleSemanal, MapeamentoTurno
+from .models import Matricula, TipoEvento, EventoEscala, PerfilUsuario, Tipo, TPD, EscalaMensal, DiaEscala, ControleSemanal, MapeamentoTurno
 from core.models import Hospital, Setor
 
 @admin.register(PerfilUsuario)
@@ -50,16 +50,9 @@ class TipoEventoAdmin(admin.ModelAdmin):
 
 @admin.register(TPD)
 class TPDAdmin(admin.ModelAdmin):
-    list_display = ['profissional', 'data', 'horas_trabalhadas', 'violacao_regra']
-    list_filter = ['violacao_regra', 'data']
-    search_fields = ['profissional__nome_exibicao']
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).order_by('-data')
-
-@admin.register(LegislacaoTPD)
-class LegislacaoTPDAdmin(admin.ModelAdmin):
-    list_display = ['nome']
+    list_display = ['profissional', 'data', 'hora_inicio', 'hora_fim', 'horas_trabalhadas', 'hospital', 'setor']
+    list_filter = ['data', 'hospital', 'setor']
+    search_fields = ['profissional__nome_exibicao', 'profissional__matricula']
 
 @admin.register(EscalaMensal)
 class EscalaMensalAdmin(admin.ModelAdmin):

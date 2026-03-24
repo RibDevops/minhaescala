@@ -57,11 +57,11 @@ urlpatterns = [
     path('matriculas/<int:pk>/excluir/', matricula_views.matricula_delete, name='matricula_delete'),
     path('matriculas/<int:pk>/toggle-status/', matricula_views.matricula_toggle_status, name='matricula_toggle_status'),
 
-    # path('', tpd_views.home, name='home'),
-    path('novo/', tpd_views.novo_tpd, name='novo_tpd'),
-    path('listar/', tpd_views.listar_tpd, name='listar_tpd'),
-    path('dashboard/', tpd_views.dashboard, name='dashboard'),
-    path('relatorio/', tpd_views.relatorio_mensal, name='relatorio'),
+    # TPD
+    path('tpd/novo/', tpd_views.novo_tpd, name='novo_tpd'),
+    path('tpd/listar/', tpd_views.listar_tpd, name='listar_tpd'),
+    path('tpd/<int:pk>/excluir/', tpd_views.excluir_tpd, name='excluir_tpd'),
+    path('tpd/relatorio/', tpd_views.relatorio_mensal, name='relatorio'),
 
     # Escalas
     path('escalas/', escala_views.lista_escalas, name='lista_escalas'),

@@ -1,92 +1,49 @@
-<!-- dashboard.html -->
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>📊 Dashboard</h2>
+<h2>Dashboard TPD</h2>
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5>Últimos TPDs Registrados</h5>
-            </div>
-            <div class="card-body">
-                <div class="list-group">
-                    {% for tpd in ultimos_tpd %}
-                    <div class="list-group-item {% if tpd.violacao_regra %}list-group-item-warning{% endif %}">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <strong>{{ tpd.profissional.nome }}</strong>
-                                <br>
-                                <small>{{ tpd.data|date:"d/m/Y" }} | {{ tpd.hora_inicio|time:"H:i" }}-{{ tpd.hora_fim|time:"H:i" }}</small>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge bg-primary">{{ tpd.horas_trabalhadas }}h</span>
-                                {% if tpd.horas_noturnas > 0 %}
-                                <span class="badge bg-dark">{{ tpd.horas_noturnas }}h noturnas</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% if tpd.violacao_regra %}
-                        <div class="alert alert-danger mt-2 mb-0 py-1">
-                            <small>{{ tpd.mensagem_erro }}</small>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h6>Total de TPDs</h6>
+                <h2>{{ total_tpds }}</h2>
             </div>
         </div>
     </div>
-
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5>🏥 Horas por Profissional (Mês)</h5>
-            </div>
-            <div class="card-body">
-                {% for prof in dados_profissionais %}
-                <div class="mb-2">
-                    <div class="d-flex justify-content-between">
-                        <span>{{ prof.nome }}</span>
-                        <span>{{ prof.horas }}h {{ prof.status }}</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar {% if prof.horas > 44 %}bg-danger{% else %}bg-success{% endif %}" 
-                             style="width: {{ prof.horas|divisibleby:2|default:50 }}%">
-                        </div>
-                    </div>
-                    <small class="text-muted">
-                        {% if prof.horas > 44 %}
-                        ❌ Excedeu limite (44h)
-                        {% elif prof.horas > 40 %}
-                        ⚠️ Próximo do limite
-                        {% else %}
-                        ✅ Dentro do limite
-                        {% endif %}
-                    </small>
-                </div>
-                {% endfor %}
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h6>Total de Horas</h6>
+                <h2>{{ total_horas|floatformat:1 }}h</h2>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5>⚖️ Legislação Vigente</h5>
+<div class="card">
+    <div class="card-header">
+        <h5>Últimos TPDs Registrados</h5>
+    </div>
+    <div class="card-body">
+        <div class="list-group">
+            {% for tpd in ultimos_tpd %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>{{ tpd.profissional.nome_exibicao }}</strong>
+                        <br>
+                        <small class="text-muted">
+                            {{ tpd.data|date:"d/m/Y" }} | {{ tpd.hora_inicio|time:"H:i" }}–{{ tpd.hora_fim|time:"H:i" }}
+                        </small>
+                    </div>
+                    <span class="badge bg-primary align-self-center">{{ tpd.horas_trabalhadas|floatformat:1 }}h</span>
+                </div>
             </div>
-            <div class="card-body">
-                {% if legislacao %}
-                <h6>{{ legislacao.nome }}</h6>
-                <p>{{ legislacao.descricao|truncatewords:20 }}</p>
-                <ul class="list-unstyled">
-                    <li>📅 Limite diário: {{ legislacao.limite_diario }}h</li>
-                    <li>📊 Limite mensal: {{ legislacao.limite_mensal }}h</li>
-                    <li>⏰ Intervalo mínimo: {{ legislacao.intervalo_minimo }}h</li>
-                </ul>
-                {% else %}
-                <p class="text-muted">Nenhuma legislação cadastrada.</p>
-                {% endif %}
-            </div>
+            {% empty %}
+            <p class="text-muted mb-0">Nenhum TPD registrado ainda.</p>
+            {% endfor %}
         </div>
     </div>
 </div>

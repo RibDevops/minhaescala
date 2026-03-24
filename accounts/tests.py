@@ -54,3 +54,125 @@ class PerfilUsuarioSignalTests(TestCase):
         perfil = PerfilUsuario.objects.get(user=user)
         self.assertIn("roberto", str(perfil))
         self.assertIn(perfil.tipo, str(perfil))
+
+
+# ---------------------------------------------------------------------------
+# TPD tests
+# ---------------------------------------------------------------------------
+from django.core.exceptions import ValidationError as DjangoValidationError
+from cal.models import TPD, Matricula, PerfilUsuario as CalPerfil, LIMITE_HORAS_MENSAIS_TPD
+import datetime
+
+
+class TPDModelTests(TestCase):
+    def setUp(self):
+        self.hospital = Hospital.objects.create(nome="H TPD", sigla="HT")
+        from core.models import Setor
+        self.setor = Setor.objects.create(nome="UTI", hospital=self.hospital)
+
+        user = User.objects.create_user(username="prof1", password="x")
+        perfil = CalPerfil.objects.create(user=user, tipo='ENFERMEIRO')
+        self.matricula = Matricula.objects.create(
+            user=user,
+            nome_completo="Profissional Um",
+            nome_exibicao="Prof Um",
+            matricula="M001",
+            hospital=self.hospital,
+            setor=self.setor,
+            perfil=perfil,
+        )
+
+    def _make_tpd(self, hora_inicio="07:00", hora_fim="13:00", mes=1, ano=2025):
+        return TPD(
+            profissional=self.matricula,
+            data=datetime.date(ano, mes, 10),
+            hora_inicio=datetime.time(*map(int, hora_inicio.split(":"))),
+            hora_fim=datetime.time(*map(int, hora_fim.split(":"))),
+            hospital=self.hospital,
+            setor=self.setor,
+        )
+
+    def test_horas_trabalhadas_calculadas_no_save(self):
+        tpd = self._make_tpd("07:00", "13:00")
+        tpd.save()
+        self.assertEqual(float(tpd.horas_trabalhadas), 6.0)
+
+    def test_adicional_tpd_calculado_no_save(self):
+        tpd = self._make_tpd("07:00", "13:00")  # 6h × 50 × 0.5 = 150
+        tpd.save()
+        self.assertEqual(float(tpd.adicional_tpd), 150.0)
+
+    def test_hora_fim_antes_inicio_invalido(self):
+        tpd = self._make_tpd("13:00", "07:00")
+        with self.assertRaises(DjangoValidationError):
+            tpd.full_clean()
+
+    def test_limite_mensal_bloqueado(self):
+        """Não deve permitir ultrapassar LIMITE_HORAS_MENSAIS_TPD no mês."""
+        # Cria TPDs que somam exatamente o limite
+        for dia in range(1, 9):  # 8 dias × 5h = 40h
+            t = TPD(
+                profissional=self.matricula,
+                data=datetime.date(2025, 3, dia),
+                hora_inicio=datetime.time(7, 0),
+                hora_fim=datetime.time(12, 0),
+                hospital=self.hospital,
+                setor=self.setor,
+            )
+            t.save()
+
+        # Mais 5h = 45h > 44h → deve falhar
+        tpd_extra = TPD(
+            profissional=self.matricula,
+            data=datetime.date(2025, 3, 9),
+            hora_inicio=datetime.time(7, 0),
+            hora_fim=datetime.time(12, 0),
+            hospital=self.hospital,
+            setor=self.setor,
+        )
+        with self.assertRaises(DjangoValidationError):
+            tpd_extra.full_clean()
+
+    def test_limite_mensal_permite_exato(self):
+        """Deve permitir TPDs que somam exatamente o limite."""
+        # 44h em 4 blocos de 11h
+        for dia in range(1, 5):
+            t = TPD(
+                profissional=self.matricula,
+                data=datetime.date(2025, 4, dia),
+                hora_inicio=datetime.time(7, 0),
+                hora_fim=datetime.time(18, 0),
+                hospital=self.hospital,
+                setor=self.setor,
+            )
+            t.save()
+        total = TPD.objects.filter(
+            profissional=self.matricula,
+            data__year=2025,
+            data__month=4,
+        ).count()
+        self.assertEqual(total, 4)
+
+    def test_limite_mensal_independente_por_mes(self):
+        """O limite é por mês; meses diferentes não interferem."""
+        for dia in range(1, 9):  # 40h em março
+            TPD(
+                profissional=self.matricula,
+                data=datetime.date(2025, 3, dia),
+                hora_inicio=datetime.time(7, 0),
+                hora_fim=datetime.time(12, 0),
+                hospital=self.hospital,
+                setor=self.setor,
+            ).save()
+
+        # Abril começa do zero — 5h deve passar
+        tpd_abril = TPD(
+            profissional=self.matricula,
+            data=datetime.date(2025, 4, 1),
+            hora_inicio=datetime.time(7, 0),
+            hora_fim=datetime.time(12, 0),
+            hospital=self.hospital,
+            setor=self.setor,
+        )
+        tpd_abril.save()  # não deve lançar exceção
+        self.assertIsNotNone(tpd_abril.pk)

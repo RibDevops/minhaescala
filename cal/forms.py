@@ -186,3 +186,25 @@ class TPDForm(forms.ModelForm):
             'hospital': forms.Select(attrs={'class': 'form-select'}),
             'setor': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        # user é passado pela view para restringir os querysets ao setor do escalante
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        if user:
+            matricula = getattr(user, 'matricula', None)
+            if matricula:
+                self.fields['hospital'].queryset = Hospital.objects.filter(pk=matricula.hospital.pk)
+                self.fields['hospital'].initial = matricula.hospital
+                self.fields['setor'].queryset = Setor.objects.filter(pk=matricula.setor.pk) if matricula.setor else Setor.objects.none()
+                self.fields['setor'].initial = matricula.setor
+                self.fields['profissional'].queryset = Matricula.objects.filter(
+                    hospital=matricula.hospital,
+                    setor=matricula.setor,
+                    ativo=True,
+                )
+            else:
+                self.fields['profissional'].queryset = Matricula.objects.none()
+                self.fields['hospital'].queryset = Hospital.objects.none()
+                self.fields['setor'].queryset = Setor.objects.none()

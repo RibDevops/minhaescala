@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Confirmar Exclusão</h5>
+            </div>
+            <div class="card-body">
+                <p>Deseja excluir o TPD abaixo?</p>
+                <ul class="list-unstyled">
+                    <li><strong>Profissional:</strong> {{ tpd.profissional.nome_exibicao }}</li>
+                    <li><strong>Data:</strong> {{ tpd.data|date:"d/m/Y" }}</li>
+                    <li><strong>Horário:</strong> {{ tpd.hora_inicio|time:"H:i" }} – {{ tpd.hora_fim|time:"H:i" }}</li>
+                    <li><strong>Horas:</strong> {{ tpd.horas_trabalhadas|floatformat:1 }}h</li>
+                </ul>
+                <form method="post" class="d-flex gap-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger flex-grow-1">Confirmar Exclusão</button>
+                    <a href="{% url 'cal:listar_tpd' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

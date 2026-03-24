@@ -1,4 +1,3 @@
-<!-- novo_tpd.html -->
 {% extends 'base.html' %}
 
 {% block content %}
@@ -6,21 +5,35 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h4>📝 Registrar Novo TPD</h4>
+                <h4>Registrar Novo TPD</h4>
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
 
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
                     <div class="mb-3">
                         <label class="form-label">Profissional:</label>
                         {{ form.profissional }}
+                        {% if form.profissional.errors %}
+                        <div class="text-danger small">{{ form.profissional.errors }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Data:</label>
                             {{ form.data }}
+                            {% if form.data.errors %}
+                            <div class="text-danger small">{{ form.data.errors }}</div>
+                            {% endif %}
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Início:</label>
@@ -31,26 +44,29 @@
                             {{ form.hora_fim }}
                         </div>
                     </div>
+                    {% if form.hora_inicio.errors or form.hora_fim.errors %}
+                    <div class="text-danger small mb-2">{{ form.hora_inicio.errors }}{{ form.hora_fim.errors }}</div>
+                    {% endif %}
 
-                    <div class="mb-3">
-                        <label class="form-label">Motivo:</label>
-                        {{ form.motivo }}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Hospital:</label>
+                            {{ form.hospital }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Setor:</label>
+                            {{ form.setor }}
+                        </div>
                     </div>
 
                     <div class="alert alert-info">
-                        <h6>⚠️ Regras Legais:</h6>
-                        <ul class="mb-0">
-                            <li>Limite diário: 8 horas</li>
-                            <li>Limite mensal: 44 horas</li>
-                            <li>Intervalo mínimo: 11 horas entre jornadas</li>
-                            <li>Adicional TPD: 50% sobre hora normal</li>
-                            <li>Adicional noturno: 20% (22h às 6h)</li>
-                        </ul>
+                        <strong>Limite mensal:</strong> {{ limite_mensal }}h por profissional.
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">
-                        Salvar TPD
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">Salvar TPD</button>
+                        <a href="{% url 'cal:listar_tpd' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
                 </form>
             </div>
         </div>

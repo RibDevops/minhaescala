@@ -261,33 +261,67 @@ class MapeamentoTurno(models.Model):
 # =========================
 # MÓDULO TPD
 # =========================
+
+LIMITE_HORAS_MENSAIS_TPD = 44  # horas máximas de TPD por profissional por mês
+
 class TPD(models.Model):
     profissional = models.ForeignKey(Matricula, on_delete=models.CASCADE, related_name='tpds')
     data = models.DateField()
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
     horas_trabalhadas = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    horas_noturnas = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     valor_hora = models.DecimalField(max_digits=10, decimal_places=2, default=50.00)
     adicional_tpd = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    adicional_noturno = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    violacao_regra = models.BooleanField(default=False)
-    mensagem_erro = models.TextField(blank=True, null=True)
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
     setor = models.ForeignKey(Setor, on_delete=models.PROTECT)
+    criado_por = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name='tpds_criados',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ['-data']
+        verbose_name = 'TPD'
+        verbose_name_plural = 'TPDs'
 
     def __str__(self):
         return f"TPD {self.profissional} - {self.data}"
 
+    def horas_no_mes(self):
+        """Total de horas TPD do profissional no mesmo mês/ano, excluindo este registro."""
+        qs = TPD.objects.filter(
+            profissional=self.profissional,
+            data__year=self.data.year,
+            data__month=self.data.month,
+        )
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        from django.db.models import Sum
+        return qs.aggregate(total=Sum('horas_trabalhadas'))['total'] or 0
+
+    def clean(self):
+        if self.hora_fim <= self.hora_inicio:
+            raise ValidationError("O horário de fim deve ser posterior ao horário de início.")
+
+        if self.data:
+            dt_start = datetime.combine(self.data, self.hora_inicio)
+            dt_end = datetime.combine(self.data, self.hora_fim)
+            horas = (dt_end - dt_start).total_seconds() / 3600
+            total_mes = float(self.horas_no_mes()) + horas
+            if total_mes > LIMITE_HORAS_MENSAIS_TPD:
+                raise ValidationError(
+                    f"Limite mensal de {LIMITE_HORAS_MENSAIS_TPD}h excedido. "
+                    f"O profissional já tem {float(self.horas_no_mes()):.1f}h neste mês; "
+                    f"este TPD adicionaria mais {horas:.1f}h (total: {total_mes:.1f}h)."
+                )
+
     def save(self, *args, **kwargs):
-        from datetime import datetime, combine
         dt_start = datetime.combine(self.data, self.hora_inicio)
         dt_end = datetime.combine(self.data, self.hora_fim)
-        delta = dt_end - dt_start
-        self.horas_trabalhadas = delta.total_seconds() / 3600
+        self.horas_trabalhadas = (dt_end - dt_start).total_seconds() / 3600
         self.adicional_tpd = float(self.horas_trabalhadas) * float(self.valor_hora) * 0.5
+        self.full_clean()
         super().save(*args, **kwargs)
-
-class LegislacaoTPD(models.Model):
-    nome = models.CharField(max_length=100)
-    descricao = models.TextField()
