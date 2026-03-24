@@ -17,6 +17,7 @@
             <div class="offcanvas-body">
                 <div class="navbar-nav me-auto">
                     <a class="nav-link" href="{% url 'cal:home' %}"><i class="bi bi-house-door"></i> Home</a>
+                    {% if user.is_authenticated %}
                     <a class="nav-link" href="{% url 'cal:calendar' %}">Calendário</a>
                     <a class="nav-link" href="{% url 'cal:event_new' %}">Novo Plantão</a>
                     <a class="nav-link" href="{% url 'cal:dashboard' %}">Dashboard</a>
@@ -41,7 +42,6 @@
                             <li><a class="dropdown-item" href="{% url 'cal:relatorio' %}">Relatório Mensal</a></li>
                         </ul>
                     </div>
-                    
                     {% if user.is_staff %}
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -60,6 +60,7 @@
                             <li><a class="dropdown-item" href="/admin/">Painel Admin</a></li>
                         </ul>
                     </div>
+                    {% endif %}
                     {% endif %}
                 </div>
                 <div class="navbar-nav">
