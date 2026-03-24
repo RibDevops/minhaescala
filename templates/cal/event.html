@@ -140,11 +140,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    btnAdd.addEventListener('click', function() {
-        const clone = template.content.cloneNode(true);
-        container.appendChild(clone);
-        updateCounters();
-    });
+    if (btnAdd) {
+        btnAdd.addEventListener('click', function() {
+            const clone = template.content.cloneNode(true);
+            container.appendChild(clone);
+            updateCounters();
+        });
+    }
 
     container.addEventListener('click', function(e) {
         if (e.target.closest('.remove-card')) {
@@ -155,8 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-
-    updateCounters();
 
     // Validação de carga horária via AJAX
     function validarCarga(element) {
@@ -202,12 +202,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (btnAdd) {
-        btnAdd.addEventListener('click', function() {
-            const clone = template.content.cloneNode(true);
-            container.appendChild(clone);
-            updateCounters();
-        });
-    }
+    updateCounters();
+});
+</script>
 
 {% endblock %}
