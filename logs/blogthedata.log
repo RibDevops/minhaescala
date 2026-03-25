@@ -274,3 +274,4 @@ Traceback (most recent call last):
   File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/models/base.py", line 1710, in full_clean
     raise ValidationError(errors)
 django.core.exceptions.ValidationError: {'__all__': ['Excesso de carga semanal (39h)']}
+WARNING 2026-03-24 22:45:14,264 log log.py 253 log_response Not Found: /cal/login/
