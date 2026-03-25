@@ -182,31 +182,7 @@ class EventoEscala(models.Model):
         )
         return sum(e.tipo.horas for e in eventos)
 
-    def clean(self):
-        if self.tipo.tipo_base and self.tipo.tipo_base.contabiliza:
-            total = self.carga_ultimos_7_dias() + self.tipo.horas
-            if total > self.profissional.carga_horaria_semanal:
-                raise ValidationError(
-                    f"Excesso de carga semanal ({total}h)"
-                )
-
     def save(self, *args, forcar_carga=False, **kwargs):
-        # forcar_carga=True ignora a validação de carga semanal (confirmado pelo usuário)
-        if not forcar_carga:
-            self.full_clean()
-        else:
-            # Executa as demais validações do modelo, exceto a de carga semanal
-            from django.core.exceptions import ValidationError as VE
-            try:
-                self.full_clean(exclude=None)
-            except VE as e:
-                erros = e.message_dict if hasattr(e, 'message_dict') else {'__all__': e.messages}
-                erros_sem_carga = {
-                    campo: msgs for campo, msgs in erros.items()
-                    if not any('carga semanal' in str(m).lower() for m in msgs)
-                }
-                if erros_sem_carga:
-                    raise VE(erros_sem_carga)
         super().save(*args, **kwargs)
 
     def __str__(self):
