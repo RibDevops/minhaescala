@@ -70,6 +70,9 @@
                 </div>
                 {% endif %}
 
+                <!-- Campo hidden para forçar salvamento mesmo com excesso de carga -->
+                <input type="hidden" name="forcar_carga" id="forcarCarga" value="0">
+
                 <div class="mt-5 border-top pt-4">
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{% url 'cal:calendar' %}" class="btn btn-light px-4">Cancelar</a>
@@ -77,6 +80,35 @@
                     </div>
                 </div>
             </form>
+
+<!-- Modal de confirmação de excesso de carga -->
+<div class="modal fade" id="modalExcessoCarga" tabindex="-1" aria-labelledby="modalExcessoCargaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title fw-bold" id="modalExcessoCargaLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Excesso de Carga Horária
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-3">Os seguintes plantões ultrapassam o limite semanal do profissional:</p>
+                <ul id="listaExcessos" class="list-group list-group-flush mb-3"></ul>
+                <p class="text-muted small mb-0">
+                    A carga semanal é um valor de referência. Você pode prosseguir mesmo assim ou voltar e ajustar.
+                </p>
+            </div>
+            <div class="modal-footer border-0 gap-2">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-arrow-left me-1"></i>Voltar e ajustar
+                </button>
+                <button type="button" class="btn btn-warning px-4 fw-bold" id="btnConfirmarExcesso">
+                    <i class="bi bi-check-circle me-1"></i>Salvar mesmo assim
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -126,17 +158,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('plantaoCards');
     const btnAdd = document.getElementById('btnAddPlantao');
     const template = document.getElementById('plantaoTemplate');
+    const form = document.getElementById('bulkPlantaoForm');
+    const forcarCargaInput = document.getElementById('forcarCarga');
+    const modalEl = document.getElementById('modalExcessoCarga');
+    const modal = modalEl ? new bootstrap.Modal(modalEl) : null;
+    const listaExcessos = document.getElementById('listaExcessos');
+    const btnConfirmar = document.getElementById('btnConfirmarExcesso');
+
+    // Armazena resultados de validação por card: Map<cardElement, {excedeu, mensagem, total, limite}>
+    const resultadosCarga = new Map();
 
     function updateCounters() {
         const cards = container.querySelectorAll('.plantao-item');
         cards.forEach((card, index) => {
             card.querySelector('.fw-bold.text-muted.small').textContent = `Plantão #${index + 1}`;
             const removeBtn = card.querySelector('.remove-card');
-            if (cards.length > 1) {
-                removeBtn.classList.remove('d-none');
-            } else {
-                removeBtn.classList.add('d-none');
-            }
+            removeBtn.classList.toggle('d-none', cards.length <= 1);
         });
     }
 
@@ -152,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.closest('.remove-card')) {
             const item = e.target.closest('.plantao-item');
             if (container.querySelectorAll('.plantao-item').length > 1) {
+                resultadosCarga.delete(item);
                 item.remove();
                 updateCounters();
             }
@@ -167,12 +205,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const tipoInput = item.querySelector('.tipo-input');
         const avisoDiv = item.querySelector('.carga-aviso');
 
-        if (enfermeiroId && dataInput && dataInput.value && tipoInput && tipoInput.value) {
+        if (enfermeiroId && dataInput?.value && tipoInput?.value) {
             fetch(`/api/validar-carga/?enfermeiro=${enfermeiroId}&data=${dataInput.value}&tipo=${tipoInput.value}`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
+                    resultadosCarga.set(item, data);
                     if (data.excedeu) {
-                        avisoDiv.innerHTML = `<div class="alert alert-warning py-1 px-2 mb-0" style="font-size: 0.8rem;">
+                        avisoDiv.innerHTML = `<div class="alert alert-warning py-1 px-2 mb-0" style="font-size:0.8rem;">
                             <i class="bi bi-exclamation-triangle"></i> ${data.mensagem}
                         </div>`;
                         avisoDiv.style.display = 'block';
@@ -181,8 +220,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 })
                 .catch(err => console.error('Erro na validação:', err));
-        } else if (avisoDiv) {
-            avisoDiv.style.display = 'none';
+        } else {
+            resultadosCarga.delete(item);
+            if (avisoDiv) avisoDiv.style.display = 'none';
         }
     }
 
@@ -195,10 +235,55 @@ document.addEventListener('DOMContentLoaded', function() {
     const enfermeiroSelect = document.querySelector('select[name="enfermeiro"]');
     if (enfermeiroSelect) {
         enfermeiroSelect.addEventListener('change', function() {
+            resultadosCarga.clear();
             container.querySelectorAll('.plantao-item').forEach(item => {
                 const dataInput = item.querySelector('.data-input');
-                if (dataInput && dataInput.value) validarCarga(dataInput);
+                if (dataInput?.value) validarCarga(dataInput);
             });
+        });
+    }
+
+    // Interceptar submit: verificar se algum card tem excesso
+    if (form && modal) {
+        form.addEventListener('submit', function(e) {
+            // Se já foi confirmado pelo usuário, deixa passar
+            if (forcarCargaInput.value === '1') return;
+
+            const excessos = [];
+            container.querySelectorAll('.plantao-item').forEach((item, idx) => {
+                const resultado = resultadosCarga.get(item);
+                if (resultado?.excedeu) {
+                    const dataVal = item.querySelector('.data-input')?.value || '';
+                    excessos.push({ idx: idx + 1, data: dataVal, total: resultado.total, limite: resultado.limite });
+                }
+            });
+
+            if (excessos.length > 0) {
+                e.preventDefault();
+                // Preencher lista do modal
+                listaExcessos.innerHTML = excessos.map(ex =>
+                    `<li class="list-group-item px-0 py-2">
+                        <span class="fw-bold">Plantão #${ex.idx}</span>
+                        ${ex.data ? ` — ${ex.data}` : ''}
+                        <span class="badge bg-warning text-dark ms-2">${ex.total}h / limite ${ex.limite}h</span>
+                    </li>`
+                ).join('');
+                modal.show();
+            }
+        });
+
+        // Botão "Salvar mesmo assim" — seta flag e reenvia
+        btnConfirmar.addEventListener('click', function() {
+            forcarCargaInput.value = '1';
+            modal.hide();
+            form.submit();
+        });
+
+        // Ao fechar o modal sem confirmar, resetar o flag
+        modalEl.addEventListener('hidden.bs.modal', function() {
+            if (forcarCargaInput.value !== '1') {
+                forcarCargaInput.value = '0';
+            }
         });
     }
 

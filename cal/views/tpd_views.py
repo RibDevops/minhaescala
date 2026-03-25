@@ -8,38 +8,27 @@ from datetime import datetime
 
 from ..models import TPD, Matricula, LIMITE_HORAS_MENSAIS_TPD
 from ..forms import TPDForm
-
-
-def _get_perfil(user):
-    return getattr(user, 'cal_perfil', None)
-
-
-def _matricula_do_usuario(user):
-    return getattr(user, 'matricula', None)
+from ..permissions import get_perfil, get_matricula, is_admin, is_escalante, is_escalante_ou_admin, exige_escalante_ou_admin
 
 
 def _tpd_queryset_para_usuario(user):
     """
     ADMIN/is_staff → todos os TPDs.
-    ESCALANTE      → TPDs do seu hospital + setor.
-    ENFERMEIRO     → TPDs do próprio profissional.
+    ESCALANTE      → TPDs do seu hospital + setor (transparência para gestão).
+    ENFERMEIRO     → TPDs de todo o seu setor (transparência para o time).
     """
-    perfil = _get_perfil(user)
-    if user.is_staff or (perfil and perfil.tipo == 'ADMIN'):
+    if is_admin(user):
         return TPD.objects.all()
 
-    matricula = _matricula_do_usuario(user)
+    matricula = get_matricula(user)
     if not matricula:
         return TPD.objects.none()
 
-    if perfil and perfil.tipo == 'ESCALANTE':
-        return TPD.objects.filter(
-            hospital=matricula.hospital,
-            setor=matricula.setor,
-        )
-
-    # ENFERMEIRO — só os seus
-    return TPD.objects.filter(profissional=matricula)
+    # Tanto ESCALANTE quanto ENFERMEIRO veem todos os TPDs do setor
+    return TPD.objects.filter(
+        hospital=matricula.hospital,
+        setor=matricula.setor,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -71,11 +60,10 @@ def listar_tpd(request):
         (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro'),
     ]
 
-    perfil = _get_perfil(request.user)
-    matricula = _matricula_do_usuario(request.user)
-    if request.user.is_staff or (perfil and perfil.tipo == 'ADMIN'):
+    matricula = get_matricula(request.user)
+    if is_admin(request.user):
         profissionais = Matricula.objects.filter(ativo=True)
-    elif perfil and perfil.tipo == 'ESCALANTE' and matricula:
+    elif is_escalante(request.user) and matricula:
         profissionais = Matricula.objects.filter(
             hospital=matricula.hospital,
             setor=matricula.setor,
@@ -92,7 +80,7 @@ def listar_tpd(request):
         'prof_filtro': int(profissional_filtro) if profissional_filtro else '',
         'meses': meses,
         'profissionais': profissionais,
-        'pode_criar': request.user.is_staff or (perfil and perfil.tipo in ('ADMIN', 'ESCALANTE')),
+        'pode_criar': is_escalante_ou_admin(request.user),
     }
     return render(request, 'tpd/listar_tpd.html', context)
 
@@ -103,9 +91,7 @@ def listar_tpd(request):
 
 @login_required
 def novo_tpd(request):
-    perfil = _get_perfil(request.user)
-    if not (request.user.is_staff or (perfil and perfil.tipo in ('ADMIN', 'ESCALANTE'))):
-        raise PermissionDenied
+    exige_escalante_ou_admin(request.user)
 
     if request.method == 'POST':
         form = TPDForm(request.POST, user=request.user)
@@ -137,12 +123,11 @@ def novo_tpd(request):
 @login_required
 def excluir_tpd(request, pk):
     tpd = get_object_or_404(TPD, pk=pk)
-    perfil = _get_perfil(request.user)
 
-    if not request.user.is_staff and not (perfil and perfil.tipo == 'ADMIN'):
-        matricula = _matricula_do_usuario(request.user)
+    if not is_admin(request.user):
+        matricula = get_matricula(request.user)
         if not (
-            perfil and perfil.tipo == 'ESCALANTE'
+            is_escalante(request.user)
             and matricula
             and tpd.hospital == matricula.hospital
             and tpd.setor == matricula.setor
@@ -199,11 +184,10 @@ def relatorio_mensal(request):
         (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro'),
     ]
 
-    perfil = _get_perfil(request.user)
-    matricula = _matricula_do_usuario(request.user)
-    if request.user.is_staff or (perfil and perfil.tipo == 'ADMIN'):
+    matricula = get_matricula(request.user)
+    if is_admin(request.user):
         profissionais = Matricula.objects.filter(ativo=True)
-    elif perfil and perfil.tipo == 'ESCALANTE' and matricula:
+    elif is_escalante(request.user) and matricula:
         profissionais = Matricula.objects.filter(
             hospital=matricula.hospital,
             setor=matricula.setor,

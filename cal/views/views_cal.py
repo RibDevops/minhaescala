@@ -4,12 +4,24 @@ from django.views.generic import TemplateView, CreateView, UpdateView, DeleteVie
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.db.models import Q
 from ..models import EventoEscala, Matricula, TipoEvento
 from core.models import Hospital, Setor
 from ..forms import PlantaoForm
 from ..utils import Calendar
+from ..permissions import (
+    get_perfil, get_matricula,
+    is_admin, is_escalante, is_enfermeiro, is_escalante_ou_admin,
+)
+
+
+def is_enfermeiro_criador(evento):
+    """True se o evento foi criado por um usuário com papel ENFERMEIRO."""
+    perfil = get_perfil(evento.criado_por) if evento.criado_por else None
+    return perfil is not None and perfil.tipo == 'ENFERMEIRO'
 
 from django.template.defaulttags import register
 
@@ -105,20 +117,21 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
         datas = request.POST.getlist('data[]')
         tipos = request.POST.getlist('tipo_plantao[]')
         obs = request.POST.getlist('observacoes[]')
+        forcar_carga = request.POST.get('forcar_carga') == '1'
 
         if not enfermeiro_id or not datas:
             messages.error(request, 'Dados inválidos')
             return redirect('cal:event_new')
 
         enfermeiro = get_object_or_404(Matricula, pk=enfermeiro_id)
-        
+
         user = request.user
         perfil = getattr(user, 'cal_perfil', None)
         if not user.is_staff:
             if not hasattr(user, 'matricula') or not user.matricula:
                 messages.error(request, 'Seu usuário não possui uma matrícula vinculada.')
                 return redirect('cal:event_new')
-                
+
             if perfil.tipo == 'ENFERMEIRO' and enfermeiro.user != user:
                 messages.error(request, 'Você só pode registrar plantões para si mesmo.')
                 return redirect('cal:event_new')
@@ -127,19 +140,21 @@ class PlantaoCreateView(LoginRequiredMixin, TemplateView):
                 return redirect('cal:event_new')
 
         for i in range(len(datas)):
-            if not datas[i] or not tipos[i]: continue
+            if not datas[i] or not tipos[i]:
+                continue
             data_dt = datetime.strptime(datas[i], '%Y-%m-%d').date()
             tipo = get_object_or_404(TipoEvento, pk=tipos[i])
-            EventoEscala.objects.create(
+            evento = EventoEscala(
                 profissional=enfermeiro,
                 tipo=tipo,
                 data=data_dt,
                 setor=enfermeiro.setor,
                 hospital=enfermeiro.hospital,
                 observacao=obs[i] if i < len(obs) else '',
-                criado_por=request.user
+                criado_por=request.user,
             )
-            
+            evento.save(forcar_carga=forcar_carga)
+
         messages.success(request, f'Plantões registrados para {enfermeiro.nome_exibicao}')
         return redirect('cal:calendar')
 
@@ -148,7 +163,21 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
     form_class = PlantaoForm
     template_name = 'cal/event.html'
     success_url = reverse_lazy('cal:calendar')
-    
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        if is_admin(user):
+            return obj
+        matricula = get_matricula(user)
+        if is_escalante(user) and matricula:
+            if obj.hospital == matricula.hospital and obj.setor == matricula.setor and not is_enfermeiro_criador(obj):
+                return obj
+        if is_enfermeiro(user):
+            if obj.criado_por == user and obj.profissional == matricula:
+                return obj
+        raise PermissionDenied
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
@@ -182,6 +211,7 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
         datas = request.POST.getlist('data[]')
         tipos = request.POST.getlist('tipo_plantao[]')
         obs = request.POST.getlist('observacoes[]')
+        forcar_carga = request.POST.get('forcar_carga') == '1'
 
         if not enfermeiro_id or not datas:
             messages.error(request, 'Dados inválidos')
@@ -190,16 +220,15 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
         enfermeiro = get_object_or_404(Matricula, pk=enfermeiro_id)
         data_dt = datetime.strptime(datas[0], '%Y-%m-%d').date()
         tipo = get_object_or_404(TipoEvento, pk=tipos[0])
-        
-        # Atualiza o objeto existente
+
         self.object.profissional = enfermeiro
         self.object.data = data_dt
         self.object.tipo = tipo
         self.object.observacao = obs[0] if obs else ''
         self.object.hospital = enfermeiro.hospital
         self.object.setor = enfermeiro.setor
-        self.object.save()
-            
+        self.object.save(forcar_carga=forcar_carga)
+
         messages.success(request, f'Plantão de {enfermeiro.nome_exibicao} atualizado com sucesso.')
         return redirect(self.success_url)
 
@@ -207,36 +236,85 @@ class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
     model = EventoEscala
     success_url = reverse_lazy('cal:calendar')
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        if is_admin(user):
+            return obj
+        matricula = get_matricula(user)
+        if is_escalante(user) and matricula:
+            # Escalante só deleta plantões oficiais do seu setor
+            if obj.hospital == matricula.hospital and obj.setor == matricula.setor and not is_enfermeiro_criador(obj):
+                return obj
+        if is_enfermeiro(user):
+            # Enfermeiro só deleta os seus próprios registros privados
+            if obj.criado_por == user and obj.profissional == matricula:
+                return obj
+        raise PermissionDenied
+
 class MeusPlantoesListView(LoginRequiredMixin, ListView):
     model = EventoEscala
     template_name = 'cal/lista_eventos.html'
     context_object_name = 'eventos'
-    
+
     def get_queryset(self):
         user = self.request.user
-        perfil = getattr(user, 'cal_perfil', None)
-        
-        if user.is_superuser or user.is_staff:
-            return EventoEscala.objects.all().order_by('data')
-        
-        if perfil and perfil.tipo == 'ESCALANTE' and hasattr(user, 'matricula'):
-            return EventoEscala.objects.filter(
-                hospital=user.matricula.hospital,
-                setor=user.matricula.setor
-            ).order_by('data')
-            
-        if perfil and perfil.tipo == 'ENFERMEIRO' and hasattr(user, 'matricula'):
-            return EventoEscala.objects.filter(profissional=user.matricula).order_by('data')
-            
-        return EventoEscala.objects.filter(criado_por=user).order_by('data')
+        matricula = get_matricula(user)
 
+        if is_admin(user):
+            return EventoEscala.objects.all().order_by('data')
+
+        if not matricula:
+            return EventoEscala.objects.none()
+
+        if is_escalante(user):
+            # Escalante vê todos os plantões oficiais do seu setor,
+            # excluindo registros privados criados por enfermeiros.
+            return EventoEscala.objects.filter(
+                hospital=matricula.hospital,
+                setor=matricula.setor,
+            ).exclude(
+                criado_por__cal_perfil__tipo='ENFERMEIRO'
+            ).order_by('data')
+
+        if is_enfermeiro(user):
+            # Enfermeiro vê:
+            # 1. Todos os plantões oficiais do seu setor (criados por escalante/admin)
+            # 2. Seus próprios registros privados
+            oficiais = Q(
+                hospital=matricula.hospital,
+                setor=matricula.setor,
+            ) & ~Q(criado_por__cal_perfil__tipo='ENFERMEIRO')
+            privados = Q(criado_por=user, profissional=matricula)
+            return EventoEscala.objects.filter(
+                oficiais | privados
+            ).order_by('data')
+
+        return EventoEscala.objects.none()
+
+@login_required
 def excluir_evento(request, event_id):
-    p = get_object_or_404(EventoEscala, pk=event_id)
-    p.delete()
+    evento = get_object_or_404(EventoEscala, pk=event_id)
+    user = request.user
+    matricula = get_matricula(user)
+
+    if is_admin(user):
+        pass  # acesso total
+    elif is_escalante(user) and matricula:
+        if not (evento.hospital == matricula.hospital and evento.setor == matricula.setor and not is_enfermeiro_criador(evento)):
+            raise PermissionDenied
+    elif is_enfermeiro(user):
+        if not (evento.criado_por == user and evento.profissional == matricula):
+            raise PermissionDenied
+    else:
+        raise PermissionDenied
+
+    evento.delete()
     return redirect('cal:listar_eventos')
 
 from django.http import JsonResponse
 
+@login_required
 def validar_carga_horaria(request):
     enfermeiro_id = request.GET.get('enfermeiro')
     data_str = request.GET.get('data')

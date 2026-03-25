@@ -2,46 +2,67 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.core.paginator import Paginator
 from django.db.models import Q
 from ..models import Matricula, PerfilUsuario, Hospital
 from ..forms import MatriculaSimplificadaForm
+from ..permissions import get_matricula, is_admin, is_escalante, exige_escalante_ou_admin
+
+
+def _matriculas_visiveis(user):
+    """
+    Retorna o queryset de matrículas que o usuário pode ver/gerenciar.
+    Admin → todas. Escalante → só do seu setor. Outros → nenhuma.
+    """
+    if is_admin(user):
+        return Matricula.objects.all().select_related('user', 'perfil', 'hospital', 'setor')
+    if is_escalante(user):
+        matricula = get_matricula(user)
+        if matricula:
+            return Matricula.objects.filter(
+                hospital=matricula.hospital,
+                setor=matricula.setor,
+            ).select_related('user', 'perfil', 'hospital', 'setor')
+    return Matricula.objects.none()
+
 
 @login_required
 def matricula_list(request):
-    matriculas = Matricula.objects.all().select_related('user', 'perfil', 'hospital', 'setor').order_by('nome_exibicao')
-    
-    # Filtros
+    exige_escalante_ou_admin(request.user)
+
+    matriculas = _matriculas_visiveis(request.user).order_by('nome_exibicao')
+
     search = request.GET.get('search')
     hospital_id = request.GET.get('hospital')
-    
+
     if search:
         matriculas = matriculas.filter(
             Q(matricula__icontains=search) |
             Q(nome_exibicao__icontains=search) |
             Q(nome_completo__icontains=search)
         )
-    
-    if hospital_id:
+
+    if hospital_id and is_admin(request.user):
         matriculas = matriculas.filter(hospital_id=hospital_id)
-    
-    hospitais = Hospital.objects.all()
-    
+
+    hospitais = Hospital.objects.all() if is_admin(request.user) else Hospital.objects.none()
+
     paginator = Paginator(matriculas, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     return render(request, 'cal/matricula/list.html', {
         'page_obj': page_obj,
         'hospitais': hospitais,
         'search': search or '',
         'selected_hospital': hospital_id,
-        'total_count': matriculas.count()
+        'total_count': matriculas.count(),
     })
 
 @login_required
 def matricula_create(request):
+    exige_escalante_ou_admin(request.user)
     if request.method == 'POST':
         form = MatriculaSimplificadaForm(request.POST)
         if form.is_valid():
@@ -81,7 +102,13 @@ def matricula_create(request):
 
 @login_required
 def matricula_update(request, pk):
+    exige_escalante_ou_admin(request.user)
     matricula = get_object_or_404(Matricula, pk=pk)
+    # Escalante só pode editar matrículas do seu setor
+    if is_escalante(request.user):
+        user_matricula = get_matricula(request.user)
+        if not user_matricula or matricula.hospital != user_matricula.hospital or matricula.setor != user_matricula.setor:
+            raise PermissionDenied
     if request.method == 'POST':
         form = MatriculaSimplificadaForm(request.POST, instance=matricula)
         # Ajustes para edição
@@ -123,7 +150,12 @@ def matricula_update(request, pk):
 
 @login_required
 def matricula_toggle_status(request, pk):
+    exige_escalante_ou_admin(request.user)
     matricula = get_object_or_404(Matricula, pk=pk)
+    if is_escalante(request.user):
+        user_matricula = get_matricula(request.user)
+        if not user_matricula or matricula.hospital != user_matricula.hospital or matricula.setor != user_matricula.setor:
+            raise PermissionDenied
     if request.method == 'POST':
         matricula.ativo = not matricula.ativo
         matricula.save()
@@ -133,11 +165,19 @@ def matricula_toggle_status(request, pk):
 
 @login_required
 def matricula_detail(request, pk):
+    exige_escalante_ou_admin(request.user)
     matricula = get_object_or_404(Matricula, pk=pk)
+    if is_escalante(request.user):
+        user_matricula = get_matricula(request.user)
+        if not user_matricula or matricula.hospital != user_matricula.hospital or matricula.setor != user_matricula.setor:
+            raise PermissionDenied
     return render(request, 'cal/matricula/detail.html', {'matricula': matricula})
 
 @login_required
 def matricula_delete(request, pk):
+    # Somente admin pode deletar matrículas — operação destrutiva demais para escalante
+    if not is_admin(request.user):
+        raise PermissionDenied
     matricula = get_object_or_404(Matricula, pk=pk)
     if request.method == 'POST':
         user = matricula.user

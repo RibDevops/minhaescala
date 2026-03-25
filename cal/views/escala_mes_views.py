@@ -12,9 +12,10 @@ from datetime import datetime, date, timedelta
 from calendar import monthrange, day_name, month_name
 import calendar
 from ..models import (
-    Matricula, EventoEscala, EscalaMensal, DiaEscala, 
+    Matricula, EventoEscala, EscalaMensal, DiaEscala,
     ControleSemanal, TipoEvento, Hospital, Setor, PerfilUsuario
 )
+from ..permissions import get_matricula, is_admin, is_escalante, exige_escalante_ou_admin
 from django.http import HttpResponse, JsonResponse
 import io
 import json
@@ -37,25 +38,28 @@ def escala_mes_view(request, mes=None, ano=None):
     user = request.user
     
     # Lógica de filtragem de profissionais
-    if user.is_superuser or user.is_staff:
+    matricula_usuario = get_matricula(user)
+    if is_admin(user):
         profissionais = Matricula.objects.filter(ativo=True)
         hospitais = Hospital.objects.all()
         setores = Setor.objects.all()
+    elif matricula_usuario:
+        profissionais = Matricula.objects.filter(
+            hospital=matricula_usuario.hospital,
+            setor=matricula_usuario.setor,
+            ativo=True
+        )
+        hospitais = Hospital.objects.filter(id=matricula_usuario.hospital.id)
+        setores = Setor.objects.filter(id=matricula_usuario.setor.id)
+        if not hospital_id:
+            hospital_id = matricula_usuario.hospital.id
+        if not setor_id:
+            setor_id = matricula_usuario.setor.id
     else:
-        if hasattr(user, 'matricula'):
-            profissionais = Matricula.objects.filter(
-                hospital=user.matricula.hospital,
-                setor=user.matricula.setor,
-                ativo=True
-            )
-            hospitais = Hospital.objects.filter(id=user.matricula.hospital.id)
-            setores = Setor.objects.filter(id=user.matricula.setor.id)
-            if not hospital_id: hospital_id = user.matricula.hospital.id
-            if not setor_id: setor_id = user.matricula.setor.id
-        else:
-            profissionais = Matricula.objects.filter(ativo=True)
-            hospitais = Hospital.objects.all()
-            setores = Setor.objects.all()
+        # Usuário sem matrícula vinculada não tem acesso à escala
+        profissionais = Matricula.objects.none()
+        hospitais = Hospital.objects.none()
+        setores = Setor.objects.none()
 
     if hospital_id: profissionais = profissionais.filter(hospital_id=hospital_id)
     if setor_id: profissionais = profissionais.filter(setor_id=setor_id)
@@ -137,12 +141,23 @@ def escala_mes_view(request, mes=None, ano=None):
 @login_required
 def toggle_dia_escala(request, profissional_id, dia, mes, ano):
     """
-    API para salvar plantão vindo da escala mensal
+    API para salvar plantão vindo da escala mensal.
+    Somente escalante (do mesmo setor) ou admin pode alterar.
     """
+    if not is_admin(request.user) and not is_escalante(request.user):
+        return JsonResponse({'success': False, 'error': 'Sem permissão'}, status=403)
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             profissional = get_object_or_404(Matricula, id=profissional_id)
+
+            # Escalante só pode alterar profissionais do seu setor
+            if is_escalante(request.user):
+                matricula_usuario = get_matricula(request.user)
+                if not matricula_usuario or profissional.hospital != matricula_usuario.hospital or profissional.setor != matricula_usuario.setor:
+                    return JsonResponse({'success': False, 'error': 'Sem permissão para este setor'}, status=403)
+
             data_plantao = date(int(ano), int(mes), int(dia))
             
             # Remove eventos existentes no dia para este profissional
