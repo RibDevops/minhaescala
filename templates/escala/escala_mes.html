@@ -44,6 +44,8 @@
                             <th colspan="{{ datas_cabecalho|length }}">DIAS DO MÊS</th>
                             <th colspan="{{ num_semanas|length }}">CH SEMANAL</th>
                             <th rowspan="2" class="align-middle">Total</th>
+                            <th rowspan="2" class="align-middle" style="min-width:80px;" title="Saldo de horas da semana atual (dom–sáb)">Esta semana</th>
+                            <th rowspan="2" class="align-middle" style="min-width:80px;" title="Carga ajustada para a próxima semana">Próx. semana</th>
                         </tr>
                         <tr class="table-light">
                             {% for data in datas_cabecalho %}
@@ -95,6 +97,30 @@
 
                             <td class="text-center align-middle fw-bold {% if dados.total_mes > 160 %}text-danger{% else %}text-success{% endif %}">
                                 {{ dados.total_mes|floatformat:0 }}h
+                            </td>
+
+                            {# Saldo desta semana #}
+                            <td class="text-center align-middle">
+                                {% if dados.saldo.semana_no_mes %}
+                                    {% if dados.saldo.saldo > 0 %}
+                                        <span class="badge bg-success">+{{ dados.saldo.saldo }}h</span>
+                                    {% elif dados.saldo.saldo < 0 %}
+                                        <span class="badge bg-danger">{{ dados.saldo.saldo }}h</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">0h</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                            {# Carga da próxima semana #}
+                            <td class="text-center align-middle text-muted fw-semibold">
+                                {% if dados.saldo.semana_no_mes %}
+                                    {{ dados.saldo.carga_proxima }}h
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endwith %}

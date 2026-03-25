@@ -16,6 +16,7 @@ from ..models import (
     ControleSemanal, TipoEvento, Hospital, Setor, PerfilUsuario
 )
 from ..permissions import get_matricula, is_admin, is_escalante, exige_escalante_ou_admin
+from ..utils_saldo import saldo_info
 from django.http import HttpResponse, JsonResponse
 import io
 import json
@@ -122,6 +123,7 @@ def escala_mes_view(request, mes=None, ano=None):
             'dias': dias_dict,
             'semanas_totais': semanas_totais,
             'total_mes': sum(d['horas'] for d in dias_dict.values()),
+            'saldo': saldo_info(profissional, mes, ano),
         })
 
     meses_pt = {1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'}
