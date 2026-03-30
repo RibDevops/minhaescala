@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Plantão{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-trash"></i> Confirmar Exclusão</h5>
+                </div>
+                <div class="card-body">
+                    <p>Tem certeza que deseja excluir o plantão abaixo?</p>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item"><strong>Profissional:</strong> {{ object.profissional.nome_completo }}</li>
+                        <li class="list-group-item"><strong>Data:</strong> {{ object.data|date:"d/m/Y" }}</li>
+                        <li class="list-group-item"><strong>Tipo:</strong> {{ object.tipo.nome|default:"—" }} ({{ object.tipo.codigo|default:"—" }})</li>
+                        <li class="list-group-item"><strong>Setor:</strong> {{ object.setor.nome|default:"—" }}</li>
+                    </ul>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

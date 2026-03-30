@@ -234,6 +234,7 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
 
 class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
     model = EventoEscala
+    template_name = 'cal/plantao_confirm_delete.html'
     success_url = reverse_lazy('cal:calendar')
 
     def get_object(self, queryset=None):

@@ -9,3 +9,4 @@ ERROR 2026-02-02 15:17:25,505 Thread-6 (process_request_thread) 140288831809216 
 ERROR 2026-02-02 15:46:27,252 Thread-2 (process_request_thread) 140104785983168 log log.py 249 django.server log_message 1662 "POST /plantao/novo/ HTTP/1.1" 500 189656
 ERROR 2026-02-02 16:06:13,173 Thread-1 (process_request_thread) 134246160135744 basehttp basehttp.py 213 django.server log_message 1879479 "POST /plantao/novo/ HTTP/1.1" 500 108201
 ERROR 2026-02-02 16:52:15,803 Thread-1 (process_request_thread) 139927954126528 log log.py 249 django.server log_message 4053 "POST /plantao/novo/ HTTP/1.1" 500 190053
+ERROR 2026-03-30 08:21:53,254 Thread-1 (process_request_thread) 139745954887360 log log.py 249 django.server log_message 1998 "GET /plantao/37/excluir/ HTTP/1.1" 500 170389
