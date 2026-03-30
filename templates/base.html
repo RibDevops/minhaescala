@@ -4,14 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
+
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <link href="{% static 'css/simple-sidebar.css' %}" rel="stylesheet">
     <link href="{% static 'css/fontawesome.min.css' %}" rel="stylesheet">
-    <link rel="shortcut icon" href="{% static 'img/meuplantao.png' %}" type="image/png">
     <link rel="stylesheet" type="text/css" href="{% static 'css/calendar.css' %}">
+    <link rel="shortcut icon" href="{% static 'img/meuplantao.png' %}" type="image/png">
 
     <!-- PWA Setup -->
     <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
@@ -19,18 +18,185 @@
     <link rel="apple-touch-icon" href="{% static 'img/meuplantao.png' %}">
 
     <title>{% block title %}{% endblock %} | Minha Escala</title>
+
+    <style>
+        /* ── Sidebar ─────────────────────────────── */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 240px;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: #1a1d21;
+            z-index: 1040;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #2e3338;
+            transition: right 0.28s ease;
+        }
+
+        /* Desktop: sidebar sempre visível, conteúdo com margem direita */
+        @media (min-width: 768px) {
+            body { margin-right: 240px; }
+            #topbar { display: none !important; }
+            #sidebar-backdrop { display: none !important; }
+        }
+
+        /* Mobile: sidebar escondida, topbar visível */
+        @media (max-width: 767.98px) {
+            #sidebar {
+                right: -260px;
+                width: 260px;
+                z-index: 1055;
+            }
+            #sidebar.sidebar-open { right: 0; }
+            body { padding-top: 54px; }
+        }
+
+        /* ── Topbar (mobile only) ─────────────────── */
+        #topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 54px;
+            background-color: #1a1d21;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            z-index: 1040;
+            border-bottom: 1px solid #2e3338;
+        }
+
+        /* ── Backdrop mobile ─────────────────────── */
+        #sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1050;
+        }
+        #sidebar-backdrop.show { display: block; }
+
+        /* ── Sidebar interna ─────────────────────── */
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.1rem 0.75rem;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid #2e3338;
+        }
+        .sidebar-brand:hover { color: #90b4f8; }
+
+        .sidebar-section {
+            padding: 0.35rem 0;
+            border-bottom: 1px solid #2e3338;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.45rem 1.1rem;
+            color: #ced4da;
+            text-decoration: none;
+            font-size: 0.875rem;
+            border-radius: 0;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: #2c3036;
+            color: #fff;
+        }
+        .sidebar-link i { font-size: 0.95rem; min-width: 16px; }
+
+        .sidebar-group-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            width: 100%;
+            padding: 0.45rem 1.1rem;
+            background: none;
+            border: none;
+            color: #adb5bd;
+            font-size: 0.875rem;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .sidebar-group-btn:hover { background: #2c3036; color: #fff; }
+        .sidebar-group-btn .chevron {
+            margin-left: auto;
+            transition: transform 0.2s;
+            font-size: 0.75rem;
+        }
+        .sidebar-group-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+        .sidebar-sub {
+            background: #161820;
+        }
+        .sidebar-sub .sidebar-link {
+            padding-left: 2.4rem;
+            font-size: 0.835rem;
+            color: #adb5bd;
+        }
+        .sidebar-sub .sidebar-link:hover { color: #fff; background: #2c3036; }
+        .sidebar-sub hr { border-color: #2e3338; margin: 0.2rem 1rem; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid #2e3338;
+            padding: 0.5rem 0;
+        }
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1.1rem;
+            color: #ced4da;
+            font-size: 0.875rem;
+        }
+
+        /* ── Content ─────────────────────────────── */
+        .page-content {
+            min-height: 100vh;
+            padding: 1.5rem 1.25rem 4rem;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar -->
+
+    <!-- Topbar mobile -->
+    <div id="topbar">
+        <a href="{% url 'cal:home' %}" style="color:#fff;text-decoration:none;font-weight:600;font-size:1rem;">
+            <i class="bi bi-calendar3"></i> Minha Escala
+        </a>
+        <button id="sidebarToggle" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+
+    <!-- Backdrop mobile -->
+    <div id="sidebar-backdrop"></div>
+
+    <!-- Sidebar -->
     {% include 'navbar.html' %}
 
     <!-- Conteúdo Principal -->
-    <main class="container mt-4 mb-5">
+    <main class="page-content">
         {% if messages %}
-        <div class="alert-messages">
+        <div class="mb-3">
             {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}" role="alert">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             {% endfor %}
         </div>
@@ -39,18 +205,35 @@
         {% block content %}{% endblock %}
     </main>
 
-    
-
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register("{% static 'pwa/service-worker.js' %}")
-                    .then(reg => console.log('SW Registered'))
+                    .then(() => console.log('SW Registered'))
                     .catch(err => console.log('SW Error', err));
             });
         }
+
+        // Sidebar mobile toggle
+        const sidebar    = document.getElementById('sidebar');
+        const backdrop   = document.getElementById('sidebar-backdrop');
+        const toggleBtn  = document.getElementById('sidebarToggle');
+
+        function openSidebar() {
+            sidebar.classList.add('sidebar-open');
+            backdrop.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('sidebar-open');
+            backdrop.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
+        if (backdrop)  backdrop.addEventListener('click', closeSidebar);
     </script>
     {% block scripts %}{% endblock %}
 </body>

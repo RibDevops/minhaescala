@@ -1,99 +1,146 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <div class="container-fluid">
-        <!-- Logo/Brand -->
-        <a class="navbar-brand" href="{% url 'cal:home' %}"><i class="bi bi-calendar3"></i> Minha Escala</a>
-        
-        <!-- Botão Toggler para Offcanvas -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
-            <span class="navbar-toggler-icon"></span>
+<aside id="sidebar">
+
+    <!-- Brand -->
+    <a href="{% url 'cal:home' %}" class="sidebar-brand">
+        <i class="bi bi-calendar3"></i> Minha Escala
+    </a>
+
+    {% if user.is_authenticated %}
+
+    <!-- Links principais -->
+    <div class="sidebar-section">
+        <a href="{% url 'cal:home' %}" class="sidebar-link">
+            <i class="bi bi-house-door"></i> Home
+        </a>
+        <a href="{% url 'cal:calendar' %}" class="sidebar-link">
+            <i class="bi bi-calendar-week"></i> Calendário
+        </a>
+        <a href="{% url 'cal:event_new' %}" class="sidebar-link">
+            <i class="bi bi-plus-circle"></i> Novo Plantão
+        </a>
+        <a href="{% url 'cal:dashboard' %}" class="sidebar-link">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </div>
+
+    <!-- Escalas -->
+    <div class="sidebar-section">
+        <button class="sidebar-group-btn" type="button"
+                data-bs-toggle="collapse" data-bs-target="#menuEscalas"
+                aria-expanded="false">
+            <i class="bi bi-table"></i> Escalas
+            <i class="bi bi-chevron-down chevron"></i>
         </button>
-        
-        <!-- Offcanvas Menu -->
-        <div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="offcanvasNavbar">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title">Menu</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-                <div class="navbar-nav me-auto">
-                    <a class="nav-link" href="{% url 'cal:home' %}"><i class="bi bi-house-door"></i> Home</a>
-                    {% if user.is_authenticated %}
-                    <a class="nav-link" href="{% url 'cal:calendar' %}"><i class="bi bi-calendar-week"></i> Calendário</a>
-                    <a class="nav-link" href="{% url 'cal:event_new' %}"><i class="bi bi-plus-circle"></i> Novo Plantão</a>
-                    <a class="nav-link" href="{% url 'cal:dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="escalaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-table"></i> Escalas
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="escalaDropdown">
-                            <li><a class="dropdown-item" href="{% url 'cal:escala_mensal' %}"><i class="bi bi-calendar-month"></i> Escala Mensal</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:plantoes_por_profissional' %}"><i class="bi bi-person-lines-fill"></i> Plantões por Profissional</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:lista_escalas' %}"><i class="bi bi-list-ul"></i> Listar Escalas</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:importar_escala' %}"><i class="bi bi-upload"></i> Importar Escala</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:dashboard_escala' %}"><i class="bi bi-bar-chart-line"></i> Dashboard de Escalas</a></li>
-                        </ul>
-                    </div>
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="tpdDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-clock-history"></i> TPD
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="tpdDropdown">
-                            <li><a class="dropdown-item" href="{% url 'cal:listar_tpd' %}"><i class="bi bi-list-check"></i> Listar TPDs</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:novo_tpd' %}"><i class="bi bi-plus-square"></i> Novo TPD</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:relatorio' %}"><i class="bi bi-file-earmark-bar-graph"></i> Relatório Mensal</a></li>
-                        </ul>
-                    </div>
-                    {% if user.is_staff %}
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-gear"></i> Gerenciamento
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="{% url 'cal:hospital_list' %}"><i class="bi bi-hospital"></i> Hospitais</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:setor_list' %}"><i class="bi bi-diagram-3"></i> Setores</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:especialidade_list' %}"><i class="bi bi-award"></i> Especialidades</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:matricula_list' %}"><i class="bi bi-person-badge"></i> Matrículas</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:tipo_list' %}"><i class="bi bi-tags"></i> Tipos (Geral)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:tipoevento_list' %}"><i class="bi bi-calendar-event"></i> Tipos de Evento</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:listar_eventos' %}"><i class="bi bi-card-list"></i> Lista de Plantões</a></li>
-                            <li><a class="dropdown-item" href="/admin/"><i class="bi bi-shield-lock"></i> Painel Admin</a></li>
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endif %}
-                </div>
-                <div class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle"></i> {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'cal:perfil' %}"><i class="bi bi-person-gear"></i> Meu Perfil</a></li>
-                                {% if user.is_staff %}
-                                    <li><a class="dropdown-item" href="{% url 'cal:listar_usuarios' %}"><i class="bi bi-people"></i> Gerenciar Usuários</a></li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form id="logout-form" action="{% url 'cal:logout' %}" method="post" style="display: none;">
-                                        {% csrf_token %}
-                                    </form>
-                                    <a class="dropdown-item" href="#" onclick="document.getElementById('logout-form').submit(); return false;">
-                                        <i class="bi bi-box-arrow-right"></i> Sair
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    {% else %}
-                        <a class="nav-link" href="{% url 'cal:login' %}">
-                            <i class="bi bi-box-arrow-in-right"></i> Login
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
+        <div class="collapse sidebar-sub" id="menuEscalas">
+            <a href="{% url 'cal:escala_mensal' %}" class="sidebar-link">
+                <i class="bi bi-calendar-month"></i> Escala Mensal
+            </a>
+            <a href="{% url 'cal:plantoes_por_profissional' %}" class="sidebar-link">
+                <i class="bi bi-person-lines-fill"></i> Por Profissional
+            </a>
+            <hr>
+            <a href="{% url 'cal:lista_escalas' %}" class="sidebar-link">
+                <i class="bi bi-list-ul"></i> Listar Escalas
+            </a>
+            <a href="{% url 'cal:importar_escala' %}" class="sidebar-link">
+                <i class="bi bi-upload"></i> Importar Escala
+            </a>
+            <a href="{% url 'cal:dashboard_escala' %}" class="sidebar-link">
+                <i class="bi bi-bar-chart-line"></i> Dashboard
+            </a>
         </div>
     </div>
-</nav>
+
+    <!-- TPD -->
+    <div class="sidebar-section">
+        <button class="sidebar-group-btn" type="button"
+                data-bs-toggle="collapse" data-bs-target="#menuTPD"
+                aria-expanded="false">
+            <i class="bi bi-clock-history"></i> TPD
+            <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse sidebar-sub" id="menuTPD">
+            <a href="{% url 'cal:listar_tpd' %}" class="sidebar-link">
+                <i class="bi bi-list-check"></i> Listar TPDs
+            </a>
+            <a href="{% url 'cal:novo_tpd' %}" class="sidebar-link">
+                <i class="bi bi-plus-square"></i> Novo TPD
+            </a>
+            <a href="{% url 'cal:relatorio' %}" class="sidebar-link">
+                <i class="bi bi-file-earmark-bar-graph"></i> Relatório Mensal
+            </a>
+        </div>
+    </div>
+
+    <!-- Gerenciamento (staff only) -->
+    {% if user.is_staff %}
+    <div class="sidebar-section">
+        <button class="sidebar-group-btn" type="button"
+                data-bs-toggle="collapse" data-bs-target="#menuAdmin"
+                aria-expanded="false">
+            <i class="bi bi-gear"></i> Gerenciamento
+            <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse sidebar-sub" id="menuAdmin">
+            <a href="{% url 'cal:hospital_list' %}" class="sidebar-link">
+                <i class="bi bi-hospital"></i> Hospitais
+            </a>
+            <a href="{% url 'cal:setor_list' %}" class="sidebar-link">
+                <i class="bi bi-diagram-3"></i> Setores
+            </a>
+            <a href="{% url 'cal:especialidade_list' %}" class="sidebar-link">
+                <i class="bi bi-award"></i> Especialidades
+            </a>
+            <a href="{% url 'cal:matricula_list' %}" class="sidebar-link">
+                <i class="bi bi-person-badge"></i> Matrículas
+            </a>
+            <hr>
+            <a href="{% url 'cal:tipo_list' %}" class="sidebar-link">
+                <i class="bi bi-tags"></i> Tipos (Geral)
+            </a>
+            <a href="{% url 'cal:tipoevento_list' %}" class="sidebar-link">
+                <i class="bi bi-calendar-event"></i> Tipos de Evento
+            </a>
+            <hr>
+            <a href="{% url 'cal:listar_eventos' %}" class="sidebar-link">
+                <i class="bi bi-card-list"></i> Lista de Plantões
+            </a>
+            <a href="/admin/" class="sidebar-link">
+                <i class="bi bi-shield-lock"></i> Painel Admin
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+
+    <!-- Footer: usuário -->
+    <div class="sidebar-footer">
+        {% if user.is_authenticated %}
+            <div class="sidebar-user">
+                <i class="bi bi-person-circle" style="font-size:1.1rem;"></i>
+                <span class="text-truncate">{{ user.username }}</span>
+            </div>
+            <a href="{% url 'cal:perfil' %}" class="sidebar-link">
+                <i class="bi bi-person-gear"></i> Meu Perfil
+            </a>
+            {% if user.is_staff %}
+            <a href="{% url 'cal:listar_usuarios' %}" class="sidebar-link">
+                <i class="bi bi-people"></i> Usuários
+            </a>
+            {% endif %}
+            <form id="logout-form" action="{% url 'cal:logout' %}" method="post" style="display:none;">
+                {% csrf_token %}
+            </form>
+            <a href="#" class="sidebar-link text-danger-emphasis"
+               onclick="document.getElementById('logout-form').submit(); return false;">
+                <i class="bi bi-box-arrow-right"></i> Sair
+            </a>
+        {% else %}
+            <a href="{% url 'cal:login' %}" class="sidebar-link">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+        {% endif %}
+    </div>
+
+</aside>
