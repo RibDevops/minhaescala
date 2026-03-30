@@ -18,7 +18,12 @@ class Calendar(HTMLCalendar):
             codigo = plantao.tipo.codigo
             horas = plantao.tipo.horas
             cor = plantao.tipo.cor
-            d += f'<li style="background-color: {cor}; color: white; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; list-style: none; font-size: 0.85em;">{nome} ({codigo} - {horas}h)</li>'
+            d += (
+                f'<li onclick="abrirModalEvento({plantao.id}, \'{nome}\', \'{codigo}\', {horas}, \'{plantao.data}\')" '
+                f'style="background-color: {cor}; color: white; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; '
+                f'list-style: none; font-size: 0.85em; cursor: pointer;">'
+                f'{nome} ({codigo} - {horas}h)</li>'
+            )
             
             # Contagem por especialidade do profissional
             esp = plantao.profissional.especialidade

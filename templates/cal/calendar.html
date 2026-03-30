@@ -29,4 +29,70 @@
         </a>
     </div>
 </div>
+
+<!-- Modal de Evento do Calendário -->
+<div class="modal fade" id="modalEvento" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-calendar-event"></i> Plantão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1"><strong>Profissional:</strong> <span id="modalNome"></span></p>
+                <p class="mb-1"><strong>Tipo:</strong> <span id="modalCodigo"></span></p>
+                <p class="mb-1"><strong>Carga:</strong> <span id="modalHoras"></span>h</p>
+                <p class="mb-0"><strong>Data:</strong> <span id="modalData"></span></p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger btn-sm" id="btnDeletarCalendario" onclick="deletarEventoCalendario()">
+                    <i class="bi bi-trash"></i> Deletar
+                </button>
+                <a id="btnEditarCalendario" href="#" class="btn btn-primary btn-sm">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let eventoIdAtual = null;
+    const modalEvento = new bootstrap.Modal(document.getElementById('modalEvento'));
+
+    function abrirModalEvento(eventoId, nome, codigo, horas, data) {
+        eventoIdAtual = eventoId;
+        document.getElementById('modalNome').textContent = nome;
+        document.getElementById('modalCodigo').textContent = codigo;
+        document.getElementById('modalHoras').textContent = horas;
+        document.getElementById('modalData').textContent = data;
+        document.getElementById('btnEditarCalendario').href = `/plantao/${eventoId}/editar/`;
+        modalEvento.show();
+    }
+
+    function deletarEventoCalendario() {
+        if (!confirm('Tem certeza que deseja deletar este plantão?')) return;
+        fetch(`/plantao/${eventoIdAtual}/excluir/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.redirected || response.ok) {
+                modalEvento.hide();
+                location.reload();
+            } else {
+                alert('Erro ao deletar o plantão.');
+            }
+        })
+        .catch(() => {
+            // Fallback: redireciona para a página de exclusão
+            window.location.href = `/plantao/${eventoIdAtual}/excluir/`;
+        });
+    }
+</script>
 {% endblock %}

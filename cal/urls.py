@@ -75,6 +75,9 @@ urlpatterns = [
     path('api/saldo-semanal/<int:profissional_id>/<int:mes>/<int:ano>/', 
              escala_views.api_saldo_semanal, name='api_saldo_semanal'),
 
+    # Plantões por Profissional
+    path('plantoes-por-profissional/', views_cal.plantoes_por_profissional, name='plantoes_por_profissional'),
+
     # Escala Mensal
     path('escala-mensal/', escala_mes_views.escala_mes_view, name='escala_mensal'),
     path('escala-mensal/<int:mes>/<int:ano>/', escala_mes_views.escala_mes_view, name='escala_mensal_mes_ano'),

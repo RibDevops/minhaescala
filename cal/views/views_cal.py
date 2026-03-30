@@ -312,6 +312,63 @@ def excluir_evento(request, event_id):
     evento.delete()
     return redirect('cal:listar_eventos')
 
+@login_required
+def plantoes_por_profissional(request):
+    """Lista todos os plantões agrupados por profissional."""
+    from ..models import Matricula
+    user = request.user
+    matricula_usuario = get_matricula(user)
+
+    if is_admin(user):
+        profissionais = Matricula.objects.filter(ativo=True).order_by('nome_completo')
+    elif matricula_usuario:
+        profissionais = Matricula.objects.filter(
+            hospital=matricula_usuario.hospital,
+            setor=matricula_usuario.setor,
+            ativo=True
+        ).order_by('nome_completo')
+    else:
+        profissionais = Matricula.objects.none()
+
+    # Filtros de mês/ano
+    from datetime import datetime
+    hoje = datetime.today()
+    mes = int(request.GET.get('mes', hoje.month))
+    ano = int(request.GET.get('ano', hoje.year))
+
+    from datetime import date
+    from calendar import monthrange
+    primeiro_dia = date(ano, mes, 1)
+    ultimo_dia = date(ano, mes, monthrange(ano, mes)[1])
+
+    dados = []
+    for prof in profissionais:
+        eventos = EventoEscala.objects.filter(
+            profissional=prof,
+            data__range=[primeiro_dia, ultimo_dia]
+        ).select_related('tipo').order_by('data')
+        if eventos.exists():
+            dados.append({
+                'profissional': prof,
+                'eventos': eventos,
+                'total_horas': sum(e.tipo.horas for e in eventos if e.tipo),
+                'total_plantoes': eventos.count(),
+            })
+
+    meses = [
+        (1,'Janeiro'),(2,'Fevereiro'),(3,'Março'),(4,'Abril'),
+        (5,'Maio'),(6,'Junho'),(7,'Julho'),(8,'Agosto'),
+        (9,'Setembro'),(10,'Outubro'),(11,'Novembro'),(12,'Dezembro'),
+    ]
+
+    return render(request, 'cal/plantoes_por_profissional.html', {
+        'dados': dados,
+        'mes': mes,
+        'ano': ano,
+        'meses': meses,
+    })
+
+
 from django.http import JsonResponse
 
 @login_required

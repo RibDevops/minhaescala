@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Plantões por Profissional{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-person-lines-fill"></i> Plantões por Profissional</h4>
+        <a href="{% url 'cal:event_new' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Novo Plantão
+        </a>
+    </div>
+
+    <!-- Filtro de mês/ano -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-2">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-0 small">Mês</label>
+                    <select name="mes" class="form-select form-select-sm">
+                        {% for num, nome in meses %}
+                            <option value="{{ num }}" {% if num == mes %}selected{% endif %}>{{ nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0 small">Ano</label>
+                    <input type="number" name="ano" value="{{ ano }}" class="form-control form-control-sm" style="width: 90px;">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-filter"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if dados %}
+        {% for item in dados %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <div>
+                    <strong><i class="bi bi-person-circle"></i> {{ item.profissional.nome_completo }}</strong>
+                    <span class="text-muted ms-2 small">Matrícula: {{ item.profissional.numero }}</span>
+                    {% if item.profissional.setor %}
+                        <span class="badge bg-secondary ms-2">{{ item.profissional.setor.nome }}</span>
+                    {% endif %}
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary">{{ item.total_plantoes }} plantão(ões)</span>
+                    <span class="badge bg-success ms-1">{{ item.total_horas }}h total</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Data</th>
+                                <th>Tipo</th>
+                                <th>Código</th>
+                                <th>Horas</th>
+                                <th>Hospital</th>
+                                <th>Setor</th>
+                                <th class="text-end pe-3">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for evento in item.eventos %}
+                            <tr>
+                                <td class="ps-3">
+                                    <span class="fw-semibold">{{ evento.data|date:"d/m/Y" }}</span>
+                                    <small class="text-muted ms-1">{{ evento.data|date:"D"|upper }}</small>
+                                </td>
+                                <td>
+                                    {% if evento.tipo %}
+                                        <span class="badge" style="background-color: {{ evento.tipo.cor }};">
+                                            {{ evento.tipo.nome }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ evento.tipo.codigo|default:"—" }}</td>
+                                <td>{{ evento.tipo.horas|default:"—" }}h</td>
+                                <td>{{ evento.hospital.sigla|default:evento.hospital.nome|default:"—" }}</td>
+                                <td>{{ evento.setor.nome|default:"—" }}</td>
+                                <td class="text-end pe-3">
+                                    <a href="{% url 'cal:event_edit' evento.pk %}" class="btn btn-outline-primary btn-sm py-0 px-2">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'cal:plantao_delete' evento.pk %}" class="btn btn-outline-danger btn-sm py-0 px-2 ms-1">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-calendar-x fs-1"></i>
+            <p class="mt-2">Nenhum plantão encontrado para o período selecionado.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

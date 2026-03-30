@@ -100,7 +100,8 @@ def escala_mes_view(request, mes=None, ano=None):
             dias_dict[evento.data.day] = {
                 'turnos': codigo,
                 'horas': horas,
-                'e_tpd': 'TPD' in codigo.upper()
+                'e_tpd': 'TPD' in codigo.upper(),
+                'evento_id': evento.id
             }
 
         semanas_totais = {}

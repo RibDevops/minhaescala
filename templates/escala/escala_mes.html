@@ -77,7 +77,7 @@
                                     {% if dia_num == dia_idx %}
                                         <div class="h-100 w-100 d-flex flex-column justify-content-center cursor-pointer 
                                             {% if dia_info.e_tpd %}bg-warning text-dark{% elif dia_info.horas > 0 %}bg-primary text-white{% endif %}"
-                                            onclick="editarDia({{ dia_idx }}, {{ prof.id }}, '{{ dia_info.turnos }}', {{ dia_info.horas }}, {{ dia_info.e_tpd|yesno:'true,false' }})">
+                                            onclick="editarDia({{ dia_idx }}, {{ prof.id }}, '{{ dia_info.turnos }}', {{ dia_info.horas }}, {{ dia_info.e_tpd|yesno:'true,false' }}, {{ dia_info.evento_id|default:0 }})">
                                             <div class="fw-bold">{{ dia_info.turnos }}</div>
                                             <div style="font-size: 0.7rem;">{{ dia_info.horas|floatformat:0 }}h</div>
                                         </div>
@@ -144,6 +144,7 @@
                     {% csrf_token %}
                     <input type="hidden" id="editProfId">
                     <input type="hidden" id="editDiaNum">
+                    <input type="hidden" id="editEventId">
                     <div class="mb-3">
                         <label class="form-label">Turno</label>
                         <input type="text" id="editTurno" class="form-control" placeholder="Ex: SM6, SN12">
@@ -158,9 +159,14 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="marcarFolga()">Folga</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="salvarDia()">Salvar</button>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger btn-sm" id="btnDeletar" onclick="deletarPlantao()">
+                    <i class="bi bi-trash"></i> Deletar
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="marcarFolga()">Folga</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="salvarDia()">Salvar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -172,13 +178,40 @@
     const modalEl = document.getElementById('modalEditarDia');
     const bsModal = new bootstrap.Modal(modalEl);
 
-    function editarDia(dia, profId, turno, horas, eTpd) {
+    function editarDia(dia, profId, turno, horas, eTpd, eventId) {
         document.getElementById('editProfId').value = profId;
         document.getElementById('editDiaNum').value = dia;
         document.getElementById('editTurno').value = turno || '';
         document.getElementById('editHoras').value = horas || 0;
         document.getElementById('editTpd').checked = eTpd;
+        document.getElementById('editEventId').value = eventId || 0;
+        // Mostra/oculta botão de deletar conforme há evento
+        document.getElementById('btnDeletar').style.display = eventId ? 'inline-block' : 'none';
         bsModal.show();
+    }
+
+    function deletarPlantao() {
+        if (!confirm('Tem certeza que deseja deletar este plantão?')) return;
+        const profId = document.getElementById('editProfId').value;
+        const dia = document.getElementById('editDiaNum').value;
+        // Deleta enviando turno vazio (remove o evento)
+        fetch(`{% url 'cal:toggle_dia_escala' 0 0 0 0 %}`.replace('0/0/0/0/', `${profId}/${dia}/${mes_atual}/${ano_atual}/`), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ turno: '', horas: 0, e_tpd: false })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                bsModal.hide();
+                location.reload();
+            } else {
+                alert('Erro ao deletar: ' + (data.error || 'Erro desconhecido'));
+            }
+        });
     }
 
     function marcarFolga() {
