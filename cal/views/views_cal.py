@@ -212,6 +212,7 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
         tipos = request.POST.getlist('tipo_plantao[]')
         obs = request.POST.getlist('observacoes[]')
         forcar_carga = request.POST.get('forcar_carga') == '1'
+        next_url = request.POST.get('next', '')
 
         if not enfermeiro_id or not datas:
             messages.error(request, 'Dados inválidos')
@@ -230,12 +231,15 @@ class PlantaoUpdateView(LoginRequiredMixin, UpdateView):
         self.object.save(forcar_carga=forcar_carga)
 
         messages.success(request, f'Plantão de {enfermeiro.nome_exibicao} atualizado com sucesso.')
-        return redirect(self.success_url)
+        return redirect(next_url if next_url else self.success_url)
 
 class PlantaoDeleteView(LoginRequiredMixin, DeleteView):
     model = EventoEscala
     template_name = 'cal/plantao_confirm_delete.html'
-    success_url = reverse_lazy('cal:calendar')
+
+    def get_success_url(self):
+        next_url = self.request.POST.get('next', '') or self.request.GET.get('next', '')
+        return next_url if next_url else reverse_lazy('cal:calendar')
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
@@ -362,9 +366,12 @@ def plantoes_por_profissional(request):
         (9,'Setembro'),(10,'Outubro'),(11,'Novembro'),(12,'Dezembro'),
     ]
 
+    tipos_plantao = TipoEvento.objects.all()
+
     return render(request, 'cal/plantoes_por_profissional.html', {
         'dados': dados,
         'mes': mes,
+        'tipos_plantao': tipos_plantao,
         'ano': ano,
         'meses': meses,
     })

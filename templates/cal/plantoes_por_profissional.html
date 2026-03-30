@@ -43,7 +43,7 @@
             <div class="card-header d-flex justify-content-between align-items-center py-2">
                 <div>
                     <strong><i class="bi bi-person-circle"></i> {{ item.profissional.nome_completo }}</strong>
-                    <span class="text-muted ms-2 small">Matrícula: {{ item.profissional.numero }}</span>
+                    <span class="text-muted ms-2 small">Matrícula: {{ item.profissional.matricula }}</span>
                     {% if item.profissional.setor %}
                         <span class="badge bg-secondary ms-2">{{ item.profissional.setor.nome }}</span>
                     {% endif %}
@@ -60,10 +60,10 @@
                             <tr>
                                 <th class="ps-3">Data</th>
                                 <th>Tipo</th>
-                                <th>Código</th>
                                 <th>Horas</th>
                                 <th>Hospital</th>
                                 <th>Setor</th>
+                                <th>Observação</th>
                                 <th class="text-end pe-3">Ações</th>
                             </tr>
                         </thead>
@@ -77,23 +77,41 @@
                                 <td>
                                     {% if evento.tipo %}
                                         <span class="badge" style="background-color: {{ evento.tipo.cor }};">
-                                            {{ evento.tipo.nome }}
+                                            {{ evento.tipo.codigo }}
                                         </span>
                                     {% else %}
                                         <span class="text-muted">—</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ evento.tipo.codigo|default:"—" }}</td>
                                 <td>{{ evento.tipo.horas|default:"—" }}h</td>
                                 <td>{{ evento.hospital.sigla|default:evento.hospital.nome|default:"—" }}</td>
                                 <td>{{ evento.setor.nome|default:"—" }}</td>
+                                <td class="text-muted small">{{ evento.observacao|default:"—" }}</td>
                                 <td class="text-end pe-3">
-                                    <a href="{% url 'cal:event_edit' evento.pk %}" class="btn btn-outline-primary btn-sm py-0 px-2">
+                                    <button type="button"
+                                        class="btn btn-outline-primary btn-sm py-0 px-2"
+                                        onclick="abrirModalEditar(
+                                            {{ evento.pk }},
+                                            {{ evento.profissional.pk }},
+                                            '{{ evento.profissional.nome_completo|escapejs }}',
+                                            '{{ evento.data|date:"Y-m-d" }}',
+                                            {{ evento.tipo.pk|default:'null' }},
+                                            '{{ evento.observacao|escapejs }}'
+                                        )"
+                                        title="Editar">
                                         <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a href="{% url 'cal:plantao_delete' evento.pk %}" class="btn btn-outline-danger btn-sm py-0 px-2 ms-1">
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-outline-danger btn-sm py-0 px-2 ms-1"
+                                        onclick="abrirModalDeletar(
+                                            {{ evento.pk }},
+                                            '{{ evento.profissional.nome_completo|escapejs }}',
+                                            '{{ evento.data|date:"d/m/Y" }}',
+                                            '{{ evento.tipo.codigo|default:""|escapejs }}'
+                                        )"
+                                        title="Excluir">
                                         <i class="bi bi-trash"></i>
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -110,4 +128,106 @@
         </div>
     {% endif %}
 </div>
+
+<!-- Modal: Editar Plantão -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEditar" method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" name="enfermeiro" id="editEnfermeiroId">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarLabel"><i class="bi bi-pencil"></i> Editar Plantão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Profissional</label>
+                        <p class="form-control-plaintext" id="editNomeProfissional"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editData" class="form-label fw-semibold">Data</label>
+                        <input type="date" name="data[]" id="editData" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTipo" class="form-label fw-semibold">Tipo de Plantão</label>
+                        <select name="tipo_plantao[]" id="editTipo" class="form-select" required>
+                            <option value="">— Selecione —</option>
+                            {% for tp in tipos_plantao %}
+                            <option value="{{ tp.pk }}"
+                                data-cor="{{ tp.cor }}"
+                                data-horas="{{ tp.horas }}">
+                                {{ tp.codigo }}{% if tp.descricao and tp.descricao != tp.codigo %} – {{ tp.descricao }}{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editObs" class="form-label fw-semibold">Observação</label>
+                        <textarea name="observacoes[]" id="editObs" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Exclusão -->
+<div class="modal fade" id="modalDeletar" tabindex="-1" aria-labelledby="modalDeletarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-danger">
+            <form id="formDeletar" method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <div class="modal-header bg-danger text-white py-2">
+                    <h6 class="modal-title" id="modalDeletarLabel"><i class="bi bi-trash"></i> Confirmar Exclusão</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Excluir o plantão abaixo?</p>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item px-0"><strong>Profissional:</strong> <span id="delNome"></span></li>
+                        <li class="list-group-item px-0"><strong>Data:</strong> <span id="delData"></span></li>
+                        <li class="list-group-item px-0"><strong>Tipo:</strong> <span id="delTipo"></span></li>
+                    </ul>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function abrirModalEditar(eventoId, profissionalId, nomeProfissional, data, tipoId, observacao) {
+    document.getElementById('formEditar').action = '/plantao/' + eventoId + '/editar/';
+    document.getElementById('editEnfermeiroId').value = profissionalId;
+    document.getElementById('editNomeProfissional').textContent = nomeProfissional;
+    document.getElementById('editData').value = data;
+    document.getElementById('editObs').value = observacao;
+    document.getElementById('editTipo').value = tipoId !== null ? tipoId : '';
+    new bootstrap.Modal(document.getElementById('modalEditar')).show();
+}
+
+function abrirModalDeletar(eventoId, nomeProfissional, data, tipo) {
+    document.getElementById('formDeletar').action = '/plantao/' + eventoId + '/excluir/';
+    document.getElementById('delNome').textContent = nomeProfissional;
+    document.getElementById('delData').textContent = data;
+    document.getElementById('delTipo').textContent = tipo || '—';
+    new bootstrap.Modal(document.getElementById('modalDeletar')).show();
+}
+</script>
 {% endblock %}
