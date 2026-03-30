@@ -18,48 +18,48 @@
                 <div class="navbar-nav me-auto">
                     <a class="nav-link" href="{% url 'cal:home' %}"><i class="bi bi-house-door"></i> Home</a>
                     {% if user.is_authenticated %}
-                    <a class="nav-link" href="{% url 'cal:calendar' %}">Calendário</a>
-                    <a class="nav-link" href="{% url 'cal:event_new' %}">Novo Plantão</a>
-                    <a class="nav-link" href="{% url 'cal:dashboard' %}">Dashboard</a>
+                    <a class="nav-link" href="{% url 'cal:calendar' %}"><i class="bi bi-calendar-week"></i> Calendário</a>
+                    <a class="nav-link" href="{% url 'cal:event_new' %}"><i class="bi bi-plus-circle"></i> Novo Plantão</a>
+                    <a class="nav-link" href="{% url 'cal:dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="escalaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Escalas
+                            <i class="bi bi-table"></i> Escalas
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="escalaDropdown">
-                            <li><a class="dropdown-item" href="{% url 'cal:escala_mensal' %}">Escala Mensal</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:escala_mensal' %}"><i class="bi bi-calendar-month"></i> Escala Mensal</a></li>
                             <li><a class="dropdown-item" href="{% url 'cal:plantoes_por_profissional' %}"><i class="bi bi-person-lines-fill"></i> Plantões por Profissional</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:lista_escalas' %}">Listar Escalas</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:importar_escala' %}">Importar Escala</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:dashboard_escala' %}">Dashboard de Escalas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:lista_escalas' %}"><i class="bi bi-list-ul"></i> Listar Escalas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:importar_escala' %}"><i class="bi bi-upload"></i> Importar Escala</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:dashboard_escala' %}"><i class="bi bi-bar-chart-line"></i> Dashboard de Escalas</a></li>
                         </ul>
                     </div>
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="tpdDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            TPD
+                            <i class="bi bi-clock-history"></i> TPD
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="tpdDropdown">
-                            <li><a class="dropdown-item" href="{% url 'cal:listar_tpd' %}">Listar TPDs</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:novo_tpd' %}">Novo TPD</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:relatorio' %}">Relatório Mensal</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:listar_tpd' %}"><i class="bi bi-list-check"></i> Listar TPDs</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:novo_tpd' %}"><i class="bi bi-plus-square"></i> Novo TPD</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:relatorio' %}"><i class="bi bi-file-earmark-bar-graph"></i> Relatório Mensal</a></li>
                         </ul>
                     </div>
                     {% if user.is_staff %}
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Gerenciamento
+                            <i class="bi bi-gear"></i> Gerenciamento
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="{% url 'cal:hospital_list' %}">Hospitais</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:setor_list' %}">Setores</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:especialidade_list' %}">Especialidades</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:matricula_list' %}">Matrículas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:hospital_list' %}"><i class="bi bi-hospital"></i> Hospitais</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:setor_list' %}"><i class="bi bi-diagram-3"></i> Setores</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:especialidade_list' %}"><i class="bi bi-award"></i> Especialidades</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:matricula_list' %}"><i class="bi bi-person-badge"></i> Matrículas</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:tipo_list' %}">Tipos (Geral)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:tipoevento_list' %}">Tipos de Evento</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:tipo_list' %}"><i class="bi bi-tags"></i> Tipos (Geral)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:tipoevento_list' %}"><i class="bi bi-calendar-event"></i> Tipos de Evento</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'cal:listar_eventos' %}">Lista de Plantões</a></li>
-                            <li><a class="dropdown-item" href="/admin/">Painel Admin</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cal:listar_eventos' %}"><i class="bi bi-card-list"></i> Lista de Plantões</a></li>
+                            <li><a class="dropdown-item" href="/admin/"><i class="bi bi-shield-lock"></i> Painel Admin</a></li>
                         </ul>
                     </div>
                     {% endif %}
@@ -72,9 +72,9 @@
                                 <i class="bi bi-person-circle"></i> {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'cal:perfil' %}">Meu Perfil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cal:perfil' %}"><i class="bi bi-person-gear"></i> Meu Perfil</a></li>
                                 {% if user.is_staff %}
-                                    <li><a class="dropdown-item" href="{% url 'cal:listar_usuarios' %}">Gerenciar Usuários</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'cal:listar_usuarios' %}"><i class="bi bi-people"></i> Gerenciar Usuários</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
