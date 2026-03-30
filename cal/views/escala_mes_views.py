@@ -119,12 +119,13 @@ def escala_mes_view(request, mes=None, ano=None):
         if semana_idx > semana_atual:
             semana_atual = semana_idx
 
+        total_mes = sum(d['horas'] for d in dias_dict.values())
         dados_profissionais.append({
             'profissional': profissional,
             'dias': dias_dict,
             'semanas_totais': semanas_totais,
-            'total_mes': sum(d['horas'] for d in dias_dict.values()),
-            'saldo': saldo_info(profissional, mes, ano),
+            'total_mes': total_mes,
+            'saldo': saldo_info(profissional, mes, ano, total_horas=total_mes),
         })
 
     meses_pt = {1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'}

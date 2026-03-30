@@ -69,25 +69,41 @@ def carga_proxima_semana(profissional, referencia=None):
     return max(0, carga_ajustada)
 
 
-def saldo_info(profissional, mes, ano):
+def saldo_info(profissional, mes, ano, total_horas=None):
     """
     Retorna um dict com os dados de saldo para exibição na escala mensal.
 
-    Se a semana atual não pertence ao mês/ano exibido, retorna None
-    para indicar que as colunas devem mostrar '—'.
+    Fórmula:
+        Esta semana  (x)         = total_horas - carga_horaria_semanal
+        Próx. semana             = carga_horaria_semanal - x
+
+    Exemplos:
+        total=25, carga=20 → Esta semana= +5,  Próx.= 15
+        total=15, carga=20 → Esta semana= -5,  Próx.= 25
 
     Retorno:
         {
-            'saldo': int,           # ex: +8 ou -4
-            'carga_proxima': int,   # ex: 12
-            'semana_no_mes': bool,  # True se a semana atual está no mês exibido
+            'saldo': int,           # Esta semana: total - carga
+            'carga_proxima': int,   # Próx. semana: carga - saldo
+            'semana_no_mes': True,  # sempre True quando total_horas fornecido
         }
     """
+    carga = profissional.carga_horaria_semanal or 0
+
+    if total_horas is not None:
+        x = total_horas - carga
+        carga_prox = carga - x
+        return {
+            'saldo': x,
+            'carga_proxima': carga_prox,
+            'semana_no_mes': True,
+        }
+
+    # Fallback: usa horas da semana atual (comportamento legado)
     hoje = date.today()
     inicio = inicio_semana(hoje)
     fim = fim_semana(hoje)
 
-    # Verifica se algum dia da semana atual pertence ao mês exibido
     semana_no_mes = (
         (inicio.year == ano and inicio.month == mes) or
         (fim.year == ano and fim.month == mes) or
@@ -95,7 +111,7 @@ def saldo_info(profissional, mes, ano):
     )
 
     saldo = saldo_semana(profissional, hoje)
-    carga_prox = carga_proxima_semana(profissional, hoje)
+    carga_prox = carga - saldo
 
     return {
         'saldo': saldo,
