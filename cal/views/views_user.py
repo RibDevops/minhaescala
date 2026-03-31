@@ -8,7 +8,43 @@ from django.contrib.auth import update_session_auth_hash
 from ..models import Matricula
 
 def home(request):
-    return redirect('cal:calendar')
+    if not request.user.is_authenticated:
+        return render(request, 'home.html')
+
+    from datetime import date, timedelta
+    from ..models import EventoEscala
+
+    hoje = date.today()
+    matricula = None
+    try:
+        from ..models import Matricula
+        matricula = Matricula.objects.filter(user=request.user, ativo=True).first()
+    except Exception:
+        pass
+
+    plantoes_hoje = []
+    proximos = []
+
+    if matricula:
+        fim = hoje + timedelta(days=30)
+        eventos = (
+            EventoEscala.objects
+            .filter(profissional=matricula, data__gte=hoje, data__lte=fim)
+            .select_related('tipo', 'hospital', 'setor')
+            .order_by('data')
+        )
+        for e in eventos:
+            if e.data == hoje:
+                plantoes_hoje.append(e)
+            else:
+                proximos.append(e)
+
+    return render(request, 'home.html', {
+        'hoje': hoje,
+        'matricula': matricula,
+        'plantoes_hoje': plantoes_hoje,
+        'proximos': proximos[:15],
+    })
 
 def login_view(request):
     if request.method == 'POST':

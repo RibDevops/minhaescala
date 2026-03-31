@@ -1,28 +1,184 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block title %}Início{% endblock %}
+
 {% block content %}
- <!-- Page content -->
 
+{% if user.is_authenticated %}
 
+{# ── Saudação ──────────────────────────────────────────── #}
+<div class="d-flex align-items-center gap-3 mb-4">
+    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+         style="width:48px;height:48px;font-size:1.25rem;flex-shrink:0;">
+        {{ user.username|first|upper }}
+    </div>
+    <div>
+        <div class="fw-bold" style="font-size:1.05rem;">Olá, {{ user.first_name|default:user.username }}!</div>
+        <div class="text-muted small">{{ hoje|date:"l, d \d\e F \d\e Y" }}</div>
+    </div>
+</div>
 
- 
+{# ── Plantão de Hoje ────────────────────────────────────── #}
+{% if plantoes_hoje %}
+    {% for p in plantoes_hoje %}
+    <div class="card border-0 shadow-sm mb-3"
+         style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); color:#fff;">
+        <div class="card-body py-3">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-alarm-fill"></i>
+                <span class="small text-white-50 fw-semibold text-uppercase">Plantão Hoje</span>
+            </div>
+            <div class="fw-bold" style="font-size:1.4rem;">
+                {% if p.tipo %}{{ p.tipo.codigo }}{% else %}—{% endif %}
+            </div>
+            <div class="small text-white-75">
+                {% if p.tipo and p.tipo.descricao and p.tipo.descricao != p.tipo.codigo %}
+                    {{ p.tipo.descricao }} &nbsp;·&nbsp;
+                {% endif %}
+                {{ p.tipo.horas|default:"?" }}h
+                {% if p.setor %}&nbsp;·&nbsp; {{ p.setor.nome }}{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card border-0 bg-light mb-3">
+        <div class="card-body py-3 d-flex align-items-center gap-3">
+            <i class="bi bi-moon-stars text-muted" style="font-size:1.5rem;"></i>
+            <div>
+                <div class="fw-semibold">Sem plantão hoje</div>
+                <div class="text-muted small">Aproveite o dia de folga!</div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 
- <div class="container mt-5">
-   <h1 class="mb-4">Bem-vindo ao Sistema de Escalas</h1>
-   <p>Este sistema foi desenvolvido para organizar e visualizar escalas de plantões de forma clara e intuitiva. O calendário mostra os plantões agendados para cada dia, e você pode navegar entre os meses usando os botões "Mês Anterior" e "Próximo Mês".</p>
-   
-   <h3 class="mt-4">Funcionalidades:</h3>
-   <ul>
-     <li><strong>Visualização de Plantões:</strong> Veja todos os eventos e escalas por dia.</li>
-     <li><strong>Criação de Plantões:</strong> Cadastre novos eventos clicando em “Novo Plantão”.</li>
-     <li><strong>Responsividade:</strong> A interface é adaptável para dispositivos móveis.</li>
-   </ul>
-   
-   <a href="{% url 'cal:calendar' %}" class="btn btn-primary mt-3">Ver Calendário</a>
- </div>
- 
- 
+{# ── Atalhos rápidos ────────────────────────────────────── #}
+<div class="row g-2 mb-4">
+    <div class="col-6">
+        <a href="{% url 'cal:event_new' %}"
+           class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-1">
+            <i class="bi bi-plus-circle-fill" style="font-size:1.4rem;"></i>
+            <span class="small fw-semibold">Novo Plantão</span>
+        </a>
+    </div>
+    <div class="col-6">
+        <a href="{% url 'cal:calendar' %}"
+           class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-1">
+            <i class="bi bi-calendar-week-fill" style="font-size:1.4rem;"></i>
+            <span class="small fw-semibold">Calendário</span>
+        </a>
+    </div>
+    <div class="col-6">
+        <a href="{% url 'cal:escala_mensal' %}"
+           class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-1">
+            <i class="bi bi-table" style="font-size:1.4rem;"></i>
+            <span class="small fw-semibold">Escala Mensal</span>
+        </a>
+    </div>
+    <div class="col-6">
+        <a href="{% url 'cal:dashboard' %}"
+           class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-1">
+            <i class="bi bi-speedometer2" style="font-size:1.4rem;"></i>
+            <span class="small fw-semibold">Dashboard</span>
+        </a>
+    </div>
+</div>
+
+{# ── Próximos Plantões ──────────────────────────────────── #}
+{% if proximos %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0 fw-bold"><i class="bi bi-calendar-event text-primary"></i> Próximos Plantões</h6>
+    <a href="{% url 'cal:listar_eventos' %}" class="small text-muted">Ver todos</a>
+</div>
+<div class="card border-0 shadow-sm mb-4">
+    <ul class="list-group list-group-flush">
+        {% for p in proximos %}
+        {% with delta=p.data|timeuntil:hoje %}
+        <li class="list-group-item px-3 py-2">
+            <div class="d-flex align-items-center gap-3">
+                {# Bloco da data #}
+                <div class="text-center rounded"
+                     style="min-width:42px;background:#f0f4ff;padding:4px 6px;">
+                    <div class="fw-bold text-primary" style="font-size:1.05rem;line-height:1.1;">
+                        {{ p.data|date:"d" }}
+                    </div>
+                    <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.5px;">
+                        {{ p.data|date:"M" }}
+                    </div>
+                </div>
+                {# Detalhes #}
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2">
+                        {% if p.tipo %}
+                        <span class="badge fw-semibold"
+                              style="background-color:{{ p.tipo.cor|default:'#6c757d' }}; font-size:.75rem;">
+                            {{ p.tipo.codigo }}
+                        </span>
+                        {% endif %}
+                        <span class="small text-muted">{{ p.data|date:"l"|upper }}</span>
+                    </div>
+                    {% if p.tipo %}
+                    <div class="text-muted" style="font-size:0.78rem;">
+                        {{ p.tipo.horas }}h
+                        {% if p.setor %}&nbsp;·&nbsp;{{ p.setor.nome }}{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {# Ícone de seta #}
+                <i class="bi bi-chevron-right text-muted small"></i>
+            </div>
+        </li>
+        {% endwith %}
+        {% endfor %}
+    </ul>
+</div>
+{% elif matricula %}
+<div class="text-center text-muted py-4">
+    <i class="bi bi-calendar-check fs-1"></i>
+    <p class="mt-2 mb-0 small">Nenhum plantão nos próximos 30 dias.</p>
+    <a href="{% url 'cal:event_new' %}" class="btn btn-sm btn-primary mt-3">Registrar Plantão</a>
+</div>
+{% endif %}
+
+{# ── Sem matrícula ──────────────────────────────────────── #}
+{% if not matricula %}
+<div class="alert alert-warning d-flex gap-2 align-items-start">
+    <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+    <div>
+        <strong>Matrícula não vinculada.</strong><br>
+        <span class="small">Seu usuário ainda não possui uma matrícula ativa. Peça ao administrador para configurar.</span>
+    </div>
+</div>
+{% endif %}
+
+{# ── Rodapé info ────────────────────────────────────────── #}
+<div class="card border-0 bg-light mt-2 mb-3">
+    <div class="card-body py-3">
+        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle text-primary"></i> Sobre o Sistema</h6>
+        <p class="small text-muted mb-0">
+            Sistema de gestão de escalas hospitalares. Organiza plantões por profissional,
+            setor e hospital, com controle de carga horária semanal, exportação de relatórios
+            e acesso via celular ou computador.
+        </p>
+    </div>
+</div>
+
+{% else %}
+{# ── Usuário não logado ─────────────────────────────────── #}
+<div class="text-center py-5">
+    <i class="bi bi-calendar3 text-primary" style="font-size:3.5rem;"></i>
+    <h4 class="mt-3 fw-bold">Minha Escala</h4>
+    <p class="text-muted">Sistema de gestão de plantões hospitalares.</p>
+    <a href="{% url 'cal:login' %}" class="btn btn-primary px-5 mt-2">
+        <i class="bi bi-box-arrow-in-right"></i> Entrar
+    </a>
+</div>
+{% endif %}
+
+<style>
+    .text-white-75 { color: rgba(255,255,255,.75) !important; }
+</style>
+
 {% endblock %}
-
-
-
