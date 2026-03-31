@@ -60,9 +60,18 @@
 {% block scripts %}
 <script>
     let eventoIdAtual = null;
-    const modalEvento = new bootstrap.Modal(document.getElementById('modalEvento'));
+    let modalEvento = null;
+
+    function initializeModal() {
+        if (typeof bootstrap !== 'undefined' && !modalEvento) {
+            modalEvento = new bootstrap.Modal(document.getElementById('modalEvento'));
+        }
+    }
 
     function abrirModalEvento(eventoId, nome, codigo, horas, data) {
+        initializeModal();
+        if (!modalEvento) return;
+        
         eventoIdAtual = eventoId;
         document.getElementById('modalNome').textContent = nome;
         document.getElementById('modalCodigo').textContent = codigo;
@@ -83,7 +92,7 @@
         })
         .then(response => {
             if (response.redirected || response.ok) {
-                modalEvento.hide();
+                if (modalEvento) modalEvento.hide();
                 location.reload();
             } else {
                 alert('Erro ao deletar o plantão.');
@@ -94,5 +103,8 @@
             window.location.href = `/plantao/${eventoIdAtual}/excluir/`;
         });
     }
+
+    // Initialize modal when DOM is ready and Bootstrap is loaded
+    document.addEventListener('DOMContentLoaded', initializeModal);
 </script>
 {% endblock %}
