@@ -72,6 +72,8 @@
             <a href="{% url 'cal:event_new' %}" class="btn btn-primary">Cadastrar Primeiro Plantão</a>
         </div>
     {% endif %}
+
+    {% include 'partials/paginacao.html' %}
 </div>
 {% endblock %}
 

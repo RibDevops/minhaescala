@@ -261,6 +261,7 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
     model = EventoEscala
     template_name = 'cal/lista_eventos.html'
     context_object_name = 'eventos'
+    paginate_by = 30
 
     def get_queryset(self):
         user = self.request.user
@@ -368,8 +369,14 @@ def plantoes_por_profissional(request):
 
     tipos_plantao = TipoEvento.objects.all()
 
+    # Paginação: 10 profissionais por página
+    from django.core.paginator import Paginator
+    paginator = Paginator(dados, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     return render(request, 'cal/plantoes_por_profissional.html', {
-        'dados': dados,
+        'dados': page_obj,
+        'page_obj': page_obj,
         'mes': mes,
         'tipos_plantao': tipos_plantao,
         'ano': ano,
@@ -384,32 +391,40 @@ def validar_carga_horaria(request):
     enfermeiro_id = request.GET.get('enfermeiro')
     data_str = request.GET.get('data')
     tipo_id = request.GET.get('tipo')
-    
+
     if not all([enfermeiro_id, data_str, tipo_id]):
         return JsonResponse({'error': 'Parâmetros ausentes'}, status=400)
-    
+
     try:
+        from ..utils_saldo import inicio_semana, fim_semana
         enfermeiro = Matricula.objects.get(pk=enfermeiro_id)
         data_dt = datetime.strptime(data_str, '%Y-%m-%d').date()
         tipo = TipoEvento.objects.get(pk=tipo_id)
-        
-        # Simula a validação do modelo
-        inicio = data_dt - timedelta(days=7)
+
+        # Usa a semana real dom–sáb que contém a data informada
+        inicio = inicio_semana(data_dt)
+        fim = fim_semana(data_dt)
+
         eventos = EventoEscala.objects.filter(
             profissional=enfermeiro,
-            data__range=(inicio, data_dt),
-            tipo__tipo_base__contabiliza=True
+            data__range=(inicio, fim),
+            tipo__tipo_base__contabiliza=True,
         )
         carga_atual = sum(e.tipo.horas for e in eventos)
-        total = carga_atual + tipo.horas
-        
-        excedeu = total > enfermeiro.carga_horaria_semanal
-        
+        total = carga_atual + (tipo.horas or 0)
+        limite = enfermeiro.carga_horaria_semanal or 0
+        excedeu = limite > 0 and total > limite
+
         return JsonResponse({
             'total': total,
-            'limite': enfermeiro.carga_horaria_semanal,
+            'limite': limite,
             'excedeu': excedeu,
-            'mensagem': f"Aviso: Carga semanal atingirá {total}h (Limite: {enfermeiro.carga_horaria_semanal}h)" if excedeu else ""
+            'semana_inicio': inicio.strftime('%d/%m'),
+            'semana_fim': fim.strftime('%d/%m'),
+            'mensagem': (
+                f"Carga da semana ({inicio.strftime('%d/%m')}–{fim.strftime('%d/%m')}) "
+                f"atingirá {total}h — limite: {limite}h"
+            ) if excedeu else ''
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

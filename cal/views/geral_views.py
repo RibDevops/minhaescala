@@ -12,6 +12,7 @@ class TipoListView(AdminRequiredMixin, ListView):
     model = Tipo
     template_name = 'cal/tipo/list.html'
     context_object_name = 'objetos'
+    paginate_by = 20
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({'titulo': 'Tipos', 'labels': ['Sigla', 'Descrição', 'Contabiliza'], 'create_url': 'cal:tipo_create', 'update_url': 'cal:tipo_update', 'delete_url': 'cal:tipo_delete'})
@@ -51,6 +52,7 @@ class TipoEventoListView(AdminRequiredMixin, ListView):
     model = TipoEvento
     template_name = 'cal/tipo_evento_list.html'
     context_object_name = 'objetos'
+    paginate_by = 20
     def get_queryset(self):
         return TipoEvento.objects.all()
     def get_context_data(self, **kwargs):
@@ -100,6 +102,7 @@ class TipoEventoDeleteView(AdminRequiredMixin, DeleteView):
 
 # Hospital
 class HospitalListView(AdminRequiredMixin, ListView):
+    paginate_by = 20
     model = Hospital
     template_name = 'cal/hospital_list.html'
     context_object_name = 'objetos'
@@ -141,6 +144,7 @@ class HospitalDeleteView(AdminRequiredMixin, DeleteView):
 
 # Setor
 class SetorListView(AdminRequiredMixin, ListView):
+    paginate_by = 20
     model = Setor
     template_name = 'cal/setor_list.html'
     context_object_name = 'objetos'
@@ -182,6 +186,7 @@ class SetorDeleteView(AdminRequiredMixin, DeleteView):
 
 # Especialidade
 class EspecialidadeListView(AdminRequiredMixin, ListView):
+    paginate_by = 20
     model = Especialidade
     template_name = 'cal/especialidade_list.html'
     context_object_name = 'objetos'
@@ -226,6 +231,7 @@ class MatriculaListView(AdminRequiredMixin, ListView):
     model = Matricula
     template_name = 'cal/matricula/list.html'
     context_object_name = 'objetos'
+    paginate_by = 20
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({'titulo': 'Matrículas', 'labels': ['Matrícula', 'Nome Guerra', 'Carga Horária'], 'create_url': 'cal:matricula_create', 'update_url': 'cal:matricula_update', 'delete_url': 'cal:matricula_delete'})
