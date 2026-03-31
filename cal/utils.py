@@ -32,7 +32,7 @@ class Calendar(HTMLCalendar):
 
         resumo_html = ''
         if resumo_especialidade:
-            resumo_html = '<div class="calendar-summary" style="margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee; font-size: 0.8em;"><strong>QTD:</strong><br/>'
+            resumo_html = '<div class="calendar-summary" style="margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee; font-size: 0.8em;">'
             resumo_html += ' '.join([f'<span>{nome}: {qtd}</span><br />' for nome, qtd in resumo_especialidade.items()])
             resumo_html += '</div>'
 
