@@ -78,35 +78,28 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function() {
-    $('.delete-event').click(function() {
-        const btn = $(this);
-        const eventId = btn.data('id');
-        const url = btn.data('url');
-        
-        if (confirm('Deseja realmente excluir este plantão?')) {
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    $(`#event-row-${eventId}`).fadeOut(300, function() {
-                        $(this).remove();
-                        // Se não sobrar nenhum evento no mês, remove o card do mês
-                        if ($(`table tr[id^="event-row-"]`).length === 0) {
-                            location.reload();
-                        }
-                    });
-                },
-                error: function() {
-                    alert('Erro ao excluir o plantão. Tente novamente.');
+document.querySelectorAll('.delete-event').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const eventId = btn.dataset.id;
+        const url = btn.dataset.url;
+        if (!confirm('Deseja realmente excluir este plantão?')) return;
+
+        const body = new URLSearchParams({ csrfmiddlewaretoken: '{{ csrf_token }}' });
+        fetch(url, { method: 'POST', body: body })
+            .then(function(r) {
+                if (!r.ok) throw new Error();
+                const row = document.getElementById('event-row-' + eventId);
+                if (row) {
+                    row.style.transition = 'opacity .3s';
+                    row.style.opacity = '0';
+                    setTimeout(function() {
+                        row.remove();
+                        if (!document.querySelector('tr[id^="event-row-"]')) location.reload();
+                    }, 300);
                 }
-            });
-        }
+            })
+            .catch(function() { alert('Erro ao excluir o plantão. Tente novamente.'); });
     });
 });
 </script>

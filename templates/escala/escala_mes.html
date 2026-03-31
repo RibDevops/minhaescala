@@ -13,7 +13,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <a href="{% url 'cal:escala_mensal_mes_ano' mes_anterior.mes mes_anterior.ano %}" class="btn btn-outline-primary d-print-none">
-            <i class="fas fa-chevron-left"></i> {{ mes_anterior.nome }}
+            <i class="bi bi-chevron-left"></i> {{ mes_anterior.nome }}
         </a>
     </div>
 
@@ -24,10 +24,10 @@
 
     <div class="d-flex gap-2">
         <a href="{% url 'cal:exportar_escala_pdf' mes_atual ano_atual %}" class="btn btn-danger d-print-none">
-            <i class="fas fa-file-pdf"></i> Exportar PDF
+            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
         </a>
         <a href="{% url 'cal:escala_mensal_mes_ano' mes_proximo.mes mes_proximo.ano %}" class="btn btn-outline-primary d-print-none">
-            {{ mes_proximo.nome }} <i class="fas fa-chevron-right"></i>
+            {{ mes_proximo.nome }} <i class="bi bi-chevron-right"></i>
         </a>
     </div>
 </div>

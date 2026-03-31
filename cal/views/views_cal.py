@@ -54,7 +54,9 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         
         user = self.request.user
         perfil = getattr(user, 'cal_perfil', None)
-        plantoes = EventoEscala.objects.filter(data__range=[primeiro_dia, ultimo_dia])
+        plantoes = EventoEscala.objects.filter(
+            data__range=[primeiro_dia, ultimo_dia]
+        ).select_related('tipo', 'profissional', 'hospital', 'setor', 'criado_por')
         
         if not user.is_staff and perfil:
             if perfil.tipo == 'ESCALANTE':
@@ -267,16 +269,18 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
         user = self.request.user
         matricula = get_matricula(user)
 
+        base_qs = EventoEscala.objects.select_related(
+            'tipo', 'profissional', 'hospital', 'setor', 'criado_por'
+        )
+
         if is_admin(user):
-            return EventoEscala.objects.all().order_by('data')
+            return base_qs.all().order_by('data')
 
         if not matricula:
             return EventoEscala.objects.none()
 
         if is_escalante(user):
-            # Escalante vê todos os plantões oficiais do seu setor,
-            # excluindo registros privados criados por enfermeiros.
-            return EventoEscala.objects.filter(
+            return base_qs.filter(
                 hospital=matricula.hospital,
                 setor=matricula.setor,
             ).exclude(
@@ -284,17 +288,12 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
             ).order_by('data')
 
         if is_enfermeiro(user):
-            # Enfermeiro vê:
-            # 1. Todos os plantões oficiais do seu setor (criados por escalante/admin)
-            # 2. Seus próprios registros privados
             oficiais = Q(
                 hospital=matricula.hospital,
                 setor=matricula.setor,
             ) & ~Q(criado_por__cal_perfil__tipo='ENFERMEIRO')
             privados = Q(criado_por=user, profissional=matricula)
-            return EventoEscala.objects.filter(
-                oficiais | privados
-            ).order_by('data')
+            return base_qs.filter(oficiais | privados).order_by('data')
 
         return EventoEscala.objects.none()
 

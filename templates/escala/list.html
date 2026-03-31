@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>📅 Escalas Mensais</h2>
         <a href="{% url 'importar_escala' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nova Escala
+            <i class="bi bi-plus-lg"></i> Nova Escala
         </a>
     </div>
     
@@ -112,19 +112,19 @@
                                 <div class="btn-group btn-group-sm">
                                     <a href="{% url 'escala_detalhes' escala.id %}" 
                                        class="btn btn-info" title="Ver">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="bi bi-eye"></i>
                                     </a>
                                     <a href="{% url 'relatorio_semanal' escala.id %}" 
                                        class="btn btn-success" title="Relatório">
-                                        <i class="fas fa-chart-bar"></i>
+                                        <i class="bi bi-bar-chart"></i>
                                     </a>
                                     <a href="{% url 'exportar_escala' escala.id %}" 
                                        class="btn btn-primary" title="Exportar">
-                                        <i class="fas fa-download"></i>
+                                        <i class="bi bi-download"></i>
                                     </a>
                                     <button class="btn btn-danger" title="Excluir"
                                             onclick="confirmarExclusao({{ escala.id }})">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </td>
