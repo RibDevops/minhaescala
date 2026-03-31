@@ -295,3 +295,5 @@ Traceback (most recent call last):
   File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/template/loader.py", line 47, in select_template
     raise TemplateDoesNotExist(", ".join(template_name_list), chain=chain)
 django.template.exceptions.TemplateDoesNotExist: cal/eventoescala_confirm_delete.html
+WARNING 2026-03-31 09:54:34,056 log log.py 249 log_message Not Found: /cal/calendar/
+WARNING 2026-03-31 09:54:40,414 log log.py 249 log_message Not Found: /favicon.ico

@@ -58,27 +58,36 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
             data__range=[primeiro_dia, ultimo_dia]
         ).select_related('tipo', 'profissional', 'hospital', 'setor', 'criado_por')
         
+        matricula = get_matricula(user)
+        pode_editar = True  # por padrão, usuários autenticados podem editar
+
         if not user.is_staff and perfil:
             if perfil.tipo == 'ESCALANTE':
-                if hasattr(user, 'matricula') and user.matricula:
-                    # Escalante vê tudo do seu setor, exceto o que foi criado por usuários 'ENFERMEIRO' (registros privados)
+                if matricula:
+                    # Escalante vê TODA a escala do setor (inclui seus próprios plantões)
+                    # Exclui apenas registros PRIVADOS de outros enfermeiros (criados por eles mesmos para si)
                     plantoes = plantoes.filter(
-                        hospital=user.matricula.hospital, 
-                        setor=user.matricula.setor
+                        hospital=matricula.hospital,
+                        setor=matricula.setor
                     ).exclude(
-                        criado_por__cal_perfil__tipo='ENFERMEIRO'
+                        # Exclui registros criados por ENFERMEIRO para si mesmo (privados)
+                        # Mas não exclui os criados pelo escalante para si mesmo
+                        Q(criado_por__cal_perfil__tipo='ENFERMEIRO') & ~Q(criado_por=user)
                     )
             elif perfil.tipo == 'ENFERMEIRO':
-                if hasattr(user, 'matricula') and user.matricula:
-                    # Enfermeiro vê o que ele mesmo criou (pessoal) E o que foi criado por ESCALANTE/ADMIN para o setor dele (oficial)
+                if matricula:
+                    # Enfermeiro vê a escala COMPLETA do setor (somente leitura)
+                    # Vê plantões oficiais do setor + seus próprios registros privados
                     plantoes = plantoes.filter(
-                        Q(profissional=user.matricula) | 
-                        (Q(setor=user.matricula.setor) & (Q(criado_por__cal_perfil__tipo='ESCALANTE') | Q(criado_por__is_staff=True)))
-                    )
-        
+                        Q(setor=matricula.setor, hospital=matricula.hospital) &
+                        ~Q(criado_por__cal_perfil__tipo='ENFERMEIRO') |
+                        Q(profissional=matricula)
+                    ).distinct()
+                    pode_editar = False  # Enfermeiro não edita
+
         cal = Calendar(d.year, d.month, plantoes)
         html_cal = cal.formatmonth(withyear=True)
-        
+
         context.update({
             'primeiro_dia': primeiro_dia,
             'ultimo_dia': ultimo_dia,
@@ -86,6 +95,7 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
             'mes_atual': d.strftime("%Y-%m"),
             'mes_anterior': (primeiro_dia - timedelta(days=1)).strftime("%Y-%m"),
             'mes_seguinte': (ultimo_dia + timedelta(days=1)).strftime("%Y-%m"),
+            'pode_editar': pode_editar,
         })
         return context
 
@@ -265,6 +275,11 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
     context_object_name = 'eventos'
     paginate_by = 30
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pode_editar'] = not is_enfermeiro(self.request.user)
+        return context
+
     def get_queryset(self):
         user = self.request.user
         matricula = get_matricula(user)
@@ -280,20 +295,22 @@ class MeusPlantoesListView(LoginRequiredMixin, ListView):
             return EventoEscala.objects.none()
 
         if is_escalante(user):
+            # Escalante vê toda a escala do setor, exceto registros privados de outros enfermeiros
             return base_qs.filter(
                 hospital=matricula.hospital,
                 setor=matricula.setor,
             ).exclude(
-                criado_por__cal_perfil__tipo='ENFERMEIRO'
+                Q(criado_por__cal_perfil__tipo='ENFERMEIRO') & ~Q(criado_por=user)
             ).order_by('data')
 
         if is_enfermeiro(user):
+            # Enfermeiro vê toda a escala oficial do setor + seus próprios registros
             oficiais = Q(
                 hospital=matricula.hospital,
                 setor=matricula.setor,
             ) & ~Q(criado_por__cal_perfil__tipo='ENFERMEIRO')
-            privados = Q(criado_por=user, profissional=matricula)
-            return base_qs.filter(oficiais | privados).order_by('data')
+            privados = Q(profissional=matricula)
+            return base_qs.filter(oficiais | privados).distinct().order_by('data')
 
         return EventoEscala.objects.none()
 

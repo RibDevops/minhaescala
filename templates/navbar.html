@@ -15,9 +15,13 @@
         <a href="{% url 'cal:calendar' %}" class="sidebar-link">
             <i class="bi bi-calendar-week"></i> Calendário
         </a>
+        {% with perfil=user.cal_perfil %}
+        {% if user.is_staff or perfil.tipo == 'ESCALANTE' %}
         <a href="{% url 'cal:event_new' %}" class="sidebar-link">
             <i class="bi bi-plus-circle"></i> Novo Plantão
         </a>
+        {% endif %}
+        {% endwith %}
         <a href="{% url 'cal:dashboard' %}" class="sidebar-link">
             <i class="bi bi-speedometer2"></i> Dashboard
         </a>
@@ -35,6 +39,11 @@
             <a href="{% url 'cal:escala_mensal' %}" class="sidebar-link">
                 <i class="bi bi-calendar-month"></i> Escala Mensal
             </a>
+            <a href="{% url 'cal:listar_eventos' %}" class="sidebar-link">
+                <i class="bi bi-card-list"></i> Lista de Plantões
+            </a>
+            {% with perfil=user.cal_perfil %}
+            {% if user.is_staff or perfil.tipo == 'ESCALANTE' %}
             <a href="{% url 'cal:plantoes_por_profissional' %}" class="sidebar-link">
                 <i class="bi bi-person-lines-fill"></i> Por Profissional
             </a>
@@ -48,6 +57,8 @@
             <a href="{% url 'cal:dashboard_escala' %}" class="sidebar-link">
                 <i class="bi bi-bar-chart-line"></i> Dashboard
             </a>
+            {% endif %}
+            {% endwith %}
         </div>
     </div>
 
@@ -63,9 +74,13 @@
             <a href="{% url 'cal:listar_tpd' %}" class="sidebar-link">
                 <i class="bi bi-list-check"></i> Listar TPDs
             </a>
+            {% with perfil=user.cal_perfil %}
+            {% if user.is_staff or perfil.tipo == 'ESCALANTE' %}
             <a href="{% url 'cal:novo_tpd' %}" class="sidebar-link">
                 <i class="bi bi-plus-square"></i> Novo TPD
             </a>
+            {% endif %}
+            {% endwith %}
             <a href="{% url 'cal:relatorio' %}" class="sidebar-link">
                 <i class="bi bi-file-earmark-bar-graph"></i> Relatório Mensal
             </a>
@@ -102,9 +117,6 @@
                 <i class="bi bi-calendar-event"></i> Tipos de Evento
             </a>
             <hr>
-            <a href="{% url 'cal:listar_eventos' %}" class="sidebar-link">
-                <i class="bi bi-card-list"></i> Lista de Plantões
-            </a>
             <a href="/admin/" class="sidebar-link">
                 <i class="bi bi-shield-lock"></i> Painel Admin
             </a>
