@@ -62,7 +62,9 @@ def home(request):
         return render(request, 'home.html')
 
     from datetime import date, timedelta
+    from django.db.models import Q
     from ..models import EventoEscala
+    from ..permissions import is_admin, is_escalante, is_enfermeiro
 
     hoje = date.today()
     matricula = None
@@ -73,26 +75,63 @@ def home(request):
 
     plantoes_hoje = []
     proximos = []
+    # Flag para controlar o que o template pode mostrar
+    pode_editar = not is_enfermeiro(request.user)
+    # Flag para indicar se a visão é de setor (ENFERMEIRO vê a escala completa)
+    visao_setor = is_enfermeiro(request.user)
 
     if matricula:
         fim = hoje + timedelta(days=30)
-        eventos = (
+        amanha = hoje + timedelta(days=1)
+        base_qs = (
             EventoEscala.objects
-            .filter(profissional=matricula, data__gte=hoje, data__lte=fim)
-            .select_related('tipo', 'hospital', 'setor')
-            .order_by('data')
+            .select_related('tipo', 'hospital', 'setor', 'profissional')
+            .order_by('data', 'profissional__nome_exibicao')
         )
-        for e in eventos:
-            if e.data == hoje:
-                plantoes_hoje.append(e)
-            else:
-                proximos.append(e)
+
+        user = request.user
+
+        # "Plantão Hoje" é SEMPRE pessoal — mostra se o usuário logado tem plantão hoje
+        plantoes_hoje = list(
+            base_qs.filter(profissional=matricula, data=hoje)
+        )
+
+        if is_admin(user):
+            proximos_qs = base_qs.filter(data__gte=amanha, data__lte=fim)
+
+        elif is_escalante(user):
+            # Escalante: "Próximos Plantões" na Home = apenas os PRÓPRIOS plantões
+            # (A escala completa do setor fica no Calendário e na Lista)
+            proximos_qs = base_qs.filter(
+                profissional=matricula,
+                data__gte=amanha,
+                data__lte=fim,
+            )
+
+        elif is_enfermeiro(user):
+            # Enfermeiro: "Próximos Plantões" = escala COMPLETA do setor (alinhado com Calendário)
+            # Apenas plantões oficiais (não criados por ENFERMEIROs) + os próprios
+            oficiais = Q(
+                hospital=matricula.hospital,
+                setor=matricula.setor,
+                data__gte=amanha,
+                data__lte=fim,
+            ) & ~Q(criado_por__cal_perfil__tipo='ENFERMEIRO')
+            proprios = Q(profissional=matricula, data__gte=amanha, data__lte=fim)
+            proximos_qs = base_qs.filter(oficiais | proprios).distinct()
+
+        else:
+            proximos_qs = base_qs.filter(profissional=matricula, data__gte=amanha, data__lte=fim)
+
+        proximos = list(proximos_qs[:20])
 
     return render(request, 'home.html', {
         'hoje': hoje,
         'matricula': matricula,
         'plantoes_hoje': plantoes_hoje,
-        'proximos': proximos[:15],
+        'proximos': proximos[:20],
+        'pode_editar': pode_editar,
+        'visao_setor': visao_setor,
     })
 
 

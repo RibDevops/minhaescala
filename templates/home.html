@@ -56,6 +56,7 @@
 
 {# ── Atalhos rápidos ────────────────────────────────────── #}
 <div class="row g-2 mb-4">
+    {% if pode_editar %}
     <div class="col-6">
         <a href="{% url 'cal:event_new' %}"
            class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-1">
@@ -64,6 +65,9 @@
         </a>
     </div>
     <div class="col-6">
+    {% else %}
+    <div class="col-6">
+    {% endif %}
         <a href="{% url 'cal:calendar' %}"
            class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-1">
             <i class="bi bi-calendar-week-fill" style="font-size:1.4rem;"></i>
@@ -89,13 +93,21 @@
 {# ── Próximos Plantões ──────────────────────────────────── #}
 {% if proximos %}
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <h6 class="mb-0 fw-bold"><i class="bi bi-calendar-event text-primary"></i> Próximos Plantões</h6>
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-calendar-event text-primary"></i>
+        {% if visao_setor %}Escala do Setor{% else %}Próximos Plantões{% endif %}
+    </h6>
     <a href="{% url 'cal:listar_eventos' %}" class="small text-muted">Ver todos</a>
 </div>
+{% if visao_setor %}
+<div class="alert alert-info py-2 px-3 mb-2 small d-flex align-items-center gap-2">
+    <i class="bi bi-eye"></i>
+    Escala completa do setor — somente visualização.
+</div>
+{% endif %}
 <div class="card border-0 shadow-sm mb-4">
     <ul class="list-group list-group-flush">
         {% for p in proximos %}
-        {% with delta=p.data|timeuntil:hoje %}
         <li class="list-group-item px-3 py-2">
             <div class="d-flex align-items-center gap-3">
                 {# Bloco da data #}
@@ -110,7 +122,7 @@
                 </div>
                 {# Detalhes #}
                 <div class="flex-grow-1">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
                         {% if p.tipo %}
                         <span class="badge fw-semibold"
                               style="background-color:{{ p.tipo.cor|default:'#6c757d' }}; font-size:.75rem;">
@@ -119,6 +131,11 @@
                         {% endif %}
                         <span class="small text-muted">{{ p.data|date:"l"|upper }}</span>
                     </div>
+                    {% if visao_setor %}
+                    <div class="fw-semibold" style="font-size:0.83rem;">
+                        {{ p.profissional.nome_exibicao }}
+                    </div>
+                    {% endif %}
                     {% if p.tipo %}
                     <div class="text-muted" style="font-size:0.78rem;">
                         {{ p.tipo.horas }}h
@@ -126,11 +143,9 @@
                     </div>
                     {% endif %}
                 </div>
-                {# Ícone de seta #}
                 <i class="bi bi-chevron-right text-muted small"></i>
             </div>
         </li>
-        {% endwith %}
         {% endfor %}
     </ul>
 </div>
@@ -138,7 +153,9 @@
 <div class="text-center text-muted py-4">
     <i class="bi bi-calendar-check fs-1"></i>
     <p class="mt-2 mb-0 small">Nenhum plantão nos próximos 30 dias.</p>
+    {% if pode_editar %}
     <a href="{% url 'cal:event_new' %}" class="btn btn-sm btn-primary mt-3">Registrar Plantão</a>
+    {% endif %}
 </div>
 {% endif %}
 
