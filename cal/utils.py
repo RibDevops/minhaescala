@@ -22,7 +22,7 @@ class Calendar(HTMLCalendar):
                 f'<li onclick="abrirModalEvento({plantao.id}, \'{nome}\', \'{codigo}\', {horas}, \'{plantao.data}\')" '
                 f'style="background-color: {cor}; color: white; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; '
                 f'list-style: none; font-size: 0.85em; cursor: pointer;">'
-                f'{nome} ({codigo} - {horas}h)</li>'
+                f'{nome} ({codigo})</li>'
             )
             
             # Contagem por especialidade do profissional
