@@ -81,34 +81,6 @@
                 </div>
             </form>
 
-<!-- Modal de confirmação de excesso de carga -->
-<div class="modal fade" id="modalExcessoCarga" tabindex="-1" aria-labelledby="modalExcessoCargaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning text-dark border-0">
-                <h5 class="modal-title fw-bold" id="modalExcessoCargaLabel">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Excesso de Carga Horária
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body py-4">
-                <p class="mb-3">Os seguintes plantões ultrapassam o limite semanal do profissional:</p>
-                <ul id="listaExcessos" class="list-group list-group-flush mb-3"></ul>
-                <p class="text-muted small mb-0">
-                    A carga semanal é um valor de referência. Você pode prosseguir mesmo assim ou voltar e ajustar.
-                </p>
-            </div>
-            <div class="modal-footer border-0 gap-2">
-                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
-                    <i class="bi bi-arrow-left me-1"></i>Voltar e ajustar
-                </button>
-                <button type="button" class="btn btn-warning px-4 fw-bold" id="btnConfirmarExcesso">
-                    <i class="bi bi-check-circle me-1"></i>Salvar mesmo assim
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
         </div>
     </div>
 </div>
@@ -163,10 +135,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const template = document.getElementById('plantaoTemplate');
     const form = document.getElementById('bulkPlantaoForm');
     const forcarCargaInput = document.getElementById('forcarCarga');
-    const modalEl = document.getElementById('modalExcessoCarga');
-    const modal = modalEl ? new bootstrap.Modal(modalEl) : null;
-    const listaExcessos = document.getElementById('listaExcessos');
-    const btnConfirmar = document.getElementById('btnConfirmarExcesso');
 
     // Armazena resultados de validação por card: Map<cardElement, {excedeu, mensagem, total, limite}>
     const resultadosCarga = new Map();
@@ -247,9 +215,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Interceptar submit: verificar se algum card tem excesso
-    if (form && modal) {
+    if (form) {
         form.addEventListener('submit', function(e) {
-            // Se já foi confirmado pelo usuário, deixa passar
             if (forcarCargaInput.value === '1') return;
 
             const excessos = [];
@@ -257,35 +224,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const resultado = resultadosCarga.get(item);
                 if (resultado?.excedeu) {
                     const dataVal = item.querySelector('.data-input')?.value || '';
-                    excessos.push({ idx: idx + 1, data: dataVal, total: resultado.total, limite: resultado.limite });
+                    excessos.push(`Plantão #${idx + 1}${dataVal ? ' — ' + dataVal : ''}: ${resultado.total}h / limite ${resultado.limite}h`);
                 }
             });
 
             if (excessos.length > 0) {
                 e.preventDefault();
-                // Preencher lista do modal
-                listaExcessos.innerHTML = excessos.map(ex =>
-                    `<li class="list-group-item px-0 py-2">
-                        <span class="fw-bold">Plantão #${ex.idx}</span>
-                        ${ex.data ? ` — ${ex.data}` : ''}
-                        <span class="badge bg-warning text-dark ms-2">${ex.total}h / limite ${ex.limite}h</span>
-                    </li>`
-                ).join('');
-                modal.show();
-            }
-        });
-
-        // Botão "Salvar mesmo assim" — seta flag e reenvia
-        btnConfirmar.addEventListener('click', function() {
-            forcarCargaInput.value = '1';
-            modal.hide();
-            form.submit();
-        });
-
-        // Ao fechar o modal sem confirmar, resetar o flag
-        modalEl.addEventListener('hidden.bs.modal', function() {
-            if (forcarCargaInput.value !== '1') {
-                forcarCargaInput.value = '0';
+                const msg = 'Excesso de carga horária:\n\n' + excessos.join('\n') + '\n\nSalvar mesmo assim?';
+                if (confirm(msg)) {
+                    forcarCargaInput.value = '1';
+                    form.submit();
+                }
             }
         });
     }
