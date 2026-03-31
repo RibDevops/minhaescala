@@ -1,12 +1,31 @@
 from calendar import HTMLCalendar
 from .models import EventoEscala
 
+MESES_PT = [
+    '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+]
+
+DIAS_SEMANA_PT = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+
 class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None, plantoes=None):
         self.year = year
         self.month = month
         self.plantoes = plantoes
         super(Calendar, self).__init__()
+
+    def formatmonthname(self, theyear, themonth, withyear=True):
+        nome_mes = MESES_PT[themonth]
+        if withyear:
+            s = f'{nome_mes} {theyear}'
+        else:
+            s = nome_mes
+        return f'<tr><th colspan="7" class="month">{s}</th></tr>'
+
+    def formatweekheader(self):
+        s = ''.join(f'<th class="{self.cssclasses[i]}">{DIAS_SEMANA_PT[i]}</th>' for i in range(7))
+        return f'<tr>{s}</tr>'
 
     def formatday(self, day, weekday):
         plantoes_do_dia = self.plantoes.filter(data__day=day)

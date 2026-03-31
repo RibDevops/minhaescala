@@ -88,6 +88,9 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         cal = Calendar(d.year, d.month, plantoes)
         html_cal = cal.formatmonth(withyear=True)
 
+        from ..utils import MESES_PT
+        mes_nome = f"{MESES_PT[d.month]} {d.year}"
+
         context.update({
             'primeiro_dia': primeiro_dia,
             'ultimo_dia': ultimo_dia,
@@ -96,6 +99,7 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
             'mes_anterior': (primeiro_dia - timedelta(days=1)).strftime("%Y-%m"),
             'mes_seguinte': (ultimo_dia + timedelta(days=1)).strftime("%Y-%m"),
             'pode_editar': pode_editar,
+            'mes_nome': mes_nome,
         })
         return context
 
