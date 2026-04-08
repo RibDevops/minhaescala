@@ -4,60 +4,83 @@
 {% block title %}Calendário{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="?month={{ mes_anterior }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-chevron-left"></i> Anterior
+<div class="container-fluid px-2 px-md-3 mt-3">
+
+    <!-- Navegação do mês -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="?month={{ mes_anterior }}"
+           class="btn btn-outline-secondary"
+           style="min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center;">
+            <i class="bi bi-chevron-left fs-5"></i>
+            <span class="d-none d-sm-inline ms-1">Anterior</span>
         </a>
-        <h4 class="mb-0 text-primary">{{ mes_nome }}</h4>
-        <a href="?month={{ mes_seguinte }}" class="btn btn-outline-secondary btn-sm">
-            Próximo <i class="bi bi-chevron-right"></i>
+
+        <h5 class="mb-0 text-primary fw-bold">{{ mes_nome }}</h5>
+
+        <a href="?month={{ mes_seguinte }}"
+           class="btn btn-outline-secondary"
+           style="min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center;">
+            <span class="d-none d-sm-inline me-1">Próximo</span>
+            <i class="bi bi-chevron-right fs-5"></i>
         </a>
     </div>
 
+    <!-- Calendário -->
     <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-body p-0">
-            <div class="table-responsive p-3">
-                {{ calendar }}
-            </div>
+        <div class="card-body p-1 p-sm-2">
+            {{ calendar }}
         </div>
     </div>
-    
+
+    <!-- Botão desktop (oculto no mobile — FAB assume) -->
     {% if pode_editar %}
-    <div class="mt-4 text-center">
+    <div class="mt-4 text-center btn-novo-plantao-desktop">
         <a href="{% url 'cal:event_new' %}" class="btn btn-primary px-4 rounded-pill shadow">
             <i class="bi bi-plus-lg"></i> Novo Plantão
         </a>
     </div>
     {% endif %}
+
 </div>
 
-<!-- Modal de Evento do Calendário -->
-<div class="modal fade" id="modalEvento" tabindex="-1">
-    <div class="modal-dialog modal-sm">
+<!-- FAB mobile -->
+{% if pode_editar %}
+<a href="{% url 'cal:event_new' %}" class="fab-novo-plantao" title="Novo Plantão">
+    <i class="bi bi-plus-lg"></i>
+</a>
+{% endif %}
+
+<!-- Modal de detalhe do plantão -->
+<div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalEventoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-calendar-event"></i> Plantão</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header py-2">
+                <h6 class="modal-title mb-0" id="modalEventoLabel">
+                    <i class="bi bi-calendar-event"></i> Plantão
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <p class="mb-1"><strong>Profissional:</strong> <span id="modalNome"></span></p>
-                <p class="mb-1"><strong>Tipo:</strong> <span id="modalCodigo"></span></p>
-                <p class="mb-1"><strong>Carga:</strong> <span id="modalHoras"></span>h</p>
-                <p class="mb-0"><strong>Data:</strong> <span id="modalData"></span></p>
+                <p class="mb-2"><strong>Profissional:</strong><br><span id="modalNome"></span></p>
+                <p class="mb-2"><strong>Tipo:</strong> <span id="modalCodigo"></span></p>
+                <p class="mb-2"><strong>Carga:</strong> <span id="modalHoras"></span>h</p>
+                <p class="mb-2"><strong>Data:</strong> <span id="modalData"></span></p>
+                <p class="mb-0" id="modalObsWrap" style="display:none;">
+                    <strong>Obs:</strong> <span id="modalObs"></span>
+                </p>
             </div>
             {% if pode_editar %}
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-danger btn-sm" id="btnDeletarCalendario" onclick="deletarEventoCalendario()">
+            <div class="modal-footer justify-content-between py-2">
+                <button type="button" class="btn btn-danger btn-sm" id="btnDeletar">
                     <i class="bi bi-trash"></i> Deletar
                 </button>
-                <a id="btnEditarCalendario" href="#" class="btn btn-primary btn-sm">
+                <a id="btnEditar" href="#" class="btn btn-primary btn-sm">
                     <i class="bi bi-pencil"></i> Editar
                 </a>
             </div>
             {% else %}
-            <div class="modal-footer">
-                <small class="text-muted"><i class="bi bi-eye"></i> Visualização somente leitura</small>
+            <div class="modal-footer py-2">
+                <small class="text-muted"><i class="bi bi-eye"></i> Somente visualização</small>
             </div>
             {% endif %}
         </div>
@@ -67,52 +90,84 @@
 
 {% block scripts %}
 <script>
-    let eventoIdAtual = null;
+(function () {
     let modalEvento = null;
+    let eventoIdAtual = null;
 
-    function initializeModal() {
-        if (typeof bootstrap !== 'undefined' && !modalEvento) {
+    function getModal() {
+        if (!modalEvento && typeof bootstrap !== 'undefined') {
             modalEvento = new bootstrap.Modal(document.getElementById('modalEvento'));
         }
+        return modalEvento;
     }
 
-    function abrirModalEvento(eventoId, nome, codigo, horas, data) {
-        initializeModal();
-        if (!modalEvento) return;
-        
-        eventoIdAtual = eventoId;
-        document.getElementById('modalNome').textContent = nome;
-        document.getElementById('modalCodigo').textContent = codigo;
-        document.getElementById('modalHoras').textContent = horas;
-        document.getElementById('modalData').textContent = data;
-        document.getElementById('btnEditarCalendario').href = `/plantao/${eventoId}/editar/`;
-        modalEvento.show();
+    function abrirModal(id, nome, codigo, horas, dataStr, obs) {
+        const m = getModal();
+        if (!m) return;
+
+        eventoIdAtual = id;
+
+        document.getElementById('modalNome').textContent    = nome;
+        document.getElementById('modalCodigo').textContent  = codigo;
+        document.getElementById('modalHoras').textContent   = horas;
+        document.getElementById('modalData').textContent    = dataStr;
+
+        const obsWrap = document.getElementById('modalObsWrap');
+        if (obs) {
+            document.getElementById('modalObs').textContent = obs;
+            obsWrap.style.display = '';
+        } else {
+            obsWrap.style.display = 'none';
+        }
+
+        const btnEditar = document.getElementById('btnEditar');
+        if (btnEditar) btnEditar.href = `/plantao/${id}/editar/`;
+
+        m.show();
     }
 
-    function deletarEventoCalendario() {
-        if (!confirm('Tem certeza que deseja deletar este plantão?')) return;
-        fetch(`/plantao/${eventoIdAtual}/excluir/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (response.redirected || response.ok) {
-                if (modalEvento) modalEvento.hide();
-                location.reload();
-            } else {
-                alert('Erro ao deletar o plantão.');
-            }
-        })
-        .catch(() => {
-            // Fallback: redireciona para a página de exclusão
-            window.location.href = `/plantao/${eventoIdAtual}/excluir/`;
+    // Delegação de eventos — captura clique em qualquer .evento-item
+    document.addEventListener('click', function (e) {
+        const li = e.target.closest('.evento-item');
+        if (!li) return;
+        abrirModal(
+            li.dataset.id,
+            li.dataset.nome,
+            li.dataset.codigo,
+            li.dataset.horas,
+            li.dataset.data,
+            li.dataset.obs || ''
+        );
+    });
+
+    // Deletar
+    const btnDeletar = document.getElementById('btnDeletar');
+    if (btnDeletar) {
+        btnDeletar.addEventListener('click', function () {
+            if (!confirm('Tem certeza que deseja deletar este plantão?')) return;
+            fetch(`/plantao/${eventoIdAtual}/excluir/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function (r) {
+                if (r.redirected || r.ok) {
+                    const m = getModal();
+                    if (m) m.hide();
+                    location.reload();
+                } else {
+                    alert('Erro ao deletar o plantão.');
+                }
+            })
+            .catch(function () {
+                window.location.href = `/plantao/${eventoIdAtual}/excluir/`;
+            });
         });
     }
 
-    // Initialize modal when DOM is ready and Bootstrap is loaded
-    document.addEventListener('DOMContentLoaded', initializeModal);
+    document.addEventListener('DOMContentLoaded', getModal);
+})();
 </script>
 {% endblock %}

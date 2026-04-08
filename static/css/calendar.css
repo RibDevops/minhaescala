@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════
-   CALENDÁRIO - Sistema de Escalas
+   CALENDÁRIO — Sistema de Escalas
+   Mobile-first design
    ═══════════════════════════════════════════════════ */
 
 /* ── Tabela principal ──────────────────────────────── */
@@ -7,7 +8,7 @@ table.calendar {
     width: 100%;
     border-collapse: separate;
     border-spacing: 3px;
-    margin-top: 8px;
+    margin-top: 4px;
     table-layout: fixed;
 }
 
@@ -15,9 +16,9 @@ table.calendar {
 table.calendar .month {
     background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     padding: 14px 10px;
     border-radius: 10px 10px 0 0;
     text-align: center;
@@ -28,16 +29,16 @@ table.calendar th {
     background-color: #f0f4ff;
     color: #3c4a6e;
     text-align: center;
-    padding: 10px 4px;
-    font-size: 0.78rem;
+    padding: 10px 2px;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     border-radius: 6px;
     border: none;
 }
 
-/* ── Células dos dias ──────────────────────────────── */
+/* ── Células dos dias (DESKTOP) ────────────────────── */
 table.calendar td {
     height: 110px;
     vertical-align: top;
@@ -47,6 +48,7 @@ table.calendar td {
     border: 1px solid #e8eaf0;
     position: relative;
     transition: background-color 0.15s, box-shadow 0.15s;
+    overflow: hidden;
 }
 
 table.calendar td:hover {
@@ -73,13 +75,14 @@ table.calendar .date {
     border-radius: 50%;
     margin-bottom: 4px;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 /* ── DIA ATUAL destacado ───────────────────────────── */
 table.calendar td.today {
     background-color: #e8f0fe;
     border: 2px solid #1a73e8;
-    box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.2), inset 0 1px 3px rgba(26,115,232,0.08);
+    box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.2);
 }
 
 table.calendar td.today:hover {
@@ -93,18 +96,22 @@ table.calendar td.today .date {
     box-shadow: 0 2px 6px rgba(26, 115, 232, 0.45);
 }
 
-/* ── Domingo (coluna) com tom levemente rosa ───────── */
+/* ── Domingo levemente rosado ──────────────────────── */
 table.calendar .sun {
     background-color: #fff8f8;
     border-color: #f0dada;
 }
-
 table.calendar td.today.sun {
     background-color: #e8f0fe;
     border-color: #1a73e8;
 }
 
-/* ── Lista de eventos dentro do dia ───────────────── */
+/* ── Sábado ────────────────────────────────────────── */
+table.calendar .sat {
+    background-color: #fafbff;
+}
+
+/* ── Lista de eventos ──────────────────────────────── */
 table.calendar td ul {
     list-style: none;
     padding: 0;
@@ -114,23 +121,38 @@ table.calendar td ul {
     gap: 2px;
 }
 
-table.calendar td li {
-    font-size: 0.78em;
-    padding: 3px 6px;
+/* ── Item de evento ────────────────────────────────── */
+.evento-item {
+    color: white;
     border-radius: 5px;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
     cursor: pointer;
-    transition: filter 0.1s, transform 0.1s;
-    line-height: 1.35;
+    transition: filter 0.12s, transform 0.12s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    overflow: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.evento-item:hover,
+.evento-item:active {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
 }
 
-table.calendar td li:hover {
-    filter: brightness(1.08);
-    transform: translateY(-1px);
+/* ── Conteúdo do evento (desktop: nome + código) ─── */
+.evento-item {
+    padding: 3px 6px;
+    font-size: 0.78em;
+    line-height: 1.3;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.evento-nome { font-weight: 500; }
+.evento-codigo { opacity: 0.85; font-size: 0.9em; }
+.evento-obs {
+    font-size: 0.78em;
+    opacity: 0.9;
+    margin-top: 1px;
+    white-space: normal;
 }
 
 /* ── Resumo de especialidades ──────────────────────── */
@@ -143,28 +165,36 @@ table.calendar td li:hover {
     line-height: 1.4;
 }
 
-/* ── Sábado levemente diferenciado ────────────────── */
-table.calendar .sat {
-    background-color: #fafbff;
-}
-
-/* ── Ajustes mobile ────────────────────────────────── */
-@media (max-width: 768px) {
+/* ══════════════════════════════════════════════════════
+   MOBILE  ≤ 600px
+   Células compactas: só a badge colorida com o código
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
     table.calendar {
         border-spacing: 2px;
     }
 
+    table.calendar th {
+        font-size: 0.62rem;
+        padding: 5px 1px;
+        letter-spacing: 0;
+    }
+
     table.calendar td {
-        height: 64px;
-        padding: 3px 2px;
-        border-radius: 5px;
+        height: 70px;
+        padding: 4px 2px 3px;
+        border-radius: 6px;
+    }
+
+    table.calendar td.today {
+        border-width: 2px;
     }
 
     table.calendar .date {
         width: 20px;
         height: 20px;
-        font-size: 0.72rem;
-        margin-bottom: 2px;
+        font-size: 0.7rem;
+        margin-bottom: 3px;
     }
 
     table.calendar td.today .date {
@@ -172,27 +202,89 @@ table.calendar .sat {
         height: 20px;
     }
 
-    table.calendar td li {
-        font-size: 0.66em;
-        padding: 2px 3px;
-        border-radius: 3px;
+    /* No mobile: mostrar só a badge com o código */
+    .evento-nome { display: none; }
+    .evento-obs  { display: none; }
+
+    .evento-item {
+        padding: 2px 4px;
+        font-size: 0.68em;
+        border-radius: 4px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
+    /* Código com mais destaque — sem parênteses */
+    .evento-codigo {
+        font-weight: 600;
+        font-size: 1em;
+        opacity: 1;
+    }
+    .evento-paren { display: none; }
+
+    .calendar-summary { display: none; }
+}
+
+/* ── Telas muito pequenas ≤ 380px ──────────────────── */
+@media (max-width: 380px) {
+    table.calendar td {
+        height: 58px;
+        padding: 3px 1px;
+    }
     table.calendar th {
-        font-size: 0.65rem;
-        padding: 6px 2px;
+        font-size: 0.55rem;
+        padding: 4px 0;
     }
-
-    .calendar-summary {
-        display: none;
+    .evento-item {
+        font-size: 0.6em;
+        padding: 1px 2px;
     }
 }
 
-@media (max-width: 480px) {
-    table.calendar td {
-        height: 52px;
+/* ══════════════════════════════════════════════════════
+   FAB — Botão Flutuante "Novo Plantão" (mobile only)
+   ══════════════════════════════════════════════════════ */
+.fab-novo-plantao {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .fab-novo-plantao {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a73e8, #0d47a1);
+        color: #fff;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 16px rgba(26,115,232,0.45);
+        z-index: 1030;
+        text-decoration: none;
+        transition: transform 0.18s, box-shadow 0.18s;
+        -webkit-tap-highlight-color: transparent;
     }
-    table.calendar td li div {
-        display: none;
+    .fab-novo-plantao:hover,
+    .fab-novo-plantao:active {
+        color: #fff;
+        transform: scale(1.08);
+        box-shadow: 0 6px 20px rgba(26,115,232,0.55);
     }
+
+    /* Botão desktop fica oculto no mobile */
+    .btn-novo-plantao-desktop {
+        display: none !important;
+    }
+}
+
+/* Desktop: FAB oculto, botão normal visível */
+@media (min-width: 768px) {
+    .fab-novo-plantao { display: none !important; }
+    .btn-novo-plantao-desktop { display: inline-flex !important; }
 }
