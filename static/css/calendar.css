@@ -1,125 +1,198 @@
-/* Estilos gerais do container e navegação */
-.calendar-container {
-    margin: 20px 0 60px; /* Unificado top, right/left, bottom */
-}
+/* ═══════════════════════════════════════════════════
+   CALENDÁRIO - Sistema de Escalas
+   ═══════════════════════════════════════════════════ */
 
-.calendar-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.calendar-navigation .btn {
-    padding: 8px 16px;
-}
-
-.calendar-title {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.5rem;
-    margin: 0 10px;
-}
-
-/* Estilos da tabela do calendário */
+/* ── Tabela principal ──────────────────────────────── */
 table.calendar {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 3px;
+    margin-top: 8px;
+    table-layout: fixed;
 }
 
-.calendar th {
-    background-color: #f8f9fa;
+/* ── Cabeçalho do mês ──────────────────────────────── */
+table.calendar .month {
+    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 14px 10px;
+    border-radius: 10px 10px 0 0;
     text-align: center;
-    padding: 10px;
-    border: 1px solid #dee2e6;
 }
 
-.calendar td {
-    height: 100px;
+/* ── Cabeçalho dos dias da semana ──────────────────── */
+table.calendar th {
+    background-color: #f0f4ff;
+    color: #3c4a6e;
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+    border: none;
+}
+
+/* ── Células dos dias ──────────────────────────────── */
+table.calendar td {
+    height: 110px;
     vertical-align: top;
-    padding: 5px;
-    border: 1px solid #dee2e6;
+    padding: 6px 5px 4px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #e8eaf0;
     position: relative;
+    transition: background-color 0.15s, box-shadow 0.15s;
 }
 
-/* Estilos dos dias e eventos */
-.calendar .date {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
+table.calendar td:hover {
+    background-color: #f7f9ff;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.12);
 }
 
-.calendar .event,
-.calendar td li {
-    font-size: 0.8em;
-    background-color: #5fe2a1;
-    padding: 2px 5px;
-    border-radius: 3px;
-    margin-bottom: 2px;
+table.calendar td.noday {
+    background-color: transparent;
+    border: none;
+    pointer-events: none;
+}
+
+/* ── Número do dia ─────────────────────────────────── */
+table.calendar .date {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #3c4a6e;
+    border-radius: 50%;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+/* ── DIA ATUAL destacado ───────────────────────────── */
+table.calendar td.today {
+    background-color: #e8f0fe;
+    border: 2px solid #1a73e8;
+    box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.2), inset 0 1px 3px rgba(26,115,232,0.08);
+}
+
+table.calendar td.today:hover {
+    background-color: #ddeafd;
+}
+
+table.calendar td.today .date {
+    background-color: #1a73e8;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(26, 115, 232, 0.45);
+}
+
+/* ── Domingo (coluna) com tom levemente rosa ───────── */
+table.calendar .sun {
+    background-color: #fff8f8;
+    border-color: #f0dada;
+}
+
+table.calendar td.today.sun {
+    background-color: #e8f0fe;
+    border-color: #1a73e8;
+}
+
+/* ── Lista de eventos dentro do dia ───────────────── */
+table.calendar td ul {
+    list-style: none;
+    padding: 0;
+    margin: 2px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+table.calendar td li {
+    font-size: 0.78em;
+    padding: 3px 6px;
+    border-radius: 5px;
     display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: filter 0.1s, transform 0.1s;
+    line-height: 1.35;
 }
 
-/* Dia atual destacado */
-.calendar td.today {
-    background-color: #ffe599; /* amarelo claro */
-    /* border: 2px solid #ffa500; */
+table.calendar td li:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
 }
 
-/* Evento normal */
-.calendar .event {
-    background-color: #5fe2a1; /* verde claro */
-    color: #000;
-}
-
-/* Evento importante (exemplo adicional, caso queira customizar) */
-.calendar .event.important {
-    background-color: #ff9999; /* vermelho claro */
-    color: #fff;
-}
-
-.calendar td ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 5px 0 0;
-}
-
-/* Estados especiais */
-.calendar .today {
-    background-color: #e7e1cb;
-}
-
-.calendar .other-month {
-    background-color: #f8f9fa;
+/* ── Resumo de especialidades ──────────────────────── */
+.calendar-summary {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed #dee2e6;
+    font-size: 0.7em;
     color: #6c757d;
+    line-height: 1.4;
 }
 
-/* Ajustes para mobile */
+/* ── Sábado levemente diferenciado ────────────────── */
+table.calendar .sat {
+    background-color: #fafbff;
+}
+
+/* ── Ajustes mobile ────────────────────────────────── */
 @media (max-width: 768px) {
-    .calendar td {
-        height: 60px;
-        font-size: 0.8rem;
-        padding: 2px;
+    table.calendar {
+        border-spacing: 2px;
     }
-    
-    .calendar .event,
-    .calendar td li {
-        font-size: 0.7em;
-        padding: 1px 3px;
+
+    table.calendar td {
+        height: 64px;
+        padding: 3px 2px;
+        border-radius: 5px;
     }
-    
-    .calendar-navigation .btn {
-        padding: 5px 10px;
-        font-size: 0.9rem;
+
+    table.calendar .date {
+        width: 20px;
+        height: 20px;
+        font-size: 0.72rem;
+        margin-bottom: 2px;
     }
-    
-    .calendar-title {
-        font-size: 1.2rem;
+
+    table.calendar td.today .date {
+        width: 20px;
+        height: 20px;
+    }
+
+    table.calendar td li {
+        font-size: 0.66em;
+        padding: 2px 3px;
+        border-radius: 3px;
+    }
+
+    table.calendar th {
+        font-size: 0.65rem;
+        padding: 6px 2px;
+    }
+
+    .calendar-summary {
+        display: none;
     }
 }
 
-
-
+@media (max-width: 480px) {
+    table.calendar td {
+        height: 52px;
+    }
+    table.calendar td li div {
+        display: none;
+    }
+}

@@ -1,4 +1,5 @@
 from calendar import HTMLCalendar
+from datetime import date
 from .models import EventoEscala
 
 MESES_PT = [
@@ -61,8 +62,11 @@ class Calendar(HTMLCalendar):
             resumo_html += '</div>'
 
         if day != 0:
-            return f"<td><span class='date'>{day}</span><ul>{d}</ul>{resumo_html}</td>"
-        return '<td></td>'
+            today = date.today()
+            is_today = (today.year == self.year and today.month == self.month and today.day == day)
+            td_class = "today" if is_today else ""
+            return f"<td class='{td_class}'><span class='date'>{day}</span><ul>{d}</ul>{resumo_html}</td>"
+        return '<td class="noday"></td>'
 
     def formatweek(self, theweek):
         s = ''.join(self.formatday(d, wd) for d, wd in theweek)
