@@ -446,3 +446,24 @@ Traceback (most recent call last):
   File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1396, in get_related_selections
     raise FieldError(
 django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'tipo_evento'. Choices are: profissional, tipo, hospital, setor, criado_por
+WARNING 2026-04-08 16:46:58,129 log log.py 248 log_response Not Found: /static/admin/css/base.css
+WARNING 2026-04-08 16:46:58,170 log log.py 248 log_response Not Found: /static/admin/css/nav_sidebar.css
+WARNING 2026-04-08 16:46:58,289 log log.py 248 log_response Not Found: /static/admin/css/responsive.css
+WARNING 2026-04-08 16:46:58,409 log log.py 248 log_response Not Found: /static/admin/js/nav_sidebar.js
+WARNING 2026-04-08 16:46:58,416 log log.py 248 log_response Not Found: /static/admin/css/dark_mode.css
+WARNING 2026-04-08 16:46:58,423 log log.py 248 log_response Not Found: /static/admin/css/dashboard.css
+WARNING 2026-04-08 16:46:58,963 log log.py 248 log_response Not Found: /static/admin/js/theme.js
+WARNING 2026-04-08 16:46:59,113 log log.py 248 log_response Not Found: /static/admin/css/dashboard.css
+WARNING 2026-04-08 16:46:59,119 log log.py 248 log_response Not Found: /static/admin/js/nav_sidebar.js
+WARNING 2026-04-08 16:46:59,126 log log.py 248 log_response Not Found: /static/admin/css/responsive.css
+WARNING 2026-04-08 16:46:59,133 log log.py 248 log_response Not Found: /static/admin/css/nav_sidebar.css
+WARNING 2026-04-08 16:46:59,355 log log.py 248 log_response Not Found: /favicon.ico
+WARNING 2026-04-08 16:48:16,109 log log.py 248 log_response Not Found: /static/admin/css/base.css
+WARNING 2026-04-08 16:48:16,124 log log.py 248 log_response Not Found: /static/admin/css/dark_mode.css
+WARNING 2026-04-08 16:48:16,266 log log.py 248 log_response Not Found: /static/admin/css/responsive.css
+WARNING 2026-04-08 16:48:16,359 log log.py 248 log_response Not Found: /static/admin/js/nav_sidebar.js
+WARNING 2026-04-08 16:48:16,378 log log.py 248 log_response Not Found: /static/admin/js/theme.js
+WARNING 2026-04-08 16:48:16,394 log log.py 248 log_response Not Found: /static/admin/css/nav_sidebar.css
+WARNING 2026-04-08 16:48:16,408 log log.py 248 log_response Not Found: /static/admin/css/dashboard.css
+WARNING 2026-04-08 16:48:16,559 log log.py 248 log_response Not Found: /static/admin/css/responsive.css
+WARNING 2026-04-08 16:48:16,579 log log.py 248 log_response Not Found: /static/admin/js/nav_sidebar.js
