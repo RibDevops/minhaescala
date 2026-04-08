@@ -299,3 +299,39 @@ WARNING 2026-03-31 09:54:34,056 log log.py 249 log_message Not Found: /cal/calen
 WARNING 2026-03-31 09:54:40,414 log log.py 249 log_message Not Found: /favicon.ico
 WARNING 2026-04-06 23:10:06,914 log log.py 248 log_response Not Found: /.well-known/assetlinks.json
 WARNING 2026-04-06 23:10:06,926 log log.py 248 log_response Not Found: /.well-known/assetlinks.json
+ERROR 2026-04-08 16:33:47,147 log log.py 253 log_response Internal Server Error: /calendar/
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/django/views/generic/base.py", line 228, in get
+    context = self.get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/cal/views/views_cal.py", line 89, in get_context_data
+    html_cal = cal.formatmonth(withyear=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/cal/utils.py", line 71, in formatmonth
+    cal += f'{self.formatweek(week)}\n'
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/cal/utils.py", line 63, in formatweek
+    s = ''.join(self.formatday(d, wd) for d, wd in theweek)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/cal/utils.py", line 63, in <genexpr>
+    s = ''.join(self.formatday(d, wd) for d, wd in theweek)
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/cal/utils.py", line 44, in formatday
+    f'{nome} ({codigo} - {observacao})</li>'
+                          ^^^^^^^^^^
+NameError: name 'observacao' is not defined

@@ -34,14 +34,19 @@ class Calendar(HTMLCalendar):
         
         for plantao in plantoes_do_dia:
             nome = plantao.profissional.nome_exibicao
-            codigo = plantao.tipo.codigo
-            horas = plantao.tipo.horas or 0
-            cor = plantao.tipo.cor
+            codigo = plantao.tipo.codigo if plantao.tipo else '—'
+            horas = plantao.tipo.horas or 0 if plantao.tipo else 0
+            cor = plantao.tipo.cor if plantao.tipo else '#999'
+            observacao = plantao.observacao or ''
+            obs_html = (
+                f'<div style="font-size:0.78em; opacity:0.9; margin-top:1px;">{observacao}</div>'
+                if observacao else ''
+            )
             d += (
                 f'<li onclick="abrirModalEvento({plantao.id}, \'{nome}\', \'{codigo}\', {horas}, \'{plantao.data}\')" '
-                f'style="background-color: {cor}; color: white; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; '
+                f'style="background-color: {cor}; color: white; padding: 3px 5px; border-radius: 3px; margin-bottom: 2px; '
                 f'list-style: none; font-size: 0.85em; cursor: pointer;">'
-                f'{nome} ({codigo})</li>'
+                f'{nome} ({codigo}){obs_html}</li>'
             )
             
             # Contagem por especialidade do profissional
