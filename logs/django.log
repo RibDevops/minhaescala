@@ -13,3 +13,4 @@ ERROR 2026-03-30 08:21:53,254 Thread-1 (process_request_thread) 139745954887360 
 ERROR 2026-04-08 16:33:47,152 Thread-1 (process_request_thread) 140168839792320 basehttp basehttp.py 213 django.server log_message 2343 "GET /calendar/ HTTP/1.1" 500 195268
 ERROR 2026-04-08 16:36:52,158 Thread-1 (process_request_thread) 140140543960768 basehttp basehttp.py 213 django.server log_message 2979 "GET /calendar/ HTTP/1.1" 500 195268
 ERROR 2026-04-08 16:36:59,069 Thread-1 (process_request_thread) 140140543960768 basehttp basehttp.py 213 django.server log_message 2979 "GET /calendar/ HTTP/1.1" 500 195223
+ERROR 2026-04-08 16:40:36,356 Thread-2 (process_request_thread) 140211272292032 basehttp basehttp.py 213 django.server log_message 3032 "GET /escala-mensal/ HTTP/1.1" 500 215114

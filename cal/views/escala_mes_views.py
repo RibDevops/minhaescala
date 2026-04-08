@@ -81,17 +81,17 @@ def escala_mes_view(request, mes=None, ano=None):
         eventos = EventoEscala.objects.filter(
             profissional=profissional,
             data__range=[primeiro_dia, ultimo_dia]
-        ).select_related('tipo_evento')
+        ).select_related('tipo')
 
         dias_dict = {}
         for evento in eventos:
             codigo = ''
             horas = 0
             cor = '#3498db'
-            if evento.tipo_evento:
-                codigo = evento.tipo_evento.codigo
-                horas = float(evento.tipo_evento.horas or 0)
-                cor = evento.tipo_evento.cor or '#3498db'
+            if evento.tipo:
+                codigo = evento.tipo.codigo
+                horas = float(evento.tipo.horas or 0)
+                cor = evento.tipo.cor or '#3498db'
             if hasattr(evento, 'cor') and evento.cor:
                 cor = evento.cor
             dias_dict[evento.data.day] = {
@@ -174,7 +174,7 @@ def toggle_dia_escala(request, profissional_id, dia, mes, ano):
                     EventoEscala.objects.create(
                         profissional=profissional,
                         data=data_plantao,
-                        tipo_evento=tipo_evento,
+                        tipo=tipo_evento,
                         hospital=profissional.hospital,
                         setor=profissional.setor,
                         criado_por=request.user
