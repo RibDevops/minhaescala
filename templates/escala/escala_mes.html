@@ -175,8 +175,14 @@
 
 {% block scripts %}
 <script>
-    const modalEl = document.getElementById('modalEditarDia');
-    const bsModal = new bootstrap.Modal(modalEl);
+    let bsModal = null;
+
+    function getModal() {
+        if (!bsModal) {
+            bsModal = new bootstrap.Modal(document.getElementById('modalEditarDia'));
+        }
+        return bsModal;
+    }
 
     function editarDia(dia, profId, turno, horas, eTpd, eventId) {
         document.getElementById('editProfId').value = profId;
@@ -187,7 +193,7 @@
         document.getElementById('editEventId').value = eventId || 0;
         // Mostra/oculta botão de deletar conforme há evento
         document.getElementById('btnDeletar').style.display = eventId ? 'inline-block' : 'none';
-        bsModal.show();
+        getModal().show();
     }
 
     function deletarPlantao() {
@@ -206,7 +212,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                bsModal.hide();
+                getModal().hide();
                 location.reload();
             } else {
                 alert('Erro ao deletar: ' + (data.error || 'Erro desconhecido'));
