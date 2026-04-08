@@ -40,7 +40,7 @@ def horas_no_periodo(profissional, inicio, fim):
     ).exclude(
         criado_por__cal_perfil__tipo='ENFERMEIRO'
     ).select_related('tipo')
-    return sum(e.tipo.horas for e in eventos)
+    return sum((e.tipo.horas or 0) for e in eventos)
 
 
 def saldo_semana(profissional, referencia=None):

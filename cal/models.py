@@ -68,7 +68,7 @@ class TipoEvento(models.Model):
     tipo_base = models.ForeignKey(Tipo, on_delete=models.CASCADE, related_name="eventos", verbose_name="Tipo Base", null=True, blank=True)
     codigo = models.CharField(max_length=10, verbose_name="Código")
     descricao = models.CharField(max_length=50, verbose_name="Descrição")
-    horas = models.PositiveIntegerField(verbose_name="Carga Horária (Horas)")
+    horas = models.PositiveIntegerField(verbose_name="Carga Horária (Horas)", blank=True, null=True)
     cor = models.CharField(max_length=20, choices=CORES_CHOICES, default='#007bff', verbose_name="Cor")
     
     class Meta:
@@ -77,7 +77,7 @@ class TipoEvento(models.Model):
         unique_together = ("codigo", "descricao")
 
     def __str__(self):
-        return f"{self.codigo} ({self.horas}h)"
+        return f"{self.codigo} ({self.horas or 0}h)"
 
 # =========================
 # PERFIL DE USUÁRIO
@@ -180,7 +180,7 @@ class EventoEscala(models.Model):
             data__range=(inicio, self.data),
             tipo__tipo_base__contabiliza=True
         )
-        return sum(e.tipo.horas for e in eventos)
+        return sum((e.tipo.horas or 0) for e in eventos)
 
     def save(self, *args, forcar_carga=False, **kwargs):
         super().save(*args, **kwargs)

@@ -37,7 +37,7 @@
                                     <td class="align-middle"><strong>{{ evento.data|date:"d/m" }}</strong></td>
                                     <td class="align-middle">
                                         <span class="badge bg-info text-dark">{{ evento.tipo.descricao|default:"-" }}</span><br>
-                                        <small class="text-muted">{{ evento.tipo.codigo }} ({{ evento.tipo.horas }}h)</small>
+                                        <small class="text-muted">{{ evento.tipo.codigo }} ({{ evento.tipo.horas|default:"—" }}{% if evento.tipo.horas %}h{% endif %})</small>
                                     </td>
                                     <td class="align-middle">
                                         <div class="fw-bold">{{ evento.profissional.nome_exibicao }}</div>

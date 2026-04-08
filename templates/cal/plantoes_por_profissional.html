@@ -159,7 +159,7 @@
                             {% for tp in tipos_plantao %}
                             <option value="{{ tp.pk }}"
                                 data-cor="{{ tp.cor }}"
-                                data-horas="{{ tp.horas }}">
+                                data-horas="{{ tp.horas|default:0 }}">
                                 {{ tp.codigo }}{% if tp.descricao and tp.descricao != tp.codigo %} – {{ tp.descricao }}{% endif %}
                             </option>
                             {% endfor %}

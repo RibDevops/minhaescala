@@ -377,7 +377,7 @@ def plantoes_por_profissional(request):
             dados.append({
                 'profissional': prof,
                 'eventos': eventos,
-                'total_horas': sum(e.tipo.horas for e in eventos if e.tipo),
+                'total_horas': sum((e.tipo.horas or 0) for e in eventos if e.tipo),
                 'total_plantoes': eventos.count(),
             })
 
@@ -430,7 +430,7 @@ def validar_carga_horaria(request):
             data__range=(inicio, fim),
             tipo__tipo_base__contabiliza=True,
         )
-        carga_atual = sum(e.tipo.horas for e in eventos)
+        carga_atual = sum((e.tipo.horas or 0) for e in eventos)
         total = carga_atual + (tipo.horas or 0)
         limite = enfermeiro.carga_horaria_semanal or 0
         excedeu = limite > 0 and total > limite

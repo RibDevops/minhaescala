@@ -35,7 +35,7 @@ class Calendar(HTMLCalendar):
         for plantao in plantoes_do_dia:
             nome = plantao.profissional.nome_exibicao
             codigo = plantao.tipo.codigo
-            horas = plantao.tipo.horas
+            horas = plantao.tipo.horas or 0
             cor = plantao.tipo.cor
             d += (
                 f'<li onclick="abrirModalEvento({plantao.id}, \'{nome}\', \'{codigo}\', {horas}, \'{plantao.data}\')" '

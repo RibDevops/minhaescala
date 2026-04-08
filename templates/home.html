@@ -138,7 +138,7 @@
                     {% endif %}
                     {% if p.tipo %}
                     <div class="text-muted" style="font-size:0.78rem;">
-                        {{ p.tipo.horas }}h
+                        {% if p.tipo.horas %}{{ p.tipo.horas }}h{% else %}—{% endif %}
                         {% if p.setor %}&nbsp;·&nbsp;{{ p.setor.nome }}{% endif %}
                     </div>
                     {% endif %}

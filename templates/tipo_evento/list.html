@@ -33,9 +33,9 @@ Escalas{% endblock %} {% block page_title %}Tipos de Evento ({{ total_count
           </td>
           <td>
             <span
-              class="badge {% if tipo.horas >= 12 %}bg-danger{% elif tipo.horas >= 8 %}bg-warning{% else %}bg-success{% endif %}"
+              class="badge {% if tipo.horas and tipo.horas >= 12 %}bg-danger{% elif tipo.horas and tipo.horas >= 8 %}bg-warning{% elif tipo.horas %}bg-success{% else %}bg-secondary{% endif %}"
             >
-              {{ tipo.horas }}h
+              {% if tipo.horas %}{{ tipo.horas }}h{% else %}—{% endif %}
             </span>
           </td>
           <td>

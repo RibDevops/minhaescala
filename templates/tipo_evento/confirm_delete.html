@@ -15,9 +15,9 @@ block content %}
       <div class="d-flex justify-content-center gap-3 mt-3">
         <span class="badge bg-primary">{{ tipo.periodo.sigla }}</span>
         <span
-          class="badge {% if tipo.horas >= 12 %}bg-danger{% elif tipo.horas >= 8 %}bg-warning{% else %}bg-success{% endif %}"
+          class="badge {% if tipo.horas and tipo.horas >= 12 %}bg-danger{% elif tipo.horas and tipo.horas >= 8 %}bg-warning{% elif tipo.horas %}bg-success{% else %}bg-secondary{% endif %}"
         >
-          {{ tipo.horas }}h
+          {% if tipo.horas %}{{ tipo.horas }}h{% else %}—{% endif %}
         </span>
         <div
           style="width: 20px; height: 20px; background-color: {{ tipo.cor }}; border-radius: 3px; border: 1px solid #ddd;"
