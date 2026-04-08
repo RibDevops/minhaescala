@@ -11,3 +11,5 @@ ERROR 2026-02-02 16:06:13,173 Thread-1 (process_request_thread) 134246160135744 
 ERROR 2026-02-02 16:52:15,803 Thread-1 (process_request_thread) 139927954126528 log log.py 249 django.server log_message 4053 "POST /plantao/novo/ HTTP/1.1" 500 190053
 ERROR 2026-03-30 08:21:53,254 Thread-1 (process_request_thread) 139745954887360 log log.py 249 django.server log_message 1998 "GET /plantao/37/excluir/ HTTP/1.1" 500 170389
 ERROR 2026-04-08 16:33:47,152 Thread-1 (process_request_thread) 140168839792320 basehttp basehttp.py 213 django.server log_message 2343 "GET /calendar/ HTTP/1.1" 500 195268
+ERROR 2026-04-08 16:36:52,158 Thread-1 (process_request_thread) 140140543960768 basehttp basehttp.py 213 django.server log_message 2979 "GET /calendar/ HTTP/1.1" 500 195268
+ERROR 2026-04-08 16:36:59,069 Thread-1 (process_request_thread) 140140543960768 basehttp basehttp.py 213 django.server log_message 2979 "GET /calendar/ HTTP/1.1" 500 195223
